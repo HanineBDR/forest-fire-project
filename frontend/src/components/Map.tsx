@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { PredictionResult, FIRMSHotspot, RegionPreset, SimulationStep } from "@/types";
-import { Layers, Flame, Satellite, Eye, EyeOff, Navigation2, Compass } from "lucide-react";
+import { Layers, Flame, Satellite, Eye, EyeOff, Navigation2 } from "lucide-react";
 
 interface MapProps {
   prediction: PredictionResult | null;
@@ -151,7 +151,7 @@ export const Map: React.FC<MapProps> = ({
 
       marker.bindPopup(`
         <div class="text-xs p-1">
-          <div class="font-bold text-red-400 mb-0.5">🎯 Ignition Origin / Target</div>
+          <div class="font-bold text-red-400 mb-0.5">Ignition point</div>
           <div class="font-mono text-slate-300">${selectedLocation.lat.toFixed(4)}°N, ${selectedLocation.lon.toFixed(4)}°E</div>
           ${prediction ? `<div class="mt-1 font-bold" style="color: ${prediction.theme_color}">Risk: ${prediction.risk_score}% (${prediction.risk_level})</div>` : ""}
         </div>
@@ -181,13 +181,13 @@ export const Map: React.FC<MapProps> = ({
         const m = L.marker([spot.latitude, spot.longitude], { icon: fireIcon });
         m.bindPopup(`
           <div class="text-xs p-1 space-y-1">
-            <div class="flex items-center gap-1 font-bold text-amber-400">
-              <span>🔥 ${spot.location_name}</span>
+            <div class="font-bold text-amber-400">
+              <span>${spot.location_name}</span>
             </div>
-            <div class="font-mono text-slate-300">Lat: ${spot.latitude.toFixed(4)}, Lon: ${spot.longitude.toFixed(4)}</div>
+            <div class="font-mono tabular-nums text-slate-300">Lat: ${spot.latitude.toFixed(4)}, Lon: ${spot.longitude.toFixed(4)}</div>
             <div class="text-slate-300">Satellite: <span class="font-semibold text-slate-100">${spot.satellite}</span></div>
-            <div class="text-slate-300">Thermal Brightness: <span class="font-semibold text-red-400 font-mono">${spot.brightness_kelvin} K</span></div>
-            <div class="text-slate-300">Confidence: <span class="font-semibold text-amber-300 uppercase">${spot.confidence}</span></div>
+            <div class="text-slate-300">Thermal brightness: <span class="font-semibold text-red-400 font-mono tabular-nums">${spot.brightness_kelvin} K</span></div>
+            <div class="text-slate-300">Confidence: <span class="font-semibold text-amber-300">${spot.confidence}</span></div>
             <div class="text-[10px] text-slate-400">FRP: ${spot.frp_mw} MW | ${spot.acq_date} ${spot.acq_time}</div>
           </div>
         `);
@@ -217,7 +217,7 @@ export const Map: React.FC<MapProps> = ({
           dashArray: "4, 6",
         });
 
-        circle.bindTooltip(`🌲 ${reg.name} (${reg.wilaya})`, {
+        circle.bindTooltip(`${reg.name} (${reg.wilaya})`, {
           permanent: false,
           direction: "top",
           className: "bg-slate-900 text-slate-100 text-xs font-semibold px-2 py-1 rounded shadow",
@@ -269,10 +269,10 @@ export const Map: React.FC<MapProps> = ({
 
         polygon.bindPopup(`
           <div class="text-xs p-1">
-            <div class="font-bold text-red-400 mb-0.5">Fire Perimeter Horizon: +${step.hours}h</div>
-            <div class="text-slate-300">Projected Burned Area: <span class="font-mono font-bold text-amber-300">${step.burned_area_hectares} ha</span></div>
-            <div class="text-slate-300">Rate of Spread: <span class="font-mono font-bold text-slate-100">${step.rate_of_spread_m_h} m/h</span></div>
-            <div class="text-slate-300">Head Distance: <span class="font-mono font-bold text-slate-100">${step.head_distance_meters} m</span></div>
+            <div class="font-bold text-red-400 mb-0.5">Fire perimeter horizon: +${step.hours}h</div>
+            <div class="text-slate-300">Projected burned area: <span class="font-mono font-bold text-amber-300">${step.burned_area_hectares} ha</span></div>
+            <div class="text-slate-300">Rate of spread: <span class="font-mono font-bold text-slate-100">${step.rate_of_spread_m_h} m/h</span></div>
+            <div class="text-slate-300">Head distance: <span class="font-mono font-bold text-slate-100">${step.head_distance_meters} m</span></div>
           </div>
         `);
 
@@ -302,7 +302,7 @@ export const Map: React.FC<MapProps> = ({
           }
         );
 
-        windLine.bindTooltip(`💨 Wind Spread Vector: ${sim.spread_azimuth_deg}° (${sim.wind_speed_kmh} km/h)`, {
+        windLine.bindTooltip(`Wind vector: ${sim.spread_azimuth_deg}° (${sim.wind_speed_kmh} km/h)`, {
           sticky: true,
           className: "bg-slate-900 text-sky-300 text-xs font-mono px-2 py-0.5 rounded",
         });
@@ -313,104 +313,110 @@ export const Map: React.FC<MapProps> = ({
   }, [prediction, activeHorizonIndex, showSimulations]);
 
   return (
-    <div className="relative w-full h-full min-h-[500px] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+    <div className="relative w-full h-full min-h-[500px] rounded-lg overflow-hidden border border-slate-800">
       {/* Leaflet DOM container */}
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Floating Basemap & Layer Control Bar */}
+      {/* Floating Basemap & Layer Control Bar (genuine overlay, tight shadow permitted) */}
       <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2">
         {/* Basemap Switcher */}
-        <div className="bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 rounded-xl p-1.5 shadow-xl flex items-center gap-1 text-xs">
+        <div className="bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 rounded-lg p-1.5 shadow-sm flex items-center gap-1 text-xs" role="group" aria-label="Map style switcher">
           <button
             onClick={() => setActiveTileLayer("satellite")}
-            className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+            aria-pressed={activeTileLayer === "satellite"}
+            className={`px-2.5 py-1 rounded-lg font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
               activeTileLayer === "satellite"
-                ? "bg-ember-600 text-white shadow-md"
+                ? "bg-ember-600 text-white"
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            🛰️ Satellite
+            Satellite
           </button>
           <button
             onClick={() => setActiveTileLayer("dark")}
-            className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+            aria-pressed={activeTileLayer === "dark"}
+            className={`px-2.5 py-1 rounded-lg font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
               activeTileLayer === "dark"
-                ? "bg-ember-600 text-white shadow-md"
+                ? "bg-ember-600 text-white"
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            🌑 Tactical Dark
+            Dark
           </button>
           <button
             onClick={() => setActiveTileLayer("osm")}
-            className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+            aria-pressed={activeTileLayer === "osm"}
+            className={`px-2.5 py-1 rounded-lg font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
               activeTileLayer === "osm"
-                ? "bg-ember-600 text-white shadow-md"
+                ? "bg-ember-600 text-white"
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            🗺️ Street
+            Street
           </button>
         </div>
 
         {/* Feature Layer Toggles */}
-        <div className="bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 rounded-xl p-2 shadow-xl flex flex-col gap-1.5 text-xs">
+        <div className="bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 rounded-lg p-2 shadow-sm flex flex-col gap-1.5 text-xs" role="group" aria-label="Feature layer toggles">
           {/* FIRMS Hotspots */}
           <button
             onClick={() => setShowFirms(!showFirms)}
-            className={`flex items-center justify-between gap-2 px-2 py-1 rounded-lg transition-colors ${
-              showFirms ? "text-amber-400 font-semibold" : "text-slate-500"
+            aria-pressed={showFirms}
+            className={`flex items-center justify-between gap-2 px-2 py-1 rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
+              showFirms ? "text-slate-200 font-semibold" : "text-slate-500"
             }`}
           >
             <div className="flex items-center gap-1.5">
-              <Satellite className="w-3.5 h-3.5" />
-              <span>NASA FIRMS Hotspots</span>
+              <Satellite className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>NASA FIRMS hotspots</span>
             </div>
-            {showFirms ? <Eye className="w-3 h-3 text-amber-400" /> : <EyeOff className="w-3 h-3 text-slate-500" />}
+            {showFirms ? <Eye className="w-3 h-3" aria-hidden="true" /> : <EyeOff className="w-3 h-3 text-slate-500" aria-hidden="true" />}
           </button>
 
           {/* Simulation Polygons */}
           <button
             onClick={() => setShowSimulations(!showSimulations)}
-            className={`flex items-center justify-between gap-2 px-2 py-1 rounded-lg transition-colors ${
-              showSimulations ? "text-red-400 font-semibold" : "text-slate-500"
+            aria-pressed={showSimulations}
+            className={`flex items-center justify-between gap-2 px-2 py-1 rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
+              showSimulations ? "text-slate-200 font-semibold" : "text-slate-500"
             }`}
           >
             <div className="flex items-center gap-1.5">
-              <Flame className="w-3.5 h-3.5" />
-              <span>Fire Spread Perimeters</span>
+              <Flame className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Fire spread perimeters</span>
             </div>
-            {showSimulations ? <Eye className="w-3 h-3 text-red-400" /> : <EyeOff className="w-3 h-3 text-slate-500" />}
+            {showSimulations ? <Eye className="w-3 h-3" aria-hidden="true" /> : <EyeOff className="w-3 h-3 text-slate-500" aria-hidden="true" />}
           </button>
 
           {/* Forest Reserves */}
           <button
             onClick={() => setShowRegions(!showRegions)}
-            className={`flex items-center justify-between gap-2 px-2 py-1 rounded-lg transition-colors ${
-              showRegions ? "text-emerald-400 font-semibold" : "text-slate-500"
+            aria-pressed={showRegions}
+            className={`flex items-center justify-between gap-2 px-2 py-1 rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
+              showRegions ? "text-slate-200 font-semibold" : "text-slate-500"
             }`}
           >
             <div className="flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5" />
-              <span>Kabylie Forest Massifs</span>
+              <Layers className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Kabylie forest massifs</span>
             </div>
-            {showRegions ? <Eye className="w-3 h-3 text-emerald-400" /> : <EyeOff className="w-3 h-3 text-slate-500" />}
+            {showRegions ? <Eye className="w-3 h-3" aria-hidden="true" /> : <EyeOff className="w-3 h-3 text-slate-500" aria-hidden="true" />}
           </button>
         </div>
       </div>
 
       {/* Floating Instructions Banner */}
-      <div className="absolute bottom-4 left-4 z-[400] hidden sm:flex items-center gap-2 bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 px-3 py-1.5 rounded-xl shadow-lg text-[11px] text-slate-300">
-        <Navigation2 className="w-3.5 h-3.5 text-ember-400 animate-spin" />
-        <span>Click any location in Northern Algeria to run AI risk prediction & Huygens spread simulation</span>
+      <div className="absolute bottom-4 left-4 z-[400] hidden sm:flex items-center gap-2 bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 px-3 py-1.5 rounded-lg shadow-sm text-[11px] text-slate-300">
+        <Navigation2 className="w-3.5 h-3.5 text-ember-400" aria-hidden="true" />
+        <span>Click any location in Northern Algeria to run risk prediction and spread simulation</span>
       </div>
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-slatebg-950/40 backdrop-blur-sm z-[500] flex items-center justify-center">
-          <div className="bg-slatebg-900/95 border border-slate-800 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full border-2 border-ember-500 border-t-transparent animate-spin"></div>
-            <span className="text-xs font-semibold text-slate-200">Processing Satellite & Wind Propagation...</span>
+        <div className="absolute inset-0 bg-slatebg-950/40 backdrop-blur-sm z-[500] flex items-center justify-center" aria-live="polite">
+          <div className="bg-slatebg-900/95 border border-slate-800 px-5 py-3 rounded-lg shadow-sm flex items-center gap-3">
+            <div className="w-5 h-5 rounded-full border-2 border-ember-500 border-t-transparent animate-spin" aria-hidden="true"></div>
+            <span className="text-xs font-semibold text-slate-200">Processing satellite and wind data</span>
           </div>
         </div>
       )}

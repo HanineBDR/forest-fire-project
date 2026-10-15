@@ -14,6 +14,12 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     overflow-x: hidden;
   }
+
+  /* Visible focus styles for keyboard navigation */
+  :focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+  }
 }
 
 /* Custom Leaflet Styling */
@@ -51,7 +57,6 @@
   background-color: #ef4444;
   border: 2px solid #ffffff;
   border-radius: 50%;
-  box-shadow: 0 0 10px #ef4444;
 }
 
 @keyframes radar-ping {
@@ -78,7 +83,6 @@
   background-color: #fb923c;
   border: 2px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 0 8px #f97316;
 }
 
 /* Dark scrollbars */
@@ -100,14 +104,14 @@
   background: #334155;
 }
 
-/* Leaflet dark popups */
+/* Leaflet dark popups (floating overlay, shadow permitted) */
 .leaflet-popup-content-wrapper {
   background: rgba(15, 23, 42, 0.95) !important;
   color: #f8fafc !important;
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 .leaflet-popup-tip {
@@ -117,4 +121,19 @@
 .leaflet-container a.leaflet-popup-close-button {
   color: #94a3b8 !important;
   padding: 6px !important;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .pulse-fire-pin::before {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
