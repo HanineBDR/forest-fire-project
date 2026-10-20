@@ -108,10 +108,11 @@ export const Map: React.FC<MapProps> = ({
       );
 
       const dark = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
-          attribution: "&copy; CartoDB",
+          attribution: "&copy; OpenStreetMap contributors",
           maxZoom: 19,
+          className: "leaflet-dark-mode-tiles",
         }
       );
 
