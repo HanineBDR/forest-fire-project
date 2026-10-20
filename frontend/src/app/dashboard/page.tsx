@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { QuickPresets } from "@/components/QuickPresets";
 import { RiskPanel } from "@/components/RiskPanel";
@@ -10,10 +10,12 @@ import {
   fetchFIRMSHotspots,
   fetchStrategicRegions,
   predictFireRisk,
+  simulateFireSpread,
+  getZoneReportDownloadUrl,
   DEFAULT_REGIONS,
 } from "@/lib/api";
 import { PredictionResult, WeatherData, FIRMSHotspot, RegionPreset } from "@/types";
-import { Shield, Radio, Flame, Wind, AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Dynamic import of Map to prevent SSR Leaflet window errors
 const DynamicMap = dynamic(() => import("@/components/Map").then((mod) => mod.Map), {
@@ -27,6 +29,7 @@ const DynamicMap = dynamic(() => import("@/components/Map").then((mod) => mod.Ma
 });
 
 export default function DashboardMapPage() {
+  const { t, language } = useLanguage();
   const [regions, setRegions] = useState<RegionPreset[]>(DEFAULT_REGIONS);
   const [firmsHotspots, setFirmsHotspots] = useState<FIRMSHotspot[]>([]);
   const [selectedRegionId, setSelectedRegionId] = useState<string>("yakouren");
@@ -40,6 +43,15 @@ export default function DashboardMapPage() {
   const [activeHorizonIndex, setActiveHorizonIndex] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isCustomOverride, setIsCustomOverride] = useState<boolean>(false);
+
+  // FEATURE 4: 6h Simulation Playback State
+  const [simulation6hData, setSimulation6hData] = useState<any>(null);
+  const [currentSimStep, setCurrentSimStep] = useState<number>(1);
+  const [isPlayingSim, setIsPlayingSim] = useState<boolean>(false);
+  const [isSimulating6h, setIsSimulating6h] = useState<boolean>(false);
+  const [isExportingReport, setIsExportingReport] = useState<boolean>(false);
+
+  const playbackTimerRef = useRef<any>(null);
 
   const runPredictionForLocation = useCallback(
     async (coords: { lat: number; lon: number }, customWeather?: any) => {
@@ -69,6 +81,22 @@ export default function DashboardMapPage() {
         });
 
         setPrediction(pred);
+
+        // Pre-fetch 6h fine-grained simulation for instant animation
+        try {
+          const simRes = await simulateFireSpread({
+            lat: coords.lat,
+            lon: coords.lon,
+            wind_speed: wind,
+            wind_dir: wind_dir,
+            risk_score: pred.risk_score,
+            hours: 6,
+          });
+          setSimulation6hData(simRes);
+          setCurrentSimStep(1);
+        } catch (simErr) {
+          console.warn("Auto simulation prefetch warning:", simErr);
+        }
       } catch (err) {
         console.error("Failed to run prediction:", err);
       } finally {
@@ -96,6 +124,29 @@ export default function DashboardMapPage() {
     init();
   }, []);
 
+  // Playback timer ticker for Feature 4
+  useEffect(() => {
+    if (isPlayingSim && simulation6hData?.steps?.length > 0) {
+      playbackTimerRef.current = setInterval(() => {
+        setCurrentSimStep((prev) => {
+          if (prev >= 12) {
+            setIsPlayingSim(false);
+            return 12;
+          }
+          return prev + 1;
+        });
+      }, 750);
+    } else {
+      if (playbackTimerRef.current) {
+        clearInterval(playbackTimerRef.current);
+      }
+    }
+
+    return () => {
+      if (playbackTimerRef.current) clearInterval(playbackTimerRef.current);
+    };
+  }, [isPlayingSim, simulation6hData]);
+
   const handleSelectRegion = (reg: RegionPreset) => {
     setSelectedRegionId(reg.id);
     setSelectedLocation({ lat: reg.lat, lon: reg.lon });
@@ -121,6 +172,64 @@ export default function DashboardMapPage() {
 
   const handleResetToLive = () => {
     runPredictionForLocation(selectedLocation);
+  };
+
+  // FEATURE 4: Explicit 6h Simulation Run
+  const handleRunSimulation6h = async () => {
+    if (!prediction) return;
+    setIsSimulating6h(true);
+    try {
+      const res = await simulateFireSpread({
+        lat: selectedLocation.lat,
+        lon: selectedLocation.lon,
+        wind_speed: prediction.input.wind,
+        wind_dir: prediction.input.wind_direction ?? 180.0,
+        risk_score: prediction.risk_score,
+        hours: 6,
+      });
+      setSimulation6hData(res);
+      setCurrentSimStep(1);
+      setIsPlayingSim(true);
+    } catch (err) {
+      console.error("Simulation run failed:", err);
+    } finally {
+      setIsSimulating6h(false);
+    }
+  };
+
+  const handleTogglePlaySim = () => {
+    if (currentSimStep >= 12 && !isPlayingSim) {
+      setCurrentSimStep(1);
+    }
+    setIsPlayingSim(!isPlayingSim);
+  };
+
+  // FEATURE 3: Official Zone Report PDF Export
+  const handleExportZoneReport = async () => {
+    setIsExportingReport(true);
+    try {
+      const currentWilaya = regions.find((r) => r.id === selectedRegionId)?.wilaya || "Tizi Ouzou";
+      const currentForest = regions.find((r) => r.id === selectedRegionId)?.name || "Massif de Yakouren";
+
+      const url = getZoneReportDownloadUrl(
+        {
+          wilaya: currentWilaya,
+          forest_name: currentForest,
+          risk_score: prediction?.risk_score || 88.0,
+          temp: prediction?.input.temp || 38.0,
+          humidity: prediction?.input.humidity || 18.0,
+          wind: prediction?.input.wind || 30.0,
+        },
+        language
+      );
+
+      // Trigger direct browser download
+      window.open(url, "_blank");
+    } catch (err) {
+      console.error("Export report error:", err);
+    } finally {
+      setIsExportingReport(false);
+    }
   };
 
   return (
@@ -165,6 +274,10 @@ export default function DashboardMapPage() {
               selectedLocation={selectedLocation}
               onMapClick={handleMapClick}
               isLoading={isLoading}
+              simulation6hData={simulation6hData}
+              currentSimStep={currentSimStep}
+              windSpeed={prediction?.input.wind ?? 30.0}
+              windDirection={prediction?.input.wind_direction ?? 180.0}
             />
           </div>
 
@@ -184,6 +297,15 @@ export default function DashboardMapPage() {
             onSimulateCustom={handleSimulateCustom}
             onResetToLiveWeather={handleResetToLive}
             isCustomOverrideActive={isCustomOverride}
+            onRunSimulation6h={handleRunSimulation6h}
+            isSimulating6h={isSimulating6h}
+            simulation6hData={simulation6hData}
+            currentSimStep={currentSimStep}
+            onStepChange={setCurrentSimStep}
+            isPlayingSim={isPlayingSim}
+            onTogglePlaySim={handleTogglePlaySim}
+            onExportZoneReport={handleExportZoneReport}
+            isExportingReport={isExportingReport}
           />
         </div>
       </div>

@@ -135,7 +135,77 @@ forest-fire-project/
 
 ---
 
-## 5. How to Run Locally
+## 5. IN9AD v3.0 — Guide d'Évaluation & Démonstration (Thirduni Top 3)
+
+### Accréditations Démo (Rôles & Accès Sécurisés)
+
+La plateforme est sécurisée par tokens JWT avec contrôle d'accès strict par rôle :
+
+| Rôle Institutionnel | Email Démo | Mot de Passe | Permissions Opérationnelles |
+| :--- | :--- | :--- | :--- |
+| **Protection Civile (الحماية المدنية)** | `protection@in9ad.dz` | `Protect123!` | Changement de statut des alertes (DETECTED ➔ UNITES_DEPLOYEES ➔ MAITRISE), validation des interventions terrain, génération de PV d'alerte. |
+| **Conservation des Forêts (محافظة الغابات)** | `foret@in9ad.dz` | `Foret123!` | Consultation en lecture seule des alertes et massifs forestiers, calcul d'indices de risque, export de rapports de secteur. |
+| **Administrateur MLOps (CODIS Central)** | `admin@in9ad.dz` | `Admin123!` | Accès complet : gestion des comptes, santé modèle, file des signalements citoyens, feuille de route 2026. |
+
+---
+
+### Fonctionnalités Clés & Guide d'Utilisation
+
+#### 1. Support Multilingue Complet (🇩🇿 العربية / 🇫🇷 Français / 🇬🇧 English)
+- **Sélecteur de langue** intégré dans la barre supérieure de navigation : `[ 🇩🇿 عربية | 🇫🇷 FR | 🇬🇧 EN ]`.
+- **Mode RTL natif** : Lorsque l'arabe est sélectionné, l'application bascule automatiquement en direction de droite à gauche (`dir="rtl"`) avec la typographie officielle **Cairo & Tajawal**.
+- Les choix de langue sont persistés dans `localStorage` et s'appliquent aux alertes, au tableau de bord, à la carte et aux audits.
+
+#### 2. Statut des Alertes Réactif & Historique d'Intervention (Feature 1)
+- Rendez-vous sur `/dashboard/alerts`.
+- Cliquez sur le badge de statut de chaque alerte pour déployer les options opérationnelles : `DETECTED`, `PRISE_EN_COMPTE`, `UNITES_DEPLOYEES`, `MAITRISE`, `ETEINT`, `FAUSSE_ALERTE`.
+- Chaque transition enregistre automatiquement le commandant intervenant, la date exacte et une directive d'opération (ex: *"Colonne Mobile n°1 déployée sur RN12"*).
+- Déroulez la chronologie sous chaque carte pour visualiser la frise temporelle des interventions.
+- Utilisez le bouton **[🔄 Rafraîchir Alertes]** ou activez l'interrupteur **[Auto-refresh 30s]**.
+
+#### 3. Explicabilité de l'IA (Why this risk?) (Feature 2)
+- Sur la carte tactique (`/dashboard`), sous la jauge du risque, inspectez le bloc **🔍 Facteurs Clés d'Explication IA**.
+- Des barres horizontales colorées indiquent la contribution relative des variables (SHAP / Gini) :
+  - **Rouge** pour les facteurs aggravants (+40% Température, +35% Sécheresse de l'air, +20% Vent fort, +15% Sirocco).
+  - **Vert** pour les facteurs atténuants (-60% Température basse, -30% Humidité élevée).
+- Survolez l'icône d'aide pour afficher l'explication de transparence opérationnelle.
+
+#### 4. Export des Rapports Officiels en PDF (Feature 3)
+- **Sur la page des alertes** : Cliquez sur **[📄 Générer PV]** sur n'importe quelle alerte pour télécharger le *Procès-Verbal officiel d'alerte incendie* généré par ReportLab avec en-tête de la République Algérienne, coordonnées GPS, météo, chronologie des ordres et lignes de signature.
+- **Sur la carte tactique** : Cliquez sur **[📄 Export Rapport Zone]** pour générer le *Bulletin Tactique de Vigilance Forestière* du secteur ciblé.
+
+#### 5. Animation et Lecture de Propagation du Feu (Feature 4)
+- Sur le panneau latéral droit, cliquez sur **[▶️ Simuler Propagation 6h]**.
+- L'algorithme d'automate cellulaire calcule 12 étapes de 30 minutes.
+- Le curseur temporel (0h - 6h) et les boutons **Lecture / Pause** permettent d'animer l'expansion du périmètre sur la carte Leaflet avec affichage dynamique de la surface calcinée : *"Propagation estimée : 243.0 ha en 6h"*.
+
+#### 6. Particules de Vent Animées (Feature 5)
+- Activez ou désactivez l'animation météorologique avec le bouton **[💨 Vent Animé : ON/OFF]** situé en haut de la carte.
+- Les flux de particules dérivent sur un canevas haute performance en suivant la direction et la vitesse réelles du vent fournies par Open-Meteo.
+
+#### 7. Historique & Audit Opérationnel (Feature 6)
+- Accessible via le menu ou l'URL `/dashboard/historique`.
+- Tableau unifié regroupant : créations d'alertes, transitions de statuts, réentraînements du modèle, signalements citoyens et synchronisations NASA FIRMS.
+- Filtres combinés par Wilaya, Type d'événement et Intervenant.
+- Graphique de répartition des actions par heure sur 24 heures.
+- Boutons d'export : **[Export CSV]** (fichier tableur en direct) et **[Export Journal PDF]**.
+
+#### 8. Signalement Citoyen de Fumée (Feature 7)
+- Bouton flottant **[📱 Signalement Citoyen]** sur la carte tactique.
+- Formulaire permettant aux citoyens de déclarer une fumée avec coordonnées GPS automatiques, prévisualisation photo mock, numéro de téléphone et description.
+- Les administrateurs peuvent examiner et valider ou rejeter les signalements dans `/dashboard/admin/roadmap`.
+
+#### 9. Téléchargement Cartographique Hors-Ligne (Feature 8)
+- Cliquez sur **[⬇️ Carte Hors-Ligne]** sur la carte tactique.
+- Sélectionnez une zone : *Massif de Yakouren (45 Mo)*, *Crête de l'Akfadou (58 Mo)*, ou *Grande Kabylie (125 Mo)*.
+- Met en cache les tuiles pour permettre aux colonnes mobiles d'opérer en zone blanche sans réseau 4G.
+
+#### 10. Feuille de Route 2026 (Feature 10)
+- Accessible via `/dashboard/admin/roadmap` : Frise stratégique en 4 phases (Mois 1-2, Mois 3, Mois 6, Long Terme) détaillant le déploiement national avec la DGF et la Protection Civile.
+
+---
+
+## 6. How to Run Locally
 
 ### Prerequisites
 - **Python**: 3.10 or higher

@@ -2,19 +2,20 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { PredictionResult, FIRMSHotspot, RegionPreset, WilayaBurnStat } from "@/types";
-import { DEFAULT_WILAYA_STATS } from "@/lib/api";
+import { DEFAULT_WILAYA_STATS, submitCommunityReport } from "@/lib/api";
+import { useLanguage } from "@/context/LanguageContext";
 import {
-  Layers,
   Flame,
-  Satellite,
-  Eye,
-  EyeOff,
-  Navigation2,
   Globe2,
   MapPin,
-  ShieldAlert,
-  ChevronRight,
   X,
+  Wind,
+  Download,
+  Smartphone,
+  CheckCircle2,
+  Navigation2,
+  Camera,
+  Send,
 } from "lucide-react";
 
 interface MapProps {
@@ -25,32 +26,13 @@ interface MapProps {
   selectedLocation: { lat: number; lon: number } | null;
   onMapClick: (coords: { lat: number; lon: number }) => void;
   isLoading: boolean;
+  // Feature 4: 6h fine-grained simulation playback
+  simulation6hData?: any;
+  currentSimStep?: number;
+  // Feature 5: Wind speed & direction from weather
+  windSpeed?: number;
+  windDirection?: number;
 }
-
-// Simulated national burn spots across Algeria (2023-2024 historical reference)
-const ALGERIA_MACRO_BURNS = [
-  // High density Kabylie cluster
-  { lat: 36.72, lon: 4.15, wilaya: "Tizi Ouzou", k: 358, frp: 52 },
-  { lat: 36.68, lon: 4.38, wilaya: "Tizi Ouzou", k: 365, frp: 74 },
-  { lat: 36.75, lon: 4.45, wilaya: "Tizi Ouzou", k: 372, frp: 81 },
-  { lat: 36.63, lon: 4.52, wilaya: "Bejaia", k: 360, frp: 68 },
-  { lat: 36.76, lon: 5.08, wilaya: "Bejaia", k: 349, frp: 45 },
-  { lat: 36.71, lon: 5.22, wilaya: "Bejaia", k: 364, frp: 62 },
-  { lat: 36.42, lon: 3.92, wilaya: "Bouira", k: 352, frp: 49 },
-  { lat: 36.48, lon: 4.12, wilaya: "Bouira", k: 368, frp: 78 },
-  { lat: 36.81, lon: 5.75, wilaya: "Jijel", k: 355, frp: 54 },
-  { lat: 36.69, lon: 5.88, wilaya: "Jijel", k: 361, frp: 66 },
-  { lat: 36.12, lon: 4.78, wilaya: "Bordj Bou Arreridj", k: 342, frp: 38 },
-  { lat: 36.22, lon: 5.39, wilaya: "Setif", k: 338, frp: 32 },
-  { lat: 36.52, lon: 5.48, wilaya: "Setif", k: 345, frp: 41 },
-  { lat: 36.75, lon: 8.28, wilaya: "El Tarf", k: 350, frp: 44 },
-  { lat: 36.44, lon: 7.41, wilaya: "Guelma", k: 341, frp: 36 },
-  // Southern / Steppe anomalies
-  { lat: 34.85, lon: 5.72, wilaya: "Biskra Steppe", k: 322, frp: 18 },
-  { lat: 33.25, lon: 1.15, wilaya: "El Bayadh", k: 318, frp: 15 },
-  { lat: 31.95, lon: 5.32, wilaya: "Ouargla Anomaly", k: 326, frp: 22 },
-  { lat: 29.25, lon: 2.50, wilaya: "In Salah Flare", k: 335, frp: 25 },
-];
 
 export const Map: React.FC<MapProps> = ({
   prediction,
@@ -60,22 +42,45 @@ export const Map: React.FC<MapProps> = ({
   selectedLocation,
   onMapClick,
   isLoading,
+  simulation6hData,
+  currentSimStep = 1,
+  windSpeed = 30.0,
+  windDirection = 180.0,
 }) => {
+  const { t } = useLanguage();
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const targetMarkerRef = useRef<any>(null);
   const simulationLayerGroupRef = useRef<any>(null);
   const firmsLayerGroupRef = useRef<any>(null);
   const regionsLayerGroupRef = useRef<any>(null);
   const algeriaBurnsLayerGroupRef = useRef<any>(null);
+  const fineGrainSimGroupRef = useRef<any>(null);
 
-  // View Scope Toggle: "Northern Algeria Risk" vs "View All Algeria Burns"
+  // View Scope & Layers
   const [viewScope, setViewScope] = useState<"northern" | "all_algeria">("northern");
   const [activeTileLayer, setActiveTileLayer] = useState<"satellite" | "dark" | "osm">("satellite");
   const [showFirms, setShowFirms] = useState<boolean>(true);
-  const [showSimulations, setShowSimulations] = useState<boolean>(true);
   const [showRegions, setShowRegions] = useState<boolean>(true);
   const [selectedWilaya, setSelectedWilaya] = useState<WilayaBurnStat | null>(null);
+
+  // FEATURE 5: Wind particle animation toggle
+  const [showWindAnimation, setShowWindAnimation] = useState<boolean>(true);
+
+  // FEATURE 8: Offline Map Download State
+  const [showOfflineMenu, setShowOfflineMenu] = useState<boolean>(false);
+  const [downloadingZone, setDownloadingZone] = useState<string | null>(null);
+  const [offlineToast, setOfflineToast] = useState<string | null>(null);
+
+  // FEATURE 7: Citizen Reporting Modal State
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reportWilaya, setReportWilaya] = useState<string>("Tizi Ouzou");
+  const [reportPhone, setReportPhone] = useState<string>("");
+  const [reportNotes, setReportNotes] = useState<string>("");
+  const [reportPhotoSelected, setReportPhotoSelected] = useState<boolean>(false);
+  const [isSubmittingReport, setIsSubmittingReport] = useState<boolean>(false);
+  const [reportSuccessToast, setReportSuccessToast] = useState<string | null>(null);
 
   const tileLayersRef = useRef<{ [key: string]: any }>({});
 
@@ -101,10 +106,7 @@ export const Map: React.FC<MapProps> = ({
       // Define Base Tile Layers
       const satellite = L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        {
-          attribution: "Esri World Imagery",
-          maxZoom: 18,
-        }
+        { attribution: "Esri World Imagery", maxZoom: 18 }
       );
 
       const dark = L.tileLayer(
@@ -129,11 +131,13 @@ export const Map: React.FC<MapProps> = ({
       const firmsGroup = L.layerGroup().addTo(map);
       const regGroup = L.layerGroup().addTo(map);
       const macroGroup = L.layerGroup().addTo(map);
+      const fineGroup = L.layerGroup().addTo(map);
 
       simulationLayerGroupRef.current = simGroup;
       firmsLayerGroupRef.current = firmsGroup;
       regionsLayerGroupRef.current = regGroup;
       algeriaBurnsLayerGroupRef.current = macroGroup;
+      fineGrainSimGroupRef.current = fineGroup;
 
       map.on("click", (e: any) => {
         const { lat, lng } = e.latlng;
@@ -171,7 +175,7 @@ export const Map: React.FC<MapProps> = ({
     else tileLayersRef.current.osm.addTo(map);
   }, [activeTileLayer]);
 
-  // Handle View Scope Toggle (Northern Algeria Risk vs View All Algeria Burns)
+  // Handle View Scope Toggle
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
@@ -210,14 +214,6 @@ export const Map: React.FC<MapProps> = ({
         zIndexOffset: 1000,
       }).addTo(map);
 
-      marker.bindPopup(`
-        <div class="text-xs p-1">
-          <div class="font-bold text-red-400 mb-0.5">Ignition Point</div>
-          <div class="font-mono text-slate-300">${selectedLocation.lat.toFixed(4)}°N, ${selectedLocation.lon.toFixed(4)}°E</div>
-          ${prediction ? `<div class="mt-1 font-bold" style="color: ${prediction.theme_color}">Risk: ${prediction.risk_score}% (${prediction.risk_level})</div>` : ""}
-        </div>
-      `);
-
       targetMarkerRef.current = marker;
     });
   }, [selectedLocation, prediction]);
@@ -247,9 +243,8 @@ export const Map: React.FC<MapProps> = ({
             </div>
             <div class="font-mono tabular-nums text-slate-300">Lat: ${spot.latitude.toFixed(4)}, Lon: ${spot.longitude.toFixed(4)}</div>
             <div class="text-slate-300">Satellite: <span class="font-semibold text-slate-100">${spot.satellite}</span></div>
-            <div class="text-slate-300">Thermal Brightness: <span class="font-semibold text-red-400 font-mono tabular-nums">${spot.brightness_kelvin} K</span></div>
-            <div class="text-slate-300">Confidence: <span class="font-semibold text-amber-300">${spot.confidence}</span></div>
-            <div class="text-[10px] text-slate-400">FRP: ${spot.frp_mw} MW | ${spot.acq_date} ${spot.acq_time}</div>
+            <div class="text-slate-300">Thermal Brightness: <span class="font-semibold text-red-400 font-mono">${spot.brightness_kelvin} K</span></div>
+            <div class="text-slate-300">FRP: <span class="font-semibold text-amber-300">${spot.frp_mw} MW</span></div>
           </div>
         `);
         group.addLayer(m);
@@ -293,315 +288,445 @@ export const Map: React.FC<MapProps> = ({
     });
   }, [regions, showRegions, onMapClick, viewScope]);
 
-  // Render Fire Spread Simulation Polygons
+  // FEATURE 4: Render Fine-Grained 6h Simulation Playback Polygon
   useEffect(() => {
-    if (!mapInstanceRef.current || !simulationLayerGroupRef.current) return;
-    const group = simulationLayerGroupRef.current;
+    if (!mapInstanceRef.current || !fineGrainSimGroupRef.current) return;
+    const group = fineGrainSimGroupRef.current;
     group.clearLayers();
 
-    if (!showSimulations || !prediction || !prediction.simulation || viewScope === "all_algeria") return;
+    if (!simulation6hData || !simulation6hData.steps || simulation6hData.steps.length === 0) return;
 
-    const sim = prediction.simulation;
-    const steps = sim.timesteps;
-    if (!steps || steps.length === 0) return;
-
-    import("leaflet").then((L) => {
-      const colors = [
-        { stroke: "#facc15", fill: "#facc15", opacity: 0.45 },
-        { stroke: "#fb923c", fill: "#fb923c", opacity: 0.5 },
-        { stroke: "#f87171", fill: "#f87171", opacity: 0.55 },
-        { stroke: "#ef4444", fill: "#dc2626", opacity: 0.65 },
-      ];
-
-      steps.forEach((step, idx) => {
-        const color = colors[idx % colors.length];
-        const isActive = idx === activeHorizonIndex;
-
-        const polygon = L.polygon(step.polygon, {
-          color: color.stroke,
-          weight: isActive ? 2.5 : 1.2,
-          opacity: isActive ? 0.95 : 0.45,
-          fillColor: color.fill,
-          fillOpacity: isActive ? color.opacity : color.opacity * 0.4,
-          dashArray: isActive ? undefined : "4, 4",
-        });
-
-        polygon.bindTooltip(
-          `Horizon +${step.hours}h: ${step.burned_area_hectares} ha (${step.rate_of_spread_m_h} m/h)`,
-          { sticky: true, className: "bg-slate-900 text-slate-100 text-xs px-2 py-1 rounded" }
-        );
-
-        group.addLayer(polygon);
-      });
-    });
-  }, [prediction, activeHorizonIndex, showSimulations, viewScope]);
-
-  // Render All Algeria Macro Burn Detections & Wilaya Centroids
-  useEffect(() => {
-    if (!mapInstanceRef.current || !algeriaBurnsLayerGroupRef.current) return;
-    const group = algeriaBurnsLayerGroupRef.current;
-    group.clearLayers();
-
-    if (viewScope !== "all_algeria") return;
+    const stepIndex = Math.max(0, Math.min(simulation6hData.steps.length - 1, currentSimStep - 1));
+    const activeStep = simulation6hData.steps[stepIndex];
+    if (!activeStep || !activeStep.polygon) return;
 
     import("leaflet").then((L) => {
-      // 1. Highlight Northern Algeria priority corridor bounding box
-      const bbox = L.rectangle(
-        [
-          [35.5, 3.0],
-          [37.5, 6.5],
-        ],
-        {
-          color: "#ef4444",
-          weight: 2,
-          fill: true,
-          fillColor: "#dc2626",
-          fillOpacity: 0.08,
-          dashArray: "6, 6",
+      // Draw past contour trails
+      for (let i = 0; i < stepIndex; i++) {
+        const past = simulation6hData.steps[i];
+        if (past && past.polygon) {
+          const trailPoly = L.polygon(past.polygon, {
+            color: "#f97316",
+            weight: 1,
+            opacity: 0.35,
+            fillColor: "#ea580c",
+            fillOpacity: 0.15,
+            dashArray: "3, 3",
+          });
+          group.addLayer(trailPoly);
         }
+      }
+
+      // Draw current active burning front polygon
+      const activePoly = L.polygon(activeStep.polygon, {
+        color: "#ef4444",
+        weight: 3,
+        opacity: 0.95,
+        fillColor: "#dc2626",
+        fillOpacity: 0.55,
+      });
+
+      activePoly.bindTooltip(
+        `<b>Front d'incendie simulé : ${activeStep.hour_label}</b><br/>Surface détruite : <b>${activeStep.burned_area_hectares} ha</b>`,
+        { permanent: false, sticky: true, className: "bg-red-950 text-white text-xs border border-red-700 px-2 py-1 rounded" }
       );
-      bbox.bindTooltip("Northern Algeria High Density Wildfire Zone (Kabylie & Babors)", {
-        direction: "top",
-        className: "bg-slate-900 text-red-300 text-xs font-semibold px-2 py-1 rounded",
-      });
-      group.addLayer(bbox);
 
-      // 2. Macro burn detections across Algeria
-      ALGERIA_MACRO_BURNS.forEach((spot) => {
-        const dot = L.circleMarker([spot.lat, spot.lon], {
-          radius: 5,
-          color: "#ef4444",
-          fillColor: "#dc2626",
-          fillOpacity: 0.8,
-          weight: 1,
-        });
-
-        dot.bindPopup(`
-          <div class="text-xs p-1">
-            <div class="font-bold text-red-400">Burn Hotspot: ${spot.wilaya}</div>
-            <div class="font-mono text-slate-300">Lat: ${spot.lat.toFixed(2)}, Lon: ${spot.lon.toFixed(2)}</div>
-            <div class="text-slate-200">Brightness: <span class="font-mono font-bold">${spot.k} K</span></div>
-            <div class="text-slate-200">FRP: <span class="font-mono font-bold">${spot.frp} MW</span></div>
-          </div>
-        `);
-        group.addLayer(dot);
-      });
-
-      // 3. Wilaya centroid markers with detailed statistics
-      DEFAULT_WILAYA_STATS.forEach((w) => {
-        const center = getWilayaCenter(w.wilaya_code);
-        const marker = L.circleMarker([center.lat, center.lon], {
-          radius: 10,
-          color: "#fb923c",
-          fillColor: "#ea580c",
-          fillOpacity: 0.9,
-          weight: 2,
-        });
-
-        marker.bindPopup(`
-          <div class="text-xs p-1 space-y-1">
-            <div class="font-bold text-white text-sm">${w.wilaya_name} (${w.wilaya_code})</div>
-            <div class="text-slate-300">${w.region}</div>
-            <div class="py-1 border-t border-b border-slate-700/80 my-1 font-mono">
-              <div>Total Burn Points: <span class="font-bold text-ember-400">${w.total_burned_points} pts</span></div>
-              <div>Estimated Area: <span class="font-bold text-white">${w.estimated_burned_area_ha.toLocaleString()} ha</span></div>
-            </div>
-            <div class="text-slate-300">Canopy: <span class="text-slate-100">${w.top_vegetation_type}</span></div>
-          </div>
-        `);
-
-        marker.on("click", () => {
-          setSelectedWilaya(w);
-        });
-
-        group.addLayer(marker);
-      });
+      group.addLayer(activePoly);
     });
-  }, [viewScope]);
+  }, [simulation6hData, currentSimStep]);
 
-  const handleSelectWilayaFromCard = (w: WilayaBurnStat) => {
-    setSelectedWilaya(w);
-    const center = getWilayaCenter(w.wilaya_code);
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.flyTo([center.lat, center.lon], 9, { duration: 0.8 });
+  // FEATURE 5: Canvas Wind Particle Flow Overlay
+  useEffect(() => {
+    if (!showWindAnimation || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    const width = (canvas.width = canvas.parentElement?.clientWidth || 800);
+    const height = (canvas.height = canvas.parentElement?.clientHeight || 600);
+
+    // Spread angle: wind blows FROM windDirection, so particles move towards (windDirection + 180)
+    const angleRad = (((windDirection || 180) + 180) % 360) * (Math.PI / 180.0);
+    const speed = Math.max(1.2, Math.min(5.5, (windSpeed || 25) / 12.0));
+    const vx = Math.sin(angleRad) * speed;
+    const vy = -Math.cos(angleRad) * speed;
+
+    const numParticles = 65;
+    const particles = Array.from({ length: numParticles }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      len: 12 + Math.random() * 20,
+      opacity: 0.2 + Math.random() * 0.5,
+    }));
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.lineWidth = 1.6;
+      for (const p of particles) {
+        ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity})`;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - vx * (p.len / speed), p.y - vy * (p.len / speed));
+        ctx.stroke();
+
+        p.x += vx;
+        p.y += vy;
+
+        if (p.x < -30) p.x = width + 20;
+        if (p.x > width + 30) p.x = -20;
+        if (p.y < -30) p.y = height + 20;
+        if (p.y > height + 30) p.y = -20;
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animId);
+    };
+  }, [showWindAnimation, windSpeed, windDirection]);
+
+  // Handle Offline Map Download Simulation
+  const handleDownloadOfflineZone = (zoneKey: string, zoneLabel: string, size: string) => {
+    setDownloadingZone(zoneKey);
+    setTimeout(() => {
+      try {
+        localStorage.setItem(`in9ad_offline_${zoneKey}`, "cached_true");
+      } catch {}
+      setDownloadingZone(null);
+      setShowOfflineMenu(false);
+      setOfflineToast(`Carte ${zoneLabel} téléchargée (${size}) - Utilisable sans internet.`);
+      setTimeout(() => setOfflineToast(null), 5000);
+    }, 1200);
+  };
+
+  // Handle Community Report Submit
+  const handleSendCommunityReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportNotes.trim()) return;
+
+    setIsSubmittingReport(true);
+    try {
+      const lat = selectedLocation ? selectedLocation.lat : 36.735;
+      const lon = selectedLocation ? selectedLocation.lon : 4.435;
+
+      await submitCommunityReport({
+        lat,
+        lon,
+        wilaya: reportWilaya,
+        description: reportNotes,
+        phone: reportPhone,
+        photo_url: reportPhotoSelected ? "https://images.unsplash.com/photo-1542385151-efd9000785a0?w=600" : "",
+      });
+
+      setShowReportModal(false);
+      setReportNotes("");
+      setReportPhone("");
+      setReportPhotoSelected(false);
+      setReportSuccessToast("Signalement transmis avec succès au centre d'opérations de la Protection Civile.");
+      setTimeout(() => setReportSuccessToast(null), 5000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmittingReport(false);
     }
   };
 
   return (
-    <div className="relative w-full h-full min-h-[500px] rounded-lg overflow-hidden border border-slate-800">
-      {/* Leaflet DOM Container */}
-      <div ref={mapContainerRef} className="w-full h-full" />
+    <div className="relative w-full h-full min-h-[500px]">
+      {/* Leaflet Map DOM Container */}
+      <div ref={mapContainerRef} className="w-full h-full min-h-[500px]" />
 
-      {/* Primary Scope Toggle: Northern Algeria Risk vs View All Algeria Burns */}
-      <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2">
-        <div
-          className="bg-slatebg-900/95 backdrop-blur-md border border-slate-700/90 rounded-lg p-1 shadow flex items-center gap-1 text-xs"
-          role="group"
-          aria-label="Map view mode"
-        >
+      {/* FEATURE 5: Canvas Wind Overlay */}
+      {showWindAnimation && (
+        <canvas
+          ref={canvasRef}
+          className="pointer-events-none absolute inset-0 z-20 w-full h-full"
+        />
+      )}
+
+      {/* Top Map Control Bar */}
+      <div className="absolute top-4 left-4 z-[400] flex flex-wrap items-center gap-2">
+        {/* View Scope Switcher */}
+        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-lg p-1 shadow flex items-center gap-1 text-xs">
           <button
-            onClick={() => {
-              setViewScope("northern");
-              setSelectedWilaya(null);
-            }}
-            className={`px-3 py-1.5 rounded-md font-semibold transition-colors flex items-center gap-1.5 ${
-              viewScope === "northern"
-                ? "bg-ember-600 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+            onClick={() => setViewScope("northern")}
+            className={`px-3 py-1.5 rounded-md font-semibold transition flex items-center gap-1.5 ${
+              viewScope === "northern" ? "bg-red-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
             }`}
           >
             <Flame className="w-3.5 h-3.5" />
-            <span>Northern Algeria Risk</span>
+            <span>Nord Algérie</span>
           </button>
 
           <button
             onClick={() => setViewScope("all_algeria")}
-            className={`px-3 py-1.5 rounded-md font-semibold transition-colors flex items-center gap-1.5 ${
-              viewScope === "all_algeria"
-                ? "bg-ember-600 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+            className={`px-3 py-1.5 rounded-md font-semibold transition flex items-center gap-1.5 ${
+              viewScope === "all_algeria" ? "bg-red-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
             }`}
           >
             <Globe2 className="w-3.5 h-3.5" />
-            <span>View All Algeria Burns</span>
+            <span>Vue Nationale</span>
           </button>
         </div>
 
-        {/* Basemap Switcher */}
-        <div
-          className="bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 rounded-lg p-1.5 shadow-sm flex items-center gap-1 text-xs w-fit"
-          role="group"
-          aria-label="Map style switcher"
+        {/* FEATURE 5: Animated Wind Particle Toggle */}
+        <button
+          onClick={() => setShowWindAnimation(!showWindAnimation)}
+          className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition flex items-center gap-1.5 ${
+            showWindAnimation
+              ? "bg-cyan-950/90 border-cyan-700/80 text-cyan-300"
+              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
+          }`}
+          title="Afficher/masquer les particules de vent Open-Meteo"
         >
+          <Wind className="w-3.5 h-3.5" />
+          <span>Vent Animé : {showWindAnimation ? "ON" : "OFF"}</span>
+        </button>
+
+        {/* FEATURE 8: Offline Map Download Button & Dropdown */}
+        <div className="relative">
           <button
-            onClick={() => setActiveTileLayer("satellite")}
-            className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-              activeTileLayer === "satellite" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
-            }`}
+            onClick={() => setShowOfflineMenu(!showOfflineMenu)}
+            className="px-2.5 py-1.5 bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md border border-slate-800 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5"
           >
-            Satellite
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Carte Hors-Ligne</span>
           </button>
-          <button
-            onClick={() => setActiveTileLayer("dark")}
-            className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-              activeTileLayer === "dark" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Dark
-          </button>
-          <button
-            onClick={() => setActiveTileLayer("osm")}
-            className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
-              activeTileLayer === "osm" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Street
-          </button>
-        </div>
-      </div>
 
-      {/* Floating Wilaya Burn Statistics Card when in "View All Algeria Burns" mode */}
-      {viewScope === "all_algeria" && (
-        <div className="absolute top-4 right-4 z-[400] w-80 max-h-[calc(100%-2rem)] flex flex-col bg-slatebg-900/95 backdrop-blur-md border border-slate-800 rounded-lg p-3 shadow-lg text-xs">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-            <div>
-              <div className="text-[11px] text-ember-400 font-semibold uppercase tracking-wider">
-                NASA FIRMS 2023-2024
-              </div>
-              <h3 className="text-sm font-bold text-white">Algeria Wilaya Burn Stats</h3>
-            </div>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-950 text-red-300 border border-red-800 font-mono">
-              88% Northern
-            </span>
-          </div>
-
-          <div className="mt-2 text-slate-400 text-[11px] leading-tight">
-            Click any wilaya to inspect historical burn density and canopy impact:
-          </div>
-
-          <div className="mt-2 space-y-1.5 overflow-y-auto max-h-[320px] pr-1">
-            {DEFAULT_WILAYA_STATS.map((w) => {
-              const isSelected = selectedWilaya?.wilaya_code === w.wilaya_code;
-              return (
-                <div
-                  key={w.wilaya_code}
-                  onClick={() => handleSelectWilayaFromCard(w)}
-                  className={`p-2 rounded border cursor-pointer transition-colors ${
-                    isSelected
-                      ? "bg-slate-800 border-ember-500 text-white"
-                      : "bg-slate-900/60 border-slate-800 hover:bg-slate-800/60 text-slate-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between font-semibold">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-ember-400" />
-                      <span>{w.wilaya_name}</span>
-                      <span className="text-slate-400 font-mono text-[10px]">({w.wilaya_code})</span>
-                    </span>
-                    <span className="font-mono text-ember-400">{w.total_burned_points} pts</span>
-                  </div>
-
-                  <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
-                    <span>{Math.round(w.estimated_burned_area_ha).toLocaleString()} ha</span>
-                    <span className="text-red-300 text-[10px]">{w.risk_category}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {selectedWilaya && (
-            <div className="mt-3 pt-2 border-t border-slate-800 text-[11px] bg-slate-950/60 p-2 rounded border border-slate-800">
-              <div className="flex items-center justify-between text-slate-300 mb-1">
-                <span className="font-semibold text-white">{selectedWilaya.wilaya_name} Details:</span>
-                <button onClick={() => setSelectedWilaya(null)} className="text-slate-400 hover:text-white">
+          {showOfflineMenu && (
+            <div className="absolute left-0 mt-1.5 w-72 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 z-50 space-y-1.5 text-xs">
+              <div className="font-bold text-slate-200 px-2 py-1 border-b border-slate-800 flex justify-between items-center">
+                <span>Zones pour intervention hors-ligne</span>
+                <button onClick={() => setShowOfflineMenu(false)} className="text-slate-400 hover:text-white">
                   <X className="w-3 h-3" />
                 </button>
               </div>
-              <div className="text-slate-400">
-                Vegetation: <span className="text-slate-200">{selectedWilaya.top_vegetation_type}</span>
-              </div>
+
+              <button
+                onClick={() => handleDownloadOfflineZone("yakouren", "Yakouren", "45 Mo")}
+                disabled={downloadingZone !== null}
+                className="w-full text-left p-2 rounded hover:bg-slate-800 transition text-slate-300 hover:text-white flex justify-between items-center"
+              >
+                <div>
+                  <div className="font-semibold text-white">Zone Yakouren (Tizi Ouzou)</div>
+                  <div className="text-[10px] text-slate-400">Forêt domaniale & col d&apos;Ighil Bouchene</div>
+                </div>
+                <span className="font-mono text-emerald-400 text-[10px]">~45 Mo</span>
+              </button>
+
+              <button
+                onClick={() => handleDownloadOfflineZone("akfadou", "Akfadou", "58 Mo")}
+                disabled={downloadingZone !== null}
+                className="w-full text-left p-2 rounded hover:bg-slate-800 transition text-slate-300 hover:text-white flex justify-between items-center"
+              >
+                <div>
+                  <div className="font-semibold text-white">Zone Akfadou (Bejaia)</div>
+                  <div className="text-[10px] text-slate-400">Crête forestière & réserve intégrale</div>
+                </div>
+                <span className="font-mono text-emerald-400 text-[10px]">~58 Mo</span>
+              </button>
+
+              <button
+                onClick={() => handleDownloadOfflineZone("kabylie", "Grande Kabylie", "125 Mo")}
+                disabled={downloadingZone !== null}
+                className="w-full text-left p-2 rounded hover:bg-slate-800 transition text-slate-300 hover:text-white flex justify-between items-center"
+              >
+                <div>
+                  <div className="font-semibold text-white">Tout le corridor Kabylie</div>
+                  <div className="text-[10px] text-slate-400">Tizi Ouzou + Bejaia + Bouira</div>
+                </div>
+                <span className="font-mono text-emerald-400 text-[10px]">~125 Mo</span>
+              </button>
+
+              {downloadingZone && (
+                <div className="p-2 text-center text-emerald-400 font-semibold flex items-center justify-center gap-2">
+                  <div className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                  <span>Téléchargement et mise en cache...</span>
+                </div>
+              )}
             </div>
           )}
         </div>
+      </div>
+
+      {/* FEATURE 7: Citizen Reporting Floating Action Button */}
+      <div className="absolute bottom-4 right-4 z-[400]">
+        <button
+          onClick={() => setShowReportModal(true)}
+          className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-full shadow-lg shadow-red-950/80 flex items-center gap-2 transition transform hover:scale-105 active:scale-95"
+        >
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+          </span>
+          <Smartphone className="w-4 h-4" />
+          <span>Signalement Citoyen</span>
+        </button>
+      </div>
+
+      {/* Toasts */}
+      {offlineToast && (
+        <div className="absolute bottom-16 left-4 z-[500] bg-emerald-950/95 border border-emerald-700 text-emerald-200 px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{offlineToast}</span>
+        </div>
       )}
 
-      {/* Floating Instructions Banner (when in Northern Algeria Risk mode) */}
-      {viewScope === "northern" && (
-        <div className="absolute bottom-4 left-4 z-[400] hidden sm:flex items-center gap-2 bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 px-3 py-1.5 rounded-lg shadow-sm text-[11px] text-slate-300">
-          <Navigation2 className="w-3.5 h-3.5 text-ember-400" aria-hidden="true" />
-          <span>Click any forest coordinate in Northern Algeria to run XGBoost risk prediction and 6h spread</span>
+      {reportSuccessToast && (
+        <div className="absolute bottom-16 right-4 z-[500] bg-emerald-950/95 border border-emerald-700 text-emerald-200 px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{reportSuccessToast}</span>
+        </div>
+      )}
+
+      {/* FEATURE 7: Citizen Reporting Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[600] flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2 font-bold text-white text-sm">
+                <Smartphone className="w-4 h-4 text-red-500" />
+                <span>{t("citizen_report_modal_title")}</span>
+              </div>
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t("citizen_report_desc")}
+            </p>
+
+            <form onSubmit={handleSendCommunityReport} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Wilaya concernée
+                </label>
+                <select
+                  value={reportWilaya}
+                  onChange={(e) => setReportWilaya(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
+                >
+                  <option value="Tizi Ouzou">Tizi Ouzou (15)</option>
+                  <option value="Bejaia">Bejaia (06)</option>
+                  <option value="Bouira">Bouira (10)</option>
+                  <option value="Jijel">Jijel (18)</option>
+                  <option value="Bordj Bou Arreridj">Bordj Bou Arreridj (34)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Coordonnées GPS (automatiques)
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  value={
+                    selectedLocation
+                      ? `${selectedLocation.lat.toFixed(4)}° N, ${selectedLocation.lon.toFixed(4)}° E`
+                      : "36.7350° N, 4.4350° E (Centre carte)"
+                  }
+                  className="w-full bg-slate-800/60 border border-slate-700/60 rounded-lg p-2 text-slate-400 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Téléphone du déclarant (facultatif)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="+213 550 XX XX XX"
+                  value={reportPhone}
+                  onChange={(e) => setReportPhone(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white placeholder-slate-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Description de la fumée / flammes observées *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  placeholder="Ex : Épaisse fumée blanche au-dessus des crêtes de Yakouren, vent fort vers le nord."
+                  value={reportNotes}
+                  onChange={(e) => setReportNotes(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white placeholder-slate-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Photo témoin (Simulation upload)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setReportPhotoSelected(!reportPhotoSelected)}
+                  className={`w-full p-2.5 rounded-lg border border-dashed flex items-center justify-center gap-2 transition ${
+                    reportPhotoSelected
+                      ? "bg-emerald-950/40 border-emerald-600 text-emerald-300"
+                      : "bg-slate-800/40 border-slate-700 text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>
+                    {reportPhotoSelected
+                      ? "Photo attachée : fumee_yakouren_01.jpg"
+                      : "Cliquer pour joindre une photo (Mock)"}
+                  </span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReport}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg flex items-center gap-1.5 transition"
+                >
+                  {isSubmittingReport ? (
+                    <span>Envoi...</span>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{t("citizen_submit")}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-slatebg-950/40 backdrop-blur-sm z-[500] flex items-center justify-center">
-          <div className="bg-slatebg-900/95 border border-slate-800 px-5 py-3 rounded-lg shadow-sm flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full border-2 border-ember-500 border-t-transparent animate-spin"></div>
-            <span className="text-xs font-semibold text-slate-200">Processing satellite and wind data</span>
+        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm z-[500] flex items-center justify-center">
+          <div className="bg-slate-900/95 border border-slate-800 px-5 py-3 rounded-lg shadow-sm flex items-center gap-3">
+            <div className="w-5 h-5 rounded-full border-2 border-red-500 border-t-transparent animate-spin"></div>
+            <span className="text-xs font-semibold text-slate-200">
+              Traitement satellitaire et simulation IA...
+            </span>
           </div>
         </div>
       )}
     </div>
   );
 };
-
-function getWilayaCenter(code: number): { lat: number; lon: number } {
-  switch (code) {
-    case 15:
-      return { lat: 36.7169, lon: 4.0497 }; // Tizi Ouzou
-    case 6:
-      return { lat: 36.7511, lon: 5.0567 }; // Bejaia
-    case 10:
-      return { lat: 36.3749, lon: 3.9020 }; // Bouira
-    case 18:
-      return { lat: 36.8206, lon: 5.7667 }; // Jijel
-    case 34:
-      return { lat: 36.0732, lon: 4.7611 }; // Bordj Bou Arreridj
-    case 19:
-      return { lat: 36.1911, lon: 5.4137 }; // Setif
-    default:
-      return { lat: 36.65, lon: 4.5 };
-  }
-}

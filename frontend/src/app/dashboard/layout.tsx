@@ -16,6 +16,8 @@ import {
   UserCheck
 } from "lucide-react";
 import { getStoredUser, getStoredToken, logoutUser, getRoleBadgeInfo, AuthUser } from "@/lib/auth";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -52,23 +54,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const badgeInfo = getRoleBadgeInfo(user.role);
+  const { t, isRTL } = useLanguage();
   const isAdmin = user.role === "ADMIN";
 
   const navItems = [
-    { href: "/dashboard", label: "Carte Tactique", icon: Map },
-    { href: "/dashboard/alerts", label: "Alertes Actives", icon: AlertTriangle },
-    { href: "/dashboard/history", label: "Historique & Audit", icon: History },
-    { href: "/analytics", label: "Analytics ML", icon: BarChart3 },
+    { href: "/dashboard", label: t("nav_tactical_map"), icon: Map },
+    { href: "/dashboard/alerts", label: t("nav_alerts"), icon: AlertTriangle },
+    { href: "/dashboard/historique", label: t("nav_history"), icon: History },
+    { href: "/analytics", label: t("nav_analytics"), icon: BarChart3 },
     ...(isAdmin
       ? [
-          { href: "/dashboard/admin/model-health", label: "Santé Modèle & API", icon: Activity },
-          { href: "/dashboard/admin/users", label: "Gestion Comptes", icon: Users },
+          { href: "/dashboard/admin/model-health", label: t("nav_model_health"), icon: Activity },
+          { href: "/dashboard/admin/roadmap", label: t("nav_roadmap"), icon: Shield },
+          { href: "/dashboard/admin/users", label: t("nav_users"), icon: Users },
         ]
       : []),
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${isRTL ? "font-arabic" : ""}`}>
       {/* Top Security Header */}
       <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -81,12 +85,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div>
                 <div className="text-base font-bold tracking-tight text-white flex items-center gap-2">
                   <span>IN9AD</span>
-                  <span className="text-xs px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-normal">
-                    v2.0
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-red-950/80 border border-red-800/60 text-red-300 font-bold">
+                    v3.0 TOP 3
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-medium">
-                  Système National de Veille
+                  {t("platform_sub")}
                 </div>
               </div>
             </Link>
@@ -105,7 +109,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const active = pathname === item.href;
+              const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
               return (
                 <Link
                   key={item.href}
@@ -123,8 +127,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             })}
           </nav>
 
-          {/* User Profile & Logout */}
+          {/* Language Switcher + User Profile & Logout */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+
             <div className="text-right hidden lg:block">
               <div className="text-xs font-medium text-slate-200">{user.name}</div>
               <div className="text-[10px] text-slate-400 font-mono truncate max-w-[180px]">
@@ -135,7 +141,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <button
               onClick={handleLogout}
               className="p-2 rounded border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition"
-              title="Déconnexion sécurisée"
+              title={t("logout")}
             >
               <LogOut className="w-4 h-4" />
             </button>

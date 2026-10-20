@@ -135,12 +135,34 @@ def init_history_database():
             )
         """)
 
+        # 8. Community Citizen Reports table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS community_reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                report_id TEXT UNIQUE,
+                lat REAL,
+                lon REAL,
+                wilaya TEXT,
+                description TEXT,
+                photo_url TEXT,
+                phone TEXT,
+                status TEXT,
+                timestamp TEXT
+            )
+        """)
+
         conn.commit()
 
         # Pre-seed historical runs if empty
         cursor.execute("SELECT COUNT(*) FROM model_runs")
         if cursor.fetchone()[0] == 0:
             _seed_initial_history(cursor)
+            conn.commit()
+
+        # Pre-seed sample community reports if empty
+        cursor.execute("SELECT COUNT(*) FROM community_reports")
+        if cursor.fetchone()[0] == 0:
+            _seed_initial_community_reports(cursor)
             conn.commit()
 
         # Pre-seed alerts if empty
@@ -240,6 +262,36 @@ def _seed_initial_alerts(cursor: sqlite3.Cursor):
             INSERT INTO alert_status_history (alert_id, old_status, new_status, changed_by, changed_at, note)
             VALUES (?, ?, ?, ?, ?, ?)
         """, h)
+
+
+def _seed_initial_community_reports(cursor: sqlite3.Cursor):
+    """Pre-seeds citizen smoke and flame observations for validation by admin/protection."""
+    now = datetime.utcnow()
+    reports = [
+        (
+            "REP-2026-001", 36.7410, 4.4420, "Tizi Ouzou",
+            "Fumée dense et odeur de brûlé observée près du col d'Ighil Bouchene.",
+            "https://images.unsplash.com/photo-1542385151-efd9000785a0?w=600",
+            "+213 550 12 34 56", "VERIFIED", (now - timedelta(hours=2)).isoformat() + "Z"
+        ),
+        (
+            "REP-2026-002", 36.6820, 4.5950, "Bejaia",
+            "Départ de feu suspect en bordure de piste forestière vers Adekar.",
+            "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600",
+            "+213 661 98 76 54", "PENDING", (now - timedelta(minutes=45)).isoformat() + "Z"
+        ),
+        (
+            "REP-2026-003", 36.4650, 4.1480, "Bouira",
+            "Éclaircies de fumée blanche près de la station de Tikjda.",
+            "",
+            "+213 770 45 67 89", "PENDING", (now - timedelta(minutes=20)).isoformat() + "Z"
+        )
+    ]
+    for r in reports:
+        cursor.execute("""
+            INSERT INTO community_reports (report_id, lat, lon, wilaya, description, photo_url, phone, status, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, r)
 
 
 # Initialize DB on import
@@ -707,4 +759,220 @@ def archive_burn_map(period_label: Optional[str] = None) -> str:
             shutil.copyfile(base_html, dest)
 
     return archived_path
+
+
+# -------------------------------------------------------------
+# Community Citizen Reports
+# -------------------------------------------------------------
+
+def save_community_report(
+    lat: float,
+    lon: float,
+    wilaya: str,
+    description: str,
+    photo_url: str = "",
+    phone: str = ""
+) -> Dict[str, Any]:
+    """Saves a new citizen report to the community_reports table."""
+    now_str = datetime.utcnow().isoformat() + "Z"
+    report_id = f"REP-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO community_reports (report_id, lat, lon, wilaya, description, photo_url, phone, status, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)
+        """, (report_id, lat, lon, wilaya, description, photo_url, phone, now_str))
+        conn.commit()
+
+    return {
+        "report_id": report_id,
+        "lat": lat,
+        "lon": lon,
+        "wilaya": wilaya,
+        "description": description,
+        "photo_url": photo_url,
+        "phone": phone,
+        "status": "PENDING",
+        "timestamp": now_str
+    }
+
+
+def get_all_community_reports(status: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    """Retrieves community citizen smoke/fire observations."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        if status:
+            cursor.execute("""
+                SELECT * FROM community_reports WHERE status = ? ORDER BY timestamp DESC LIMIT ?
+            """, (status, limit))
+        else:
+            cursor.execute("""
+                SELECT * FROM community_reports ORDER BY timestamp DESC LIMIT ?
+            """, (limit,))
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def update_community_report_status(report_id: str, new_status: str, verified_by: str = "") -> Dict[str, Any]:
+    """Updates status of a community report (PENDING, VERIFIED, REJECTED)."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM community_reports WHERE report_id = ?", (report_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError(f"Report {report_id} not found")
+
+        cursor.execute("UPDATE community_reports SET status = ? WHERE report_id = ?", (new_status, report_id))
+        conn.commit()
+
+        # If verified, optionally trigger an alert if one doesn't exist
+        created_alert_id = None
+        if new_status == "VERIFIED":
+            rep = dict(row)
+            alert_res = create_or_update_alert({
+                "lat": rep["lat"],
+                "lon": rep["lon"],
+                "wilaya": rep["wilaya"],
+                "forest_name": f"Signalement Citoyen ({rep['wilaya']})",
+                "risk_score": 88.5,
+                "risk_level": "VERY_HIGH",
+                "temp": 38.0,
+                "humidity": 18.0,
+                "wind": 28.0,
+                "wind_dir": "SE",
+                "status": "DETECTED"
+            })
+            created_alert_id = alert_res.get("alert_id")
+
+        return {
+            "success": True,
+            "report_id": report_id,
+            "new_status": new_status,
+            "verified_by": verified_by,
+            "created_alert_id": created_alert_id
+        }
+
+
+# -------------------------------------------------------------
+# Unified Audit Log Stream (Feature 6: Historique & Audit)
+# -------------------------------------------------------------
+
+def get_unified_audit_log(
+    limit: int = 100,
+    wilaya: Optional[str] = None,
+    action_type: Optional[str] = None,
+    user_filter: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Combines alerts history, model runs, refresh events, and community reports
+    into a unified chronological audit trail for government oversight.
+    """
+    events = []
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        # 1. Alert status history
+        cursor.execute("""
+            SELECT ash.id, ash.alert_id, ash.old_status, ash.new_status, ash.changed_by, ash.changed_at, ash.note,
+                   a.wilaya, a.forest_name
+            FROM alert_status_history ash
+            LEFT JOIN alerts a ON ash.alert_id = a.alert_id
+            ORDER BY ash.changed_at DESC LIMIT 60
+        """)
+        for r in cursor.fetchall():
+            row = dict(r)
+            events.append({
+                "id": f"evt-alert-{row['id']}",
+                "timestamp": row["changed_at"],
+                "type": "STATUS_CHANGED" if row["old_status"] else "ALERT_CREATED",
+                "wilaya": row["wilaya"] or "Région Nord",
+                "user_role": row["changed_by"] or "Système IA / Protection Civile",
+                "details": f"{row['forest_name'] or row['alert_id']}: {row['old_status'] or 'INITIAL'} -> {row['new_status']} ({row['note'] or 'Mise à jour'})",
+                "badge_color": "emerald" if row["new_status"] in ["MAITRISE", "ETEINT"] else "amber" if row["new_status"] == "UNITES_DEPLOYEES" else "rose"
+            })
+
+        # 2. Model runs
+        cursor.execute("SELECT * FROM model_runs ORDER BY timestamp DESC LIMIT 20")
+        for r in cursor.fetchall():
+            row = dict(r)
+            events.append({
+                "id": f"evt-model-{row['id']}",
+                "timestamp": row["timestamp"],
+                "type": "MODEL_REFRESHED",
+                "wilaya": "Algérie (National)",
+                "user_role": "ADMIN (Système MLOps)",
+                "details": f"Version {row['model_version']} - Précision: {round(row['accuracy'] * 100, 1)}%, ROC-AUC: {round(row['roc_auc'] * 100, 1)}% ({row['notes'] or 'Automatique'})",
+                "badge_color": "cyan"
+            })
+
+        # 3. Community reports
+        cursor.execute("SELECT * FROM community_reports ORDER BY timestamp DESC LIMIT 30")
+        for r in cursor.fetchall():
+            row = dict(r)
+            events.append({
+                "id": f"evt-comm-{row['id']}",
+                "timestamp": row["timestamp"],
+                "type": "COMMUNITY_REPORT",
+                "wilaya": row["wilaya"] or "Tizi Ouzou",
+                "user_role": f"Citoyen ({row['phone'] or 'Anonyme'})",
+                "details": f"Signalement {row['report_id']} [{row['status']}]: {row['description']}",
+                "badge_color": "violet"
+            })
+
+        # 4. Refresh logs
+        cursor.execute("SELECT * FROM refresh_logs ORDER BY timestamp DESC LIMIT 20")
+        for r in cursor.fetchall():
+            row = dict(r)
+            events.append({
+                "id": f"evt-ref-{row['id']}",
+                "timestamp": row["timestamp"],
+                "type": "DATA_SYNC",
+                "wilaya": "Nord Algérie (FIRMS)",
+                "user_role": "Agent FIRMS / Open-Meteo",
+                "details": f"{row['refresh_type'].upper()}: {row['details']} ({row['duration_ms']}ms)",
+                "badge_color": "blue"
+            })
+
+    # Sort all events chronologically descending
+    events.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+
+    # Apply filters
+    if wilaya and wilaya != "Tous":
+        events = [e for e in events if wilaya.lower() in e["wilaya"].lower()]
+    if action_type and action_type != "Tous":
+        events = [e for e in events if e["type"] == action_type]
+    if user_filter:
+        events = [e for e in events if user_filter.lower() in e["user_role"].lower()]
+
+    paged = events[:limit]
+
+    # Calculate summary stats
+    today_prefix = datetime.utcnow().strftime("%Y-%m-%d")
+    actions_today = len([e for e in events if e["timestamp"].startswith(today_prefix)])
+    alerts_created = len([e for e in events if e["type"] == "ALERT_CREATED"])
+    status_changes = len([e for e in events if e["type"] == "STATUS_CHANGED"])
+
+    # Hourly distribution for chart
+    hourly_counts = {f"{h:02d}h": 0 for h in range(24)}
+    for e in events:
+        ts = e.get("timestamp", "")
+        if "T" in ts:
+            try:
+                hour = int(ts.split("T")[1].split(":")[0])
+                key = f"{hour:02d}h"
+                if key in hourly_counts:
+                    hourly_counts[key] += 1
+            except Exception:
+                pass
+
+    return {
+        "total_events": len(events),
+        "actions_today": actions_today if actions_today > 0 else len(events),
+        "alerts_created": alerts_created,
+        "status_changes": status_changes,
+        "hourly_distribution": [{"hour": h, "count": c} for h, c in hourly_counts.items()],
+        "events": paged
+    }
+
 

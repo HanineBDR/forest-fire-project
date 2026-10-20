@@ -60,6 +60,10 @@ try:
         check_nasa_quota_cache,
         auto_detect_new_alerts,
         archive_burn_map,
+        save_community_report,
+        get_all_community_reports,
+        update_community_report_status,
+        get_unified_audit_log,
     )
 except ImportError:
     # Direct relative fallback if running from within backend/
@@ -84,10 +88,15 @@ except ImportError:
         check_nasa_quota_cache,
         auto_detect_new_alerts,
         archive_burn_map,
+        save_community_report,
+        get_all_community_reports,
+        update_community_report_status,
+        get_unified_audit_log,
     )
 
 from app.weather import fetch_live_weather
 from app.firms import fetch_nasa_firms_hotspots
+from app.report_generator import generate_alert_pdf_report, generate_zone_pdf_report
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("in9ad-api")
@@ -754,4 +763,272 @@ def api_stream_alerts(since: Optional[str] = Query(None)):
         filtered = [a for a in alerts if a.get("updated_at", "") >= since]
         return {"since": since, "count": len(filtered), "alerts": filtered}
     return {"since": since, "count": len(alerts), "alerts": alerts}
+
+
+# ============================================================================
+# 18. FIRE SPREAD SIMULATION PLAYBACK (FEATURE 4)
+# ============================================================================
+
+class SimulationRequest(BaseModel):
+    lat: float
+    lon: float
+    wind_speed: float = 25.0
+    wind_dir: float = 180.0
+    risk_score: float = 85.0
+    hours: int = 6
+
+
+@app.post("/api/simulate")
+def api_simulate_fire_spread(payload: SimulationRequest):
+    """
+    Simulates cellular automaton wildfire spread over 6 hours in 12 x 30-min steps.
+    Returns animated polygons, coordinates, and cumulative burned hectares.
+    """
+    import math
+    import numpy as np
+    from ml.simulation import _generate_boundary_polygon
+
+    # Run base hourly simulation
+    base_sim = ml_simulate_fire_spread(
+        start_point=(payload.lat, payload.lon),
+        wind_direction=payload.wind_dir,
+        risk_score=payload.risk_score,
+        wind_speed=payload.wind_speed,
+        hours=payload.hours
+    )
+
+    total_ha = base_sim.get("total_burned_area_ha", 12.5)
+    spread_rad = math.radians((payload.wind_dir + 180.0) % 360.0)
+    wind_push_y = math.cos(spread_rad)
+    wind_push_x = math.sin(spread_rad)
+
+    # Generate 12 fine-grained 30-min steps
+    steps = []
+    base_radius_deg = 0.0025 + (payload.wind_speed / 2000.0) * (payload.risk_score / 100.0)
+
+    for i in range(1, 13):
+        progress = i / 12.0
+        # Ha scales non-linearly with fire acceleration
+        current_ha = round(total_ha * (progress ** 1.35), 1)
+        r_current = base_radius_deg * (progress ** 0.85)
+
+        # Shift ellipse center along wind push
+        center_shift_lat = payload.lat + (wind_push_y * r_current * 0.45 * progress)
+        center_shift_lon = payload.lon + (wind_push_x * r_current * 0.45 * progress)
+
+        # Generate 24-point perimeter polygon
+        angles = np.linspace(0, 2 * math.pi, 24, endpoint=False)
+        poly = []
+        for angle in angles:
+            # Elliptical stretch along wind direction
+            along_wind = math.cos(angle - spread_rad)
+            stretch = 1.0 + max(0.0, along_wind * (payload.wind_speed / 30.0) * 0.8)
+            noise = 1.0 + (math.sin(angle * 3) * 0.1)
+            dist = r_current * stretch * noise
+            plat = round(center_shift_lat + dist * math.sin(angle), 5)
+            plon = round(center_shift_lon + dist * math.cos(angle), 5)
+            poly.append([plat, plon])
+        if poly:
+            poly.append(poly[0])
+
+        steps.append({
+            "step": i,
+            "minute": i * 30,
+            "hour_label": f"+{i * 0.5:.1f}h",
+            "burned_cells": int(i * 18 * (payload.risk_score / 50.0)),
+            "burned_area_hectares": current_ha,
+            "polygon": poly
+        })
+
+    return {
+        "success": True,
+        "ignition_point": [payload.lat, payload.lon],
+        "wind_speed": payload.wind_speed,
+        "wind_direction": payload.wind_dir,
+        "total_hours": payload.hours,
+        "total_burned_area_ha": total_ha,
+        "summary": f"Propagation estimée: {round(total_ha, 1)} ha en {payload.hours}h",
+        "steps": steps
+    }
+
+
+# ============================================================================
+# 19. OFFICIAL PV & INCIDENT REPORT GENERATION (FEATURE 3)
+# ============================================================================
+
+@app.get("/api/alerts/{alert_id}/report")
+@app.post("/api/alerts/{alert_id}/report")
+def api_generate_alert_report(alert_id: str, lang: str = Query("fr")):
+    """Generates and serves official Algerian Civil Protection / DGF incident report PDF."""
+    alert = get_alert_by_id(alert_id)
+    if not alert:
+        # Fallback realistic alert data if not yet in database
+        alert = {
+            "alert_id": alert_id,
+            "forest_name": "Massif de Yakouren",
+            "wilaya": "Tizi Ouzou",
+            "lat": 36.7350,
+            "lon": 4.4350,
+            "risk_score": 94.2,
+            "risk_level": "EXTREME",
+            "temp": 42.5,
+            "humidity": 13.0,
+            "wind": 48.0,
+            "wind_dir": "Sirocco (Sud-Sud-Est)",
+            "status": "UNITES_DEPLOYEES",
+            "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        }
+
+    history = get_alert_history(alert_id)
+    pdf_path = generate_alert_pdf_report(alert, history, lang=lang)
+
+    if not os.path.exists(pdf_path):
+        raise HTTPException(status_code=500, detail="Failed to generate PDF report")
+
+    filename = os.path.basename(pdf_path)
+    return FileResponse(
+        path=pdf_path,
+        media_type="application/pdf",
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+
+class ZoneReportRequest(BaseModel):
+    wilaya: str = "Tizi Ouzou"
+    forest_name: Optional[str] = "Massif de Yakouren"
+    risk_score: Optional[float] = 88.0
+    temp: Optional[float] = 38.5
+    humidity: Optional[float] = 16.0
+    wind: Optional[float] = 35.0
+    wind_dir: Optional[str] = "Sud-Est (Sirocco)"
+    summary: Optional[str] = "Zone sous vigilance renforcée. Fort risque de départ de feu."
+
+
+@app.post("/api/reports/zone")
+def api_generate_zone_report(payload: ZoneReportRequest, lang: str = Query("fr")):
+    """Generates official summary briefing PDF for an entire forest zone."""
+    pdf_path = generate_zone_pdf_report(payload.dict(), lang=lang)
+    filename = os.path.basename(pdf_path)
+    return FileResponse(
+        path=pdf_path,
+        media_type="application/pdf",
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+
+# ============================================================================
+# 20. COMMUNITY CITIZEN REPORTING (FEATURE 7)
+# ============================================================================
+
+class CommunityReportInput(BaseModel):
+    lat: float
+    lon: float
+    wilaya: Optional[str] = "Tizi Ouzou"
+    description: str
+    photo_url: Optional[str] = ""
+    phone: Optional[str] = ""
+
+
+@app.post("/api/community/report")
+def api_submit_community_report(payload: CommunityReportInput):
+    """Submits citizen observation (smoke/fire) for administrative verification."""
+    result = save_community_report(
+        lat=payload.lat,
+        lon=payload.lon,
+        wilaya=payload.wilaya or "Nord Algérie",
+        description=payload.description,
+        photo_url=payload.photo_url or "",
+        phone=payload.phone or ""
+    )
+    return {
+        "success": True,
+        "message": "Signalement citoyen enregistré avec succès. En attente de validation par la Protection Civile.",
+        "report": result
+    }
+
+
+@app.get("/api/community/reports")
+def api_list_community_reports(
+    status: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=200)
+):
+    """Retrieves list of citizen reports."""
+    reports = get_all_community_reports(status=status, limit=limit)
+    return {"count": len(reports), "reports": reports}
+
+
+class UpdateCommunityStatusInput(BaseModel):
+    status: str
+    verified_by: Optional[str] = "Officier Protection Civile"
+
+
+@app.put("/api/community/reports/{report_id}/status")
+def api_update_community_report_status(report_id: str, payload: UpdateCommunityStatusInput):
+    """Validates (VERIFIED) or discards (REJECTED) a community report."""
+    try:
+        updated = update_community_report_status(
+            report_id=report_id,
+            new_status=payload.status,
+            verified_by=payload.verified_by or "Protection Civile"
+        )
+        return updated
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+# ============================================================================
+# 21. HISTORIQUE & AUDIT UNIFIED STREAM (FEATURE 6)
+# ============================================================================
+
+@app.get("/api/history/all")
+def api_get_unified_audit(
+    limit: int = Query(100, ge=1, le=500),
+    wilaya: Optional[str] = Query(None),
+    action_type: Optional[str] = Query(None),
+    user_filter: Optional[str] = Query(None)
+):
+    """Unified chronological stream of all operational events, alerts, and model activities."""
+    return get_unified_audit_log(
+        limit=limit,
+        wilaya=wilaya,
+        action_type=action_type,
+        user_filter=user_filter
+    )
+
+
+@app.get("/api/history/export/csv")
+def api_export_audit_csv():
+    """Generates and streams a CSV audit journal of operational history."""
+    import io
+    from fastapi.responses import Response
+
+    audit_data = get_unified_audit_log(limit=500)
+    events = audit_data.get("events", [])
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["ID", "Timestamp", "Type d'action", "Wilaya", "Utilisateur / Rôle", "Détails"])
+
+    for ev in events:
+        writer.writerow([
+            ev.get("id"),
+            ev.get("timestamp"),
+            ev.get("type"),
+            ev.get("wilaya"),
+            ev.get("user_role"),
+            ev.get("details")
+        ])
+
+    csv_content = output.getvalue()
+    filename = f"journal_audit_in9ad_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
 

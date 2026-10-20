@@ -30,8 +30,10 @@ import {
   fetchAlerts, 
   fetchAlertHistory, 
   updateAlertStatus, 
-  refreshAlerts 
+  refreshAlerts,
+  getAlertReportDownloadUrl 
 } from "@/lib/api";
+import { useLanguage } from "@/context/LanguageContext";
 import { AlertRecord, AlertStatusHistory } from "@/types";
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -83,6 +85,7 @@ const NEXT_STATUS_OPTIONS = [
 ];
 
 export default function AlertsPage() {
+  const { t, language } = useLanguage();
   const [alerts, setAlerts] = useState<AlertRecord[]>([]);
   const [filterLevel, setFilterLevel] = useState<string>("ALL");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
@@ -552,6 +555,16 @@ export default function AlertsPage() {
                       <span>Voir sur la carte</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
+
+                    {/* FEATURE 3: Generate Official PV PDF */}
+                    <button
+                      onClick={() => window.open(getAlertReportDownloadUrl(alert.alert_id, language), "_blank")}
+                      className="w-full py-2 px-3 rounded-lg border border-red-800/80 bg-red-950/70 hover:bg-red-900 text-red-200 text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
+                      title="Télécharger le Procès-Verbal officiel d'alerte incendie (PDF)"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-red-400" />
+                      <span>📄 Générer PV</span>
+                    </button>
 
                     <button
                       onClick={() => openFullHistoryModal(alert)}

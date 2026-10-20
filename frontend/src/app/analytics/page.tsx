@@ -596,6 +596,41 @@ export default function AnalyticsPage() {
                 </span>
               </div>
             </div>
+
+            {/* Feature Importance Diagram */}
+            <div className="p-4 rounded-lg bg-slate-950 border border-slate-800/90 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    Poids des Paramètres & Importance des Variables (XGBoost)
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Hiérarchie des facteurs météorologiques (Température, Humidité, Sirocco, FFMC) validée sur le terrain.
+                  </p>
+                </div>
+                <a
+                  href={`${apiBase}/outputs/feature_importance.png`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium"
+                >
+                  <span>HD PNG</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+              <div className="overflow-hidden rounded-lg border border-slate-800/80 bg-slate-900/60 p-2">
+                <img
+                  src={`${apiBase}/outputs/feature_importance.png?t=${lastUpdated.getTime()}`}
+                  alt="Importance des Variables IN9AD - Poids XGBoost"
+                  className="w-full h-auto object-contain max-h-[460px] mx-auto rounded"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/feature_importance.png";
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </section>
 

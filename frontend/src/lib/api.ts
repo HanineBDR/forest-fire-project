@@ -812,3 +812,84 @@ export async function refreshAlerts(): Promise<any> {
   return await res.json();
 }
 
+export async function simulateFireSpread(params: {
+  lat: number;
+  lon: number;
+  wind_speed?: number;
+  wind_dir?: number;
+  risk_score?: number;
+  hours?: number;
+}): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/simulate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      lat: params.lat,
+      lon: params.lon,
+      wind_speed: params.wind_speed ?? 30.0,
+      wind_dir: params.wind_dir ?? 180.0,
+      risk_score: params.risk_score ?? 85.0,
+      hours: params.hours ?? 6,
+    }),
+  });
+  if (!res.ok) throw new Error("Simulation calculation failed");
+  return await res.json();
+}
+
+export async function submitCommunityReport(data: {
+  lat: number;
+  lon: number;
+  wilaya?: string;
+  description: string;
+  photo_url?: string;
+  phone?: string;
+}): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/community/report`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to submit citizen report");
+  return await res.json();
+}
+
+export async function fetchCommunityReports(status?: string): Promise<any[]> {
+  try {
+    const url = status ? `${API_BASE}/api/community/reports?status=${status}` : `${API_BASE}/api/community/reports`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      return data.reports || [];
+    }
+  } catch (err) {
+    console.warn("Failed to fetch community reports:", err);
+  }
+  return [];
+}
+
+export async function fetchUnifiedAudit(params?: {
+  limit?: number;
+  wilaya?: string;
+  action_type?: string;
+  user_filter?: string;
+}): Promise<any> {
+  const q = new URLSearchParams();
+  if (params?.limit) q.append("limit", String(params.limit));
+  if (params?.wilaya && params.wilaya !== "Tous") q.append("wilaya", params.wilaya);
+  if (params?.action_type && params.action_type !== "Tous") q.append("action_type", params.action_type);
+  if (params?.user_filter) q.append("user_filter", params.user_filter);
+
+  const res = await fetch(`${API_BASE}/api/history/all?${q.toString()}`);
+  if (!res.ok) throw new Error("Failed to fetch audit log");
+  return await res.json();
+}
+
+export function getAlertReportDownloadUrl(alertId: string, lang: string = "fr"): string {
+  return `${API_BASE}/api/alerts/${alertId}/report?lang=${lang}`;
+}
+
+export function getZoneReportDownloadUrl(zoneData: any, lang: string = "fr"): string {
+  return `${API_BASE}/api/reports/zone?lang=${lang}`;
+}
+
+

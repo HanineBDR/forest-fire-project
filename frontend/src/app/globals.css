@@ -15,6 +15,10 @@
     overflow-x: hidden;
   }
 
+  [dir="rtl"], .font-arabic {
+    font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
+  }
+
   /* Visible focus styles for keyboard navigation */
   :focus-visible {
     outline: 2px solid #f97316;

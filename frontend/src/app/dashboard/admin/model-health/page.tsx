@@ -16,7 +16,8 @@ import {
   ShieldAlert, 
   BarChart2,
   Lock,
-  Zap
+  Zap,
+  History
 } from "lucide-react";
 import { getStoredUser, getStoredToken } from "@/lib/auth";
 
