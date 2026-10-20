@@ -26,7 +26,7 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
         <span className="text-[11px] text-slate-500 font-medium">Click to inspect</span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
         {regions.map((reg) => {
           const isSelected = selectedRegionId === reg.id;
           return (
@@ -41,11 +41,11 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
               }`}
             >
               <div className="flex items-center justify-between w-full mb-1">
-                <span className="font-semibold text-xs truncate">
+                <span className="font-semibold text-xs truncate" title={reg.name}>
                   {reg.name.split(" ")[0]}
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded font-mono bg-slate-800/80 text-slate-300 border border-slate-700/40">
-                  {reg.wilaya.split(" ")[0]}
+                <span className="text-[10px] px-1 py-0.5 rounded font-mono bg-slate-800/80 text-slate-300 border border-slate-700/40 shrink-0">
+                  {reg.wilaya.match(/\((.*?)\)/)?.[1] || reg.wilaya.split(" ")[0]}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono tabular-nums">

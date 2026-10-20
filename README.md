@@ -1,7 +1,7 @@
 # IN9AD (إنقاذ) - AI-Based Forest Fire Risk Prediction for Northern Algeria
 
 > **National Wildfire Early Warning & Elliptical Spread Simulation System**  
-> *Targeted on the Northern Algerian Fire Belt: Tizi Ouzou (15), Bejaia (06), and Bouira (10)*  
+> *Targeted on the Northern Algerian Fire Belt: Tizi Ouzou (15), Bejaia (06), Bouira (10), Blida (09), El Tarf (36), Batna (05)*  
 > *PFE 2026 • Simulation-based system without IoT hardware dependencies*
 
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20Python%203.10-009688?logo=fastapi)](https://fastapi.tiangolo.com)
@@ -16,7 +16,7 @@
 
 ## 1. What is IN9AD?
 
-**IN9AD** (*إنقاذ* — Arabic for *Rescue / Salvation*) is an AI-powered wildfire risk prediction and spatial fire spread simulation system designed specifically for the vulnerable Mediterranean mountain massifs of **Northern Algeria (Kabylie Corridor: Tizi Ouzou, Bejaia, Bouira)**.
+**IN9AD** (*إنقاذ* — Arabic for *Rescue / Salvation*) is an AI-powered wildfire risk prediction and spatial fire spread simulation system designed for the vulnerable Mediterranean mountain massifs of **Northern Algeria (spanning Kabylie, Tell Atlas, Blidean Atlas, and the Aurès)**.
 
 In recent summers, Northern Algeria has experienced devastating mega-fires driven by the **Sirocco (*Chergui*)**—a hyper-dry, gale-force desert wind blowing from the Sahara across the Tell Atlas that drives temperatures above 45°C and relative humidity below 15%.
 

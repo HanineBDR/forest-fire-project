@@ -11,6 +11,7 @@ coverage/
 out/
 build/
 dist/
+*.tsbuildinfo
 
 # Python
 backend/venv/
@@ -30,6 +31,8 @@ eggs/
 # Python build artifacts
 /lib/
 /lib64/
+backend/lib/
+!frontend/src/lib/
 parts/
 sdist/
 var/

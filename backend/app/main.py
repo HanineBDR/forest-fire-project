@@ -56,57 +56,87 @@ class PredictRequest(BaseModel):
     rain: Optional[float] = Field(0.0, description="Precipitation in mm")
     wind_direction: Optional[float] = Field(180.0, description="Wind direction in degrees (0-360)")
 
-# Strategic Northern Algerian forest hotspots
+# Strategic Algerian forest massifs across the northern wildfire belt
 STRATEGIC_REGIONS = [
     {
         "id": "yakouren",
         "name": "Yakouren Forest",
-        "wilaya": "Tizi Ouzou",
+        "wilaya": "Tizi Ouzou (15)",
         "lat": 36.7350,
         "lon": 4.4350,
         "elevation_m": 850,
-        "canopy_type": "Dense Cork Oak & Zeen Oak (Chêne Liège / Chêne Zen)",
-        "description": "Critical biodiversity forest corridor in Grande Kabylie, historically vulnerable to rapid summer fire propagation."
+        "canopy_type": "Dense Cork Oak & Zeen Oak (Chêne Liège / Zen)",
+        "description": "Critical biodiversity forest corridor in Grande Kabylie with high fuel density."
     },
     {
         "id": "akfadou",
-        "name": "Akfadou Forest Massif",
-        "wilaya": "Bejaia / Tizi Ouzou Border",
-        "lat": 36.6710,
-        "lon": 4.5820,
+        "name": "Akfadou Massif",
+        "wilaya": "Bejaia (06)",
+        "lat": 36.6500,
+        "lon": 4.5500,
         "elevation_m": 1200,
-        "canopy_type": "Extensive Deciduous & Mountain Oak",
-        "description": "Massive high-altitude forest spanning the ridge between Bejaia and Tizi Ouzou, subject to strong mountain wind funnels."
+        "canopy_type": "Deciduous Mountain Oak & Cedar",
+        "description": "Extensive high-altitude ridge forest spanning Bejaia and Tizi Ouzou."
     },
     {
         "id": "tikjda",
-        "name": "Tikjda - Djurdjura National Park",
-        "wilaya": "Bouira",
-        "lat": 36.4520,
-        "lon": 4.1320,
+        "name": "Tikjda - Djurdjura",
+        "wilaya": "Bouira (10)",
+        "lat": 36.4500,
+        "lon": 4.1200,
         "elevation_m": 1600,
-        "canopy_type": "Cedar of Atlas (Cèdre de l'Atlas) & Alpine Shrub",
-        "description": "Steep limestone massif and UNESCO Biosphere Reserve with extreme slope angles amplifying up-hill fire spread."
+        "canopy_type": "Atlas Cedar & Alpine Scrub",
+        "description": "Steep limestone massif and UNESCO Biosphere Reserve in Djurdjura National Park."
     },
     {
         "id": "gouraya",
         "name": "Gouraya National Park",
-        "wilaya": "Bejaia",
-        "lat": 36.7680,
-        "lon": 5.0920,
+        "wilaya": "Bejaia (06)",
+        "lat": 36.7600,
+        "lon": 5.0600,
         "elevation_m": 660,
-        "canopy_type": "Maritime Pine, Aleppo Pine, Wild Olive & Scrub",
-        "description": "Coastal cliffs bordering Bejaia city where sea-breeze microclimates create erratic wind shifts."
+        "canopy_type": "Aleppo Pine & Coastal Maquis",
+        "description": "Coastal mountain cliffs bordering Bejaia city where sea breezes create erratic wind shifts."
     },
     {
         "id": "mizrana",
         "name": "Mizrana Forest",
-        "wilaya": "Tizi Ouzou / Boumerdes Border",
-        "lat": 36.8850,
-        "lon": 4.0200,
+        "wilaya": "Tizi Ouzou (15)",
+        "lat": 36.7800,
+        "lon": 4.0800,
         "elevation_m": 450,
-        "canopy_type": "Aleppo Pine & Dense Undergrowth Maquis",
-        "description": "Coastal Mediterranean woodland with high fuel load and frequent human-wildland interface."
+        "canopy_type": "Aleppo Pine & Dense Undergrowth",
+        "description": "Coastal Mediterranean woodland with high interface between wildland and rural villages."
+    },
+    {
+        "id": "chrea",
+        "name": "Chréa National Park",
+        "wilaya": "Blida (09)",
+        "lat": 36.4160,
+        "lon": 2.8330,
+        "elevation_m": 1500,
+        "canopy_type": "Ancient Atlas Cedar & Evergreen Oak",
+        "description": "High mountain forest overlooking the Mitidja plain, protecting water catchments."
+    },
+    {
+        "id": "elkala",
+        "name": "El Kala National Park",
+        "wilaya": "El Tarf (36)",
+        "lat": 36.8900,
+        "lon": 8.4400,
+        "elevation_m": 120,
+        "canopy_type": "Maritime Pine, Cork Oak & Wetland Maquis",
+        "description": "Wetland and forest biodiversity sanctuary bordering Tunisia with heavy summer fuel load."
+    },
+    {
+        "id": "aures",
+        "name": "Aurès - Chelia",
+        "wilaya": "Batna (05)",
+        "lat": 35.3100,
+        "lon": 6.6400,
+        "elevation_m": 1800,
+        "canopy_type": "Atlas Cedar & Dry Mountain Oak",
+        "description": "Semi-arid high mountain massif in eastern Algeria subject to rapid moisture vaporization."
     }
 ]
 

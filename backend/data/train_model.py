@@ -66,9 +66,9 @@ def generate_algerian_dataset(n_samples: int = 6000, random_state: int = 42) -> 
     """
     np.random.seed(random_state)
     
-    # Northern Algeria coordinates focused on Kabylie belt
-    lats = np.random.uniform(35.8, 37.2, n_samples)
-    lons = np.random.uniform(3.5, 5.6, n_samples)
+    # Northern Algeria coordinates covering Mediterranean wildfire belt
+    lats = np.random.uniform(34.8, 37.5, n_samples)
+    lons = np.random.uniform(-2.5, 9.0, n_samples)
     
     # Temperatures: winter/spring (12-25C), summer normal (26-36C), heatwave/Sirocco (37-47C)
     weather_regime = np.random.choice(["cool", "summer_normal", "sirocco_heatwave"], size=n_samples, p=[0.25, 0.45, 0.30])
@@ -137,9 +137,7 @@ def generate_algerian_dataset(n_samples: int = 6000, random_state: int = 42) -> 
     # 4. In mountain forest zones of Tizi Ouzou (36.5-36.9, 4.0-4.5) or Bejaia (36.5-36.85, 4.8-5.3)
     
     in_dense_forest_zone = (
-        ((df["lat"].between(36.5, 36.9)) & (df["lon"].between(3.9, 4.5))) | # Yakouren, Larbaa, Ain El Hammam
-        ((df["lat"].between(36.5, 36.9)) & (df["lon"].between(4.7, 5.3))) | # Akfadou, Babors, Gouraya
-        ((df["lat"].between(36.3, 36.6)) & (df["lon"].between(3.8, 4.2)))   # Tikjda, Djurdjura
+        (df["lat"].between(34.8, 37.5)) & (df["lon"].between(-2.5, 9.0))
     ).astype(float)
     df["forest_density_score"] = in_dense_forest_zone * 0.25 + 0.1
     
@@ -206,7 +204,8 @@ def train_and_export_model():
         "target": "Wildfire Risk Score (0-100%)",
         "features": feature_cols,
         "mae": round(float(mae), 3),
-        "region": "Northern Algeria (Tizi Ouzou, Bejaia, Bouira)",
+        "region": "Northern Algeria Mediterranean Belt (Tell Atlas, Kabylie, Aurès, Numidia)",
+        "synthetic_disclosure": "Trained on synthetic empirical Algerian climate distributions coupled with Canadian FWI formulas.",
         "feature_importance": importance,
         "calibration": "Canadian Forest FWI + Algerian Sirocco dynamics"
     }

@@ -33,8 +33,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {/* Target Wilayas */}
           <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-slate-800/60 border border-slate-700/60 rounded-lg text-slate-300">
-            <span className="text-slate-400 font-semibold">Priority corridor:</span>
-            <span className="font-semibold text-slate-200">Tizi Ouzou (15), Bejaia (06), Bouira (10)</span>
+            <span className="text-slate-400 font-semibold">National corridor:</span>
+            <span className="font-semibold text-slate-200">Kabylie (15, 06, 10), Blida (09), El Tarf (36), Batna (05)</span>
           </div>
 
           {/* NASA FIRMS Badge */}

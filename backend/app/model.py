@@ -97,12 +97,8 @@ class WildfirePredictor:
         # Check for Algerian Sirocco (Chergui) hot desert wind from South
         is_sirocco = (130.0 <= wind_direction <= 230.0) and (temp >= 33.0) and (humidity <= 32.0)
         
-        # High vegetation / forest vulnerability zones in Kabylie
-        in_dense_forest = (
-            (36.4 <= lat <= 36.95 and 3.8 <= lon <= 4.6) or  # Tizi Ouzou / Yakouren / Djurdjura
-            (36.4 <= lat <= 36.95 and 4.65 <= lon <= 5.4) or # Bejaia / Akfadou / Gouraya
-            (36.2 <= lat <= 36.65 and 3.6 <= lon <= 4.2)     # Bouira / Tikjda
-        )
+        # Generic Mediterranean forest belt detection across Northern Algeria (Tell Atlas, Kabylie, Aurès, Numidia)
+        in_dense_forest = 34.8 <= lat <= 37.5 and -2.5 <= lon <= 9.0
         
         score: float = 0.0
         used_model = "XGBoost Regressor (Inference)"
@@ -166,7 +162,7 @@ class WildfirePredictor:
         if fwi_dict["isi"] >= 15.0:
             factors.append(f"⚡ High Initial Spread Index (ISI: {fwi_dict['isi']}): rapid ignition potential.")
         if in_dense_forest:
-            factors.append("🌲 Dense Mediterranean forest canopy (Kabylie / Djurdjura / Babors zone).")
+            factors.append("🌲 Dense Mediterranean forest canopy (Tell Atlas / Coastal Mountain belt).")
         if rain > 0.0:
             factors.append(f"🌧️ Dampening factor: {rain} mm precipitation temporarily suppresses ignition.")
         if not factors:
@@ -174,9 +170,9 @@ class WildfirePredictor:
 
         # Civil Protection Recommendations (Protection Civile Algérienne / DGF)
         if score >= 75.0:
-            advisory = "CRITICAL ALERT: Activate Algerian Civil Protection emergency dispatch protocol. Prohibit agricultural burning, prepare water bombing aircraft (Beriev Be-200 / AT-802), and maintain immediate evacuation corridors for mountain villages."
+            advisory = "CRITICAL ALERT: Activate Algerian Civil Protection emergency dispatch protocol. Prohibit agricultural burning, prepare water bombing aircraft (Beriev Be-200 / AT-802), and maintain immediate evacuation corridors."
         elif score >= 50.0:
-            advisory = "HIGH VIGILANCE: Forest surveillance patrols on high alert across Tizi Ouzou, Bejaia, and Bouira massifs. Mobile fire watchtowers manned 24/7."
+            advisory = "HIGH VIGILANCE: Forest surveillance patrols on high alert across Northern Algeria massifs. Mobile fire watchtowers manned 24/7."
         else:
             advisory = "NORMAL MONITORING: Continuous satellite observation via NASA FIRMS. Routine forestry conservation patrols active."
 

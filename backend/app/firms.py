@@ -12,11 +12,11 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-# Northern Algeria Bounding Box [LonMin, LatMin, LonMax, LatMax]
-# Covers Kabylie (Tizi Ouzou, Bejaia, Bouira) + Mediterranean Atlas belt
-ALGERIA_BBOX = "2.5,35.5,6.0,37.3"
+# Algeria-wide Bounding Box [LonMin, LatMin, LonMax, LatMax]
+# Covers whole Algeria from Mediterranean coast to southern Atlas [18.0, -8.5, 37.5, 12.0]
+ALGERIA_BBOX = "-8.5,18.0,12.0,37.5"
 
-# Curated reference satellite detections for Northern Algeria
+# Curated reference satellite detections across Algeria
 # Reflects VIIRS (375m) & MODIS thermal anomalies recorded in high-risk zones
 REFERENCE_FIRE_HOTSPOTS: List[Dict[str, Any]] = [
     {
@@ -51,7 +51,7 @@ REFERENCE_FIRE_HOTSPOTS: List[Dict[str, Any]] = [
         "id": "FIRMS-DZ-003",
         "latitude": 36.4620,
         "longitude": 4.1250,
-        "location_name": "Djurdjura National Park / Tikjda Foothills (Bouira)",
+        "location_name": "Djurdjura National Park / Tikjda (Bouira)",
         "brightness_kelvin": 331.4,
         "confidence": "high",
         "satellite": "MODIS Aqua",
@@ -91,15 +91,43 @@ REFERENCE_FIRE_HOTSPOTS: List[Dict[str, Any]] = [
     },
     {
         "id": "FIRMS-DZ-006",
-        "latitude": 36.5410,
-        "longitude": 3.8820,
-        "location_name": "Haizer Massif (Bouira)",
-        "brightness_kelvin": 338.2,
+        "latitude": 36.4160,
+        "longitude": 2.8330,
+        "location_name": "Chréa National Park (Blida)",
+        "brightness_kelvin": 343.8,
+        "confidence": "nominal",
+        "satellite": "VIIRS S-NPP 375m",
+        "frp_mw": 37.6,
+        "acq_date": datetime.now().strftime("%Y-%m-%d"),
+        "acq_time": "11:15 UTC",
+        "daynight": "D",
+        "status": "Monitored Thermal Hotspot"
+    },
+    {
+        "id": "FIRMS-DZ-007",
+        "latitude": 36.8900,
+        "longitude": 8.4400,
+        "location_name": "El Kala National Park (El Tarf)",
+        "brightness_kelvin": 358.4,
+        "confidence": "high",
+        "satellite": "VIIRS NOAA-20 375m",
+        "frp_mw": 56.2,
+        "acq_date": datetime.now().strftime("%Y-%m-%d"),
+        "acq_time": "12:30 UTC",
+        "daynight": "D",
+        "status": "Active Thermal Hotspot"
+    },
+    {
+        "id": "FIRMS-DZ-008",
+        "latitude": 35.3100,
+        "longitude": 6.6400,
+        "location_name": "Aurès Massif - Djebel Chélia (Batna)",
+        "brightness_kelvin": 339.1,
         "confidence": "nominal",
         "satellite": "MODIS Terra",
-        "frp_mw": 35.1,
+        "frp_mw": 34.0,
         "acq_date": datetime.now().strftime("%Y-%m-%d"),
-        "acq_time": "10:15 UTC",
+        "acq_time": "10:25 UTC",
         "daynight": "D",
         "status": "Monitored Thermal Hotspot"
     }

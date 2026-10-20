@@ -1,0 +1,36 @@
+{
+  "model_type": "XGBRegressor",
+  "target": "Wildfire Risk Score (0-100%)",
+  "features": [
+    "lat",
+    "lon",
+    "temp",
+    "wind",
+    "humidity",
+    "rain",
+    "wind_direction",
+    "ffmc",
+    "isi",
+    "bui",
+    "fwi",
+    "is_sirocco"
+  ],
+  "mae": 1.917,
+  "region": "Northern Algeria Mediterranean Belt (Tell Atlas, Kabylie, Aur\u00e8s, Numidia)",
+  "synthetic_disclosure": "Trained on synthetic empirical Algerian climate distributions coupled with Canadian FWI formulas.",
+  "feature_importance": {
+    "lat": 15.453621864318848,
+    "lon": 14.780997276306152,
+    "temp": 46.787757873535156,
+    "wind": 22.831457138061523,
+    "humidity": 961.1793823242188,
+    "rain": 465.36016845703125,
+    "wind_direction": 30.42106819152832,
+    "ffmc": 82945.2734375,
+    "isi": 36.996238708496094,
+    "bui": 28475.3984375,
+    "fwi": 3721.8251953125,
+    "is_sirocco": 6181.0
+  },
+  "calibration": "Canadian Forest FWI + Algerian Sirocco dynamics"
+}
