@@ -138,3 +138,23 @@ simulation = simulate_fire_spread(
 - **Memory footprint**: < 120 MB RAM at runtime
 - **No Heavy Libraries**: Pure scikit-learn, XGBoost, pandas, numpy (no PyTorch, TensorFlow, or CUDA overhead)
 - **Zero IoT requirement**: Standalone algorithmic simulation engine
+
+---
+
+## 7. Persistent History & Live Refresh System (`in9ad_history.db`)
+
+All training runs, satellite burn snapshots, active alerts, and status changes are permanently tracked in SQLite at `/backend/in9ad_history.db`.
+
+To refresh live data via command line:
+```bash
+# Refresh NASA FIRMS points, diagrams, and history snapshot
+curl -X POST http://localhost:8000/api/refresh/all
+
+# Re-train XGBoost model on demand
+curl -X POST http://localhost:8000/api/refresh/model
+
+# Query history and model drift
+curl -X GET http://localhost:8000/api/history/model-runs
+curl -X GET http://localhost:8000/api/history/model-drift
+```
+

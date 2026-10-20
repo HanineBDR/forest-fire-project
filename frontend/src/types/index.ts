@@ -118,3 +118,94 @@ export interface AnalyticsResponse {
   top_wilayas: WilayaBurnStat[];
 }
 
+export interface ModelRun {
+  id: number;
+  run_id: string;
+  timestamp: string;
+  accuracy: number;
+  roc_auc: number;
+  f1: number;
+  precision: number;
+  recall: number;
+  dataset_size: number;
+  model_version: string;
+  notes: string;
+}
+
+export interface BurnSnapshot {
+  id: number;
+  snapshot_id: string;
+  timestamp: string;
+  total_points: number;
+  total_ha: number;
+  source: string;
+  bbox: string;
+  wilaya_stats?: Record<string, number>;
+}
+
+export interface ModelDrift {
+  status: "healthy" | "warning" | "degraded";
+  latest_accuracy: number;
+  average_accuracy: number;
+  min_accuracy: number;
+  runs_analyzed: number;
+  drift_detected: boolean;
+  needs_retraining: boolean;
+  message: string;
+}
+
+export interface AlertRecord {
+  id: number;
+  alert_id: string;
+  lat: number;
+  lon: number;
+  wilaya: string;
+  forest_name: string;
+  risk_score: number;
+  risk_level: "CRITIQUE" | "VERY_HIGH" | "HIGH" | "MODERATE";
+  temp: number;
+  humidity: number;
+  wind: number;
+  wind_dir: string;
+  status: "DETECTED" | "PRISE_EN_COMPTE" | "UNITES_DEPLOYEES" | "MAITRISE" | "ETEINT" | "FAUSSE_ALERTE";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AlertStatusHistory {
+  id: number;
+  alert_id: string;
+  old_status: string;
+  new_status: string;
+  changed_by: string;
+  changed_at: string;
+  note: string;
+  forest_name?: string;
+  wilaya?: string;
+}
+
+export interface RefreshAllResponse {
+  success: boolean;
+  generated_at: string;
+  duration_ms: number;
+  nasa_cache_used: boolean;
+  nasa_message: string;
+  diff_from_last: {
+    new_points: number;
+    new_ha: number;
+    previous_total: number;
+    new_total: number;
+  };
+  new_stats: {
+    total_points: number;
+    total_ha: number;
+    top_wilayas: {
+      name: string;
+      total_burned_points: number;
+      estimated_burned_area_ha: number;
+    }[];
+    snapshot_id?: string;
+  };
+}
+
+

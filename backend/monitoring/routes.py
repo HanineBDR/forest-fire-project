@@ -38,6 +38,7 @@ class SystemHealthResponse(BaseModel):
     accuracy_threshold: float
     anomalies_count: int
     total_audited_predictions: int
+    refresh_telemetry: Optional[Dict[str, Any]] = None
 
 
 @router.get("/health", response_model=SystemHealthResponse)
@@ -69,6 +70,28 @@ def get_recent_audit_logs(
     Ensures Civil Protection and Forest Guard accountability.
     """
     return get_audit_logs(limit=limit)
+
+
+@router.get("/refresh-logs")
+def get_monitoring_refresh_logs(limit: int = Query(10, ge=1, le=50)):
+    """
+    Returns recent refresh telemetry logs from history database.
+    Shows NASA API queries, model retrainings, and snapshot updates.
+    """
+    try:
+        from ml.history_manager import get_refresh_logs, check_nasa_quota_cache
+        logs = get_refresh_logs(limit=limit)
+        nasa_status = check_nasa_quota_cache()
+        failed_count = sum(1 for l in logs if l.get("status") == "failed")
+        return {
+            "logs": logs,
+            "nasa_quota": nasa_status,
+            "failed_count": failed_count,
+            "fallback_active": failed_count >= 3
+        }
+    except Exception as e:
+        return {"logs": [], "error": str(e), "failed_count": 0, "fallback_active": False}
+
 
 
 @router.post("/test-model")

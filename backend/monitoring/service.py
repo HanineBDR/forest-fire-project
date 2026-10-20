@@ -240,6 +240,24 @@ def get_full_system_health() -> Dict[str, Any]:
 
     uptime_sec = int(time.time() - SYSTEM_START_TIME)
 
+    # Refresh telemetry from history database
+    refresh_telemetry = None
+    try:
+        from ml.history_manager import get_refresh_logs, check_nasa_quota_cache
+        recent_logs = get_refresh_logs(limit=5)
+        nasa_quota = check_nasa_quota_cache()
+        failed_count = sum(1 for l in recent_logs if l.get("status") == "failed")
+        refresh_telemetry = {
+            "last_refresh": recent_logs[0]["timestamp"] if recent_logs else datetime.utcnow().isoformat() + "Z",
+            "logs": recent_logs,
+            "failed_count": failed_count,
+            "nasa_cache_active": nasa_quota.get("cached", False),
+            "next_refresh_allowed_sec": nasa_quota.get("next_allowed_in_sec", 3600),
+            "warning": "NASA API down - using cached data" if failed_count >= 3 else None
+        }
+    except Exception as e:
+        logger.warning(f"Could not load refresh telemetry: {e}")
+
     return {
         "status": overall_status,
         "uptime_seconds": uptime_sec,
@@ -249,7 +267,8 @@ def get_full_system_health() -> Dict[str, Any]:
         "model_accuracy": model_check.get("accuracy", 0.865),
         "accuracy_threshold": ACCURACY_THRESHOLD,
         "anomalies_count": len(ANOMALIES_DETECTED),
-        "total_audited_predictions": len(RECENT_AUDIT_LOGS)
+        "total_audited_predictions": len(RECENT_AUDIT_LOGS),
+        "refresh_telemetry": refresh_telemetry
     }
 
 

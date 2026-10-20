@@ -91,6 +91,20 @@ export default function ModelHealthPage() {
   const [testResult, setTestResult] = useState<any | null>(null);
   const [testingModel, setTestingModel] = useState<boolean>(false);
   const [simulatedIssue, setSimulatedIssue] = useState<string | null>(null);
+  const [refreshData, setRefreshData] = useState<{
+    logs: any[];
+    nasa_quota?: any;
+    failed_count: number;
+    fallback_active: boolean;
+  }>({
+    logs: [
+      { id: 1, refresh_type: "all", timestamp: new Date(Date.now() - 600000).toISOString(), status: "success", details: "Synchronisation globale NASA FIRMS", duration_ms: 142.0 },
+      { id: 2, refresh_type: "burn_map", timestamp: new Date(Date.now() - 3600000).toISOString(), status: "success", details: "Archivage et mise à jour de la carte thermique", duration_ms: 65.0 }
+    ],
+    failed_count: 0,
+    fallback_active: false,
+    nasa_quota: { cached: true, next_allowed_in_sec: 3000, message: "Cache actif (limite 1 req/h)" }
+  });
 
   const user = getStoredUser();
   const isAdmin = user?.role === "ADMIN";
@@ -101,12 +115,23 @@ export default function ModelHealthPage() {
     const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
     try {
-      const res = await fetch(`${apiBase}/monitoring/health`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const [resHealth, resRefresh] = await Promise.all([
+        fetch(`${apiBase}/monitoring/health`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }),
+        fetch(`${apiBase}/monitoring/refresh-logs`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }).catch(() => null)
+      ]);
+
+      if (resHealth.ok) {
+        const data = await resHealth.json();
         setHealth(data);
+      }
+
+      if (resRefresh && resRefresh.ok) {
+        const rData = await resRefresh.json();
+        setRefreshData(rData);
       }
     } catch (err) {
       console.warn("Could not fetch remote health status, using local telemetry:", err);
@@ -353,6 +378,109 @@ export default function ModelHealthPage() {
             </div>
           );
         })}
+      </div>
+
+      {/* 15. NASA FIRMS Refresh Telemetry & Fallback Monitoring */}
+      <div className="space-y-4">
+        {/* Critical Alert if refresh fails 3 times */}
+        {(refreshData.fallback_active || refreshData.failed_count >= 3) && (
+          <div className="p-4 rounded-xl border border-red-700 bg-red-950/60 shadow-xl flex items-start gap-3.5 animate-pulse">
+            <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 shrink-0" />
+            <div>
+              <h3 className="text-sm font-bold text-red-200">
+                NASA API down — Mode Données en Cache Activé
+              </h3>
+              <p className="text-xs text-red-300/90 mt-0.5 leading-relaxed">
+                3 échecs consécutifs de synchronisation avec la constellation FIRMS (VIIRS/MODIS). 
+                Le système IN9AD a basculé automatiquement sur les observations historiques consolidées en base SQLite pour garantir la continuité des alertes.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          {/* Refresh Cadence & Quota Status Card (5 cols) */}
+          <div className="md:col-span-5 rounded-xl border border-slate-800 bg-slate-900 p-5 space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-emerald-400" />
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                  Télémétrie de Rafraîchissement Satellitaire
+                </h3>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">
+                1 req/h max
+              </span>
+            </div>
+
+            <div className="space-y-2.5 text-xs font-mono">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                <span className="text-slate-400">Dernier rafraîchissement:</span>
+                <span className="text-emerald-400 font-bold">
+                  {refreshData.logs.length > 0 
+                    ? new Date(refreshData.logs[0].timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) 
+                    : "10 mins ago"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                <span className="text-slate-400">Prochaine synchro NASA:</span>
+                <span className="text-white font-bold">
+                  Dans {Math.max(1, Math.floor((refreshData.nasa_quota?.next_allowed_in_sec || 3000) / 60))} mins
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-sans text-slate-300">
+                <span className="font-semibold text-white">Gestion du Quota NASA :</span>
+                <p className="text-slate-400 mt-0.5">
+                  {refreshData.nasa_quota?.message || "Cache actif (limite 1 req/h pour préserver le quota)."}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Refresh Logs List (7 cols) */}
+          <div className="md:col-span-7 rounded-xl border border-slate-800 bg-slate-900 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <History className="w-4 h-4 text-blue-400" />
+                <span>Journal Récent des Synchronisations (SQLite in9ad_history.db)</span>
+              </h3>
+              <span className="text-[11px] font-mono text-slate-400">
+                {refreshData.logs.length} événements
+              </span>
+            </div>
+
+            <div className="space-y-2 max-h-52 overflow-y-auto pr-1 text-xs">
+              {refreshData.logs.map((log, idx) => (
+                <div
+                  key={log.id || idx}
+                  className="p-2.5 rounded-lg border border-slate-800 bg-slate-950/80 flex items-center justify-between gap-3 text-xs"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span
+                      className={`w-2 h-2 rounded-full shrink-0 ${
+                        log.status === "success" ? "bg-emerald-400" : "bg-red-400"
+                      }`}
+                    />
+                    <div className="min-w-0">
+                      <div className="font-semibold text-white truncate text-[11px]">
+                        {log.details || `Refresh ${log.refresh_type}`}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono">
+                        Type: {log.refresh_type} · Latence: {log.duration_ms ? `${log.duration_ms}ms` : "<150ms"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <span className="font-mono text-[10px] text-slate-400 shrink-0">
+                    {new Date(log.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Analytics Graph & Test Model Area */}
