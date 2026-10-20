@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { fetchUnifiedAudit } from "@/lib/api";
 import {
-  History,
+  History as HistoryIcon,
   Download,
   Search,
   Filter,
@@ -113,7 +113,7 @@ export default function HistoriqueAuditPage() {
             </span>
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-1">
-            <History className="w-6 h-6 text-red-500" />
+            <HistoryIcon className="w-6 h-6 text-red-500" />
             <span>Historique & Audit Opérationnel</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1 max-w-2xl">

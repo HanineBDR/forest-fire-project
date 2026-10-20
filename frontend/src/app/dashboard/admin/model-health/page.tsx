@@ -17,7 +17,7 @@ import {
   BarChart2,
   Lock,
   Zap,
-  History
+  History as HistoryIcon
 } from "lucide-react";
 import { getStoredUser, getStoredToken } from "@/lib/auth";
 
@@ -444,7 +444,7 @@ export default function ModelHealthPage() {
           <div className="md:col-span-7 rounded-xl border border-slate-800 bg-slate-900 p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <History className="w-4 h-4 text-blue-400" />
+                <HistoryIcon className="w-4 h-4 text-blue-400" />
                 <span>Journal Récent des Synchronisations (SQLite in9ad_history.db)</span>
               </h3>
               <span className="text-[11px] font-mono text-slate-400">

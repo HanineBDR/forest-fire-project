@@ -892,4 +892,10 @@ export function getZoneReportDownloadUrl(zoneData: any, lang: string = "fr"): st
   return `${API_BASE}/api/reports/zone?lang=${lang}`;
 }
 
+// Convenience Aliases
+export const getHotspots = fetchFIRMSHotspots;
+export const getRegions = fetchStrategicRegions;
+export const getRisk = predictFireRisk;
+export const getWeather = fetchWeather;
+
 

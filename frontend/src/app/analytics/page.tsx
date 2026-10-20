@@ -17,7 +17,7 @@ import {
   ShieldAlert,
   ChevronRight,
   Database,
-  History,
+  History as HistoryIcon,
   Layers,
   Calendar,
   Sparkles,
@@ -395,7 +395,7 @@ export default function AnalyticsPage() {
             <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/95 space-y-3 animate-in fade-in duration-200">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                 <div className="flex items-center gap-2">
-                  <History className="w-4 h-4 text-ember-400" />
+                  <HistoryIcon className="w-4 h-4 text-ember-400" />
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider">
                     {activeKpiModal === "roc_auc" && "Historique de Discrimination ROC-AUC (20 derniers runs)"}
                     {activeKpiModal === "accuracy" && "Télémétrie de Dérive & Précision du Modèle"}
@@ -638,7 +638,7 @@ export default function AnalyticsPage() {
         <section className="space-y-4">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <History className="w-4 h-4 text-ember-400" />
+              <HistoryIcon className="w-4 h-4 text-ember-400" />
               <span>2. Évolution Historique du Modèle</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
