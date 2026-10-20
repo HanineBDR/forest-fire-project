@@ -898,4 +898,62 @@ export const getRegions = fetchStrategicRegions;
 export const getRisk = predictFireRisk;
 export const getWeather = fetchWeather;
 
+export interface RoadmapLivrable {
+  id: string;
+  name: string;
+  completed: boolean;
+}
+
+export interface RoadmapPhase {
+  id: string;
+  name: string;
+  month: string;
+  status: "in_progress" | "completed" | "planned";
+  progress: number;
+  start_date: string;
+  end_date: string;
+  badge?: string;
+  badgeColor?: string;
+  metrics?: string;
+  description?: string;
+  livrables: RoadmapLivrable[];
+}
+
+export interface RoadmapData {
+  phases: RoadmapPhase[];
+}
+
+export async function fetchRoadmap(): Promise<RoadmapData> {
+  const res = await fetch(`${API_BASE}/api/roadmap`);
+  if (!res.ok) throw new Error("Failed to fetch roadmap");
+  return await res.json();
+}
+
+export async function updateRoadmapPhase(
+  phaseId: string,
+  payload: { status?: string; progress?: number }
+): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/roadmap/${phaseId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to update roadmap phase");
+  return await res.json();
+}
+
+export async function toggleRoadmapLivrable(
+  phaseId: string,
+  livrableId: string,
+  completed: boolean
+): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/roadmap/${phaseId}/livrable/${livrableId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ completed }),
+  });
+  if (!res.ok) throw new Error("Failed to toggle livrable");
+  return await res.json();
+}
+
 

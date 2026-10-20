@@ -12,6 +12,8 @@ import {
   predictFireRisk,
   simulateFireSpread,
   getZoneReportDownloadUrl,
+  fetchRoadmap,
+  RoadmapPhase,
   DEFAULT_REGIONS,
 } from "@/lib/api";
 import { PredictionResult, WeatherData, FIRMSHotspot, RegionPreset } from "@/types";
@@ -50,6 +52,7 @@ export default function DashboardMapPage() {
   const [isPlayingSim, setIsPlayingSim] = useState<boolean>(false);
   const [isSimulating6h, setIsSimulating6h] = useState<boolean>(false);
   const [isExportingReport, setIsExportingReport] = useState<boolean>(false);
+  const [roadmapPhases, setRoadmapPhases] = useState<RoadmapPhase[]>([]);
 
   const playbackTimerRef = useRef<any>(null);
 
@@ -109,12 +112,16 @@ export default function DashboardMapPage() {
   useEffect(() => {
     async function init() {
       try {
-        const [loadedRegions, loadedHotspots] = await Promise.all([
+        const [loadedRegions, loadedHotspots, roadmapRes] = await Promise.all([
           fetchStrategicRegions(),
           fetchFIRMSHotspots(),
+          fetchRoadmap().catch(() => ({ phases: [] })),
         ]);
         setRegions(loadedRegions);
         setFirmsHotspots(loadedHotspots);
+        if (roadmapRes && roadmapRes.phases) {
+          setRoadmapPhases(roadmapRes.phases);
+        }
       } catch (e) {
         console.warn("Init error:", e);
       }
@@ -236,7 +243,7 @@ export default function DashboardMapPage() {
     <div className="p-4 sm:p-6 max-w-[1720px] mx-auto space-y-4">
       {/* Tactical Status Ribbon */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/60 text-xs">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="font-semibold text-slate-200">Veille Opérationnelle Active</span>
@@ -245,6 +252,21 @@ export default function DashboardMapPage() {
           <span className="text-slate-400">
             Couverture: Massifs Forestiers de Kabylie & Nord-Est Algérien
           </span>
+
+          {/* Connected Roadmap Badges */}
+          {roadmapPhases.find((p) => p.id === "phase1")?.status === "completed" && (
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 font-bold border border-emerald-600 flex items-center gap-1.5 shadow-sm text-[11px] animate-fadeIn">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              ✓ Pilote Tizi Ouzou Actif
+            </span>
+          )}
+
+          {roadmapPhases.find((p) => p.id === "phase2")?.status === "completed" && (
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-300 font-bold border border-blue-600 flex items-center gap-1.5 shadow-sm text-[11px] animate-fadeIn">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+              ✓ Passerelle SMS 24/7 Active
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-4 text-slate-400 font-mono">
           <span>NASA FIRMS: {firmsHotspots.length} foyers</span>

@@ -1,0 +1,124 @@
+{
+  "phases": [
+    {
+      "id": "phase1",
+      "name": "Phase 1 : Intégration CODIS & Raccordement DGF",
+      "month": "Mois 1 - 2",
+      "status": "in_progress",
+      "progress": 67,
+      "start_date": "2026-05-01",
+      "end_date": "2026-06-30",
+      "badge": "Pilote Prioritaire",
+      "badgeColor": "bg-emerald-950/80 text-emerald-300 border-emerald-800",
+      "metrics": "Validation CODIS Tizi Ouzou · Raccordement DGF Azazga",
+      "description": "Déploiement sur le site pilote prioritaire de Kabylie (Tizi Ouzou) avec raccordement direct des postes de vigie DGF d'Azazga et Yakouren.",
+      "livrables": [
+        {
+          "id": "p1_1",
+          "name": "Installation du serveur local IN9AD au CODIS central de Tizi Ouzou",
+          "completed": true
+        },
+        {
+          "id": "p1_2",
+          "name": "Interconnexion directe avec les postes de vigie DGF d'Azazga et Yakouren",
+          "completed": true
+        },
+        {
+          "id": "p1_3",
+          "name": "Formation certifiée des officiers de garde aux tableaux de bord tactiques",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "phase2",
+      "name": "Phase 2 : Déploiement Mobile & Alertes SMS",
+      "month": "Mois 3",
+      "status": "planned",
+      "progress": 33,
+      "start_date": "2026-07-01",
+      "end_date": "2026-07-31",
+      "badge": "Déploiement Mobile",
+      "badgeColor": "bg-blue-950/80 text-blue-300 border-blue-800",
+      "metrics": "Passerelle SMS < 60s · PWA Hors-Ligne · Portail Citoyen",
+      "description": "Mise en place de la passerelle SMS d'urgence pour les populations rurales et application PWA autonome pour les chefs de colonne mobile.",
+      "livrables": [
+        {
+          "id": "p2_1",
+          "name": "Passerelle SMS géociblée avec Algérie Télécom / Mobilis",
+          "completed": true
+        },
+        {
+          "id": "p2_2",
+          "name": "Application mobile PWA pour les chefs de colonne mobile en forêt",
+          "completed": false
+        },
+        {
+          "id": "p2_3",
+          "name": "Cartographie hors-ligne autonome en zone blanche (Tile cache local)",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "phase3",
+      "name": "Phase 3 : Montée en Échelle ML & Microclimats Sirocco",
+      "month": "Mois 6",
+      "status": "planned",
+      "progress": 0,
+      "start_date": "2026-08-01",
+      "end_date": "2026-10-31",
+      "badge": "Montée en Échelle ML",
+      "badgeColor": "bg-amber-950/80 text-amber-300 border-amber-800",
+      "metrics": "Temps de réaction : 15 min · ROC-AUC 98.7%",
+      "description": "Réentraînement XGBoost sur l'historique complet des cicatrices de feu et corrélation en temps réel avec les microclimats de Sirocco.",
+      "livrables": [
+        {
+          "id": "p3_1",
+          "name": "Réentraînement XGBoost sur l'historique complet des cicatrices 2025",
+          "completed": false
+        },
+        {
+          "id": "p3_2",
+          "name": "Modélisation fine des microclimats de crête et couloirs de Sirocco",
+          "completed": false
+        },
+        {
+          "id": "p3_3",
+          "name": "Corrélation en temps réel avec les capteurs thermiques terrestres DGF",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "phase4",
+      "name": "Phase 4 : Couverture Nationale & Drones Thermiques",
+      "month": "Long Terme",
+      "status": "planned",
+      "progress": 0,
+      "start_date": "2026-11-01",
+      "end_date": "2027-06-30",
+      "badge": "Couverture Nationale",
+      "badgeColor": "bg-violet-950/80 text-violet-300 border-violet-800",
+      "metrics": "14 Wilayas Telliennes · Drones Thermiques Autonomes",
+      "description": "Standardisation nationale aux 14 wilayas du Tell algérien et intégration de patrouilles autonomes de drones thermiques légers.",
+      "livrables": [
+        {
+          "id": "p4_1",
+          "name": "Déploiement aux 14 wilayas du Tell (El Tarf, Jijel, Bejaia, Tipaza, Tlemcen...)",
+          "completed": false
+        },
+        {
+          "id": "p4_2",
+          "name": "Intégration télémétrique de patrouilles de drones thermiques légers",
+          "completed": false
+        },
+        {
+          "id": "p4_3",
+          "name": "Standardisation en tant que plateforme officielle du Ministère de l'Intérieur",
+          "completed": false
+        }
+      ]
+    }
+  ]
+}

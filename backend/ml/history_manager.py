@@ -271,25 +271,37 @@ def _seed_initial_community_reports(cursor: sqlite3.Cursor):
         (
             "REP-2026-001", 36.7410, 4.4420, "Tizi Ouzou",
             "Fumée dense et odeur de brûlé observée près du col d'Ighil Bouchene.",
-            "https://images.unsplash.com/photo-1542385151-efd9000785a0?w=600",
+            "/reports/report_smoke_yakouren.jpg",
             "+213 550 12 34 56", "VERIFIED", (now - timedelta(hours=2)).isoformat() + "Z"
         ),
         (
             "REP-2026-002", 36.6820, 4.5950, "Bejaia",
             "Départ de feu suspect en bordure de piste forestière vers Adekar.",
-            "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=600",
+            "/reports/report_fire_akfadou.jpg",
             "+213 661 98 76 54", "PENDING", (now - timedelta(minutes=45)).isoformat() + "Z"
         ),
         (
             "REP-2026-003", 36.4650, 4.1480, "Bouira",
-            "Éclaircies de fumée blanche près de la station de Tikjda.",
-            "",
+            "Éclaircies de fumée blanche observées depuis la vigie de Tikjda.",
+            "/reports/report_vigie.jpg",
             "+213 770 45 67 89", "PENDING", (now - timedelta(minutes=20)).isoformat() + "Z"
+        ),
+        (
+            "REP-2026-004", 36.7820, 5.3100, "Jijel",
+            "Arbres calcinés et reprise de foyer suite à rafale de vent.",
+            "/reports/report_burned_zone.jpg",
+            "+213 661 22 33 44", "PENDING", (now - timedelta(minutes=10)).isoformat() + "Z"
+        ),
+        (
+            "REP-2026-005", 36.7150, 4.3820, "Tizi Ouzou",
+            "Fort vent de Sirocco avec poussière et odeur de cendre vers Azazga.",
+            "/reports/report_sirocco.jpg",
+            "+213 555 99 88 77", "PENDING", (now - timedelta(minutes=5)).isoformat() + "Z"
         )
     ]
     for r in reports:
         cursor.execute("""
-            INSERT INTO community_reports (report_id, lat, lon, wilaya, description, photo_url, phone, status, timestamp)
+            INSERT OR REPLACE INTO community_reports (report_id, lat, lon, wilaya, description, photo_url, phone, status, timestamp)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, r)
 

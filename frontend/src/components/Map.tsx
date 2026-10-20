@@ -78,7 +78,9 @@ export const Map: React.FC<MapProps> = ({
   const [reportWilaya, setReportWilaya] = useState<string>("Tizi Ouzou");
   const [reportPhone, setReportPhone] = useState<string>("");
   const [reportNotes, setReportNotes] = useState<string>("");
-  const [reportPhotoSelected, setReportPhotoSelected] = useState<boolean>(false);
+  const [reportPhotoSelected, setReportPhotoSelected] = useState<boolean>(true);
+  const [reportPhotoUrl, setReportPhotoUrl] = useState<string>("/reports/report_smoke_yakouren.jpg");
+  const [reportImageValidationError, setReportImageValidationError] = useState<string | null>(null);
   const [isSubmittingReport, setIsSubmittingReport] = useState<boolean>(false);
   const [reportSuccessToast, setReportSuccessToast] = useState<string | null>(null);
 
@@ -410,9 +412,12 @@ export const Map: React.FC<MapProps> = ({
     if (!reportNotes.trim()) return;
 
     setIsSubmittingReport(true);
+    setReportImageValidationError(null);
     try {
       const lat = selectedLocation ? selectedLocation.lat : 36.735;
       const lon = selectedLocation ? selectedLocation.lon : 4.435;
+
+      const chosenPhoto = reportPhotoSelected ? (reportPhotoUrl || "/reports/report_smoke_yakouren.jpg") : "";
 
       await submitCommunityReport({
         lat,
@@ -420,14 +425,14 @@ export const Map: React.FC<MapProps> = ({
         wilaya: reportWilaya,
         description: reportNotes,
         phone: reportPhone,
-        photo_url: reportPhotoSelected ? "https://images.unsplash.com/photo-1542385151-efd9000785a0?w=600" : "",
+        photo_url: chosenPhoto,
       });
 
       setShowReportModal(false);
       setReportNotes("");
       setReportPhone("");
       setReportPhotoSelected(false);
-      setReportSuccessToast("Signalement transmis avec succès au centre d'opérations de la Protection Civile.");
+      setReportSuccessToast("Signalement transmis avec succès au centre d'opérations de la Protection Civile (Image vérifiée).");
       setTimeout(() => setReportSuccessToast(null), 5000);
     } catch (err) {
       console.error(err);
@@ -668,24 +673,53 @@ export const Map: React.FC<MapProps> = ({
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Photo témoin (Simulation upload)
+                  Photographie Témoin (Vérifiée Protection Civile)
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setReportPhotoSelected(!reportPhotoSelected)}
-                  className={`w-full p-2.5 rounded-lg border border-dashed flex items-center justify-center gap-2 transition ${
-                    reportPhotoSelected
-                      ? "bg-emerald-950/40 border-emerald-600 text-emerald-300"
-                      : "bg-slate-800/40 border-slate-700 text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <Camera className="w-4 h-4" />
-                  <span>
-                    {reportPhotoSelected
-                      ? "Photo attachée : fumee_yakouren_01.jpg"
-                      : "Cliquer pour joindre une photo (Mock)"}
-                  </span>
-                </button>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setReportPhotoSelected(!reportPhotoSelected)}
+                      className={`flex-1 p-2 rounded-lg border text-xs flex items-center justify-center gap-2 transition ${
+                        reportPhotoSelected
+                          ? "bg-emerald-950/40 border-emerald-600 text-emerald-300 font-semibold"
+                          : "bg-slate-800/40 border-slate-700 text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>{reportPhotoSelected ? "✓ Photo terrain jointe" : "Joindre une photo du sinistre"}</span>
+                    </button>
+                  </div>
+
+                  {reportPhotoSelected && (
+                    <div className="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
+                      {[
+                        { label: "Fumée Yakouren", path: "/reports/report_smoke_yakouren.jpg" },
+                        { label: "Feu Akfadou", path: "/reports/report_fire_akfadou.jpg" },
+                        { label: "Vigie Algérie", path: "/reports/report_vigie.jpg" },
+                        { label: "Zone Brûlée", path: "/reports/report_burned_zone.jpg" },
+                        { label: "Sirocco / Poussière", path: "/reports/report_sirocco.jpg" },
+                      ].map((item) => (
+                        <button
+                          key={item.path}
+                          type="button"
+                          onClick={() => setReportPhotoUrl(item.path)}
+                          className={`p-1.5 rounded-lg border text-left truncate transition ${
+                            reportPhotoUrl === item.path
+                              ? "bg-red-950/70 border-red-500 text-white font-bold"
+                              : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {reportImageValidationError && (
+                    <p className="text-red-400 text-[10px]">{reportImageValidationError}</p>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">

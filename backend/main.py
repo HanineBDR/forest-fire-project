@@ -1032,3 +1032,95 @@ def api_export_audit_csv():
     )
 
 
+# ============================================================================
+# 22. STRATEGIC ROADMAP STATE & DELIVERABLES (FEUILLE DE ROUTE)
+# ============================================================================
+
+ROADMAP_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "roadmap.json")
+
+
+def load_roadmap_data() -> Dict[str, Any]:
+    if not os.path.exists(ROADMAP_FILE):
+        return {"phases": []}
+    try:
+        with open(ROADMAP_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Error reading roadmap.json: {e}")
+        return {"phases": []}
+
+
+def save_roadmap_data(data: Dict[str, Any]) -> None:
+    with open(ROADMAP_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+class UpdatePhaseInput(BaseModel):
+    status: Optional[str] = None
+    progress: Optional[int] = None
+
+
+class UpdateLivrableInput(BaseModel):
+    completed: bool
+
+
+@app.get("/api/roadmap")
+def api_get_roadmap():
+    """Returns the persistent strategic deployment roadmap and phase progress."""
+    return load_roadmap_data()
+
+
+@app.put("/api/roadmap/{phase_id}")
+def api_update_roadmap_phase(phase_id: str, payload: UpdatePhaseInput):
+    """Updates phase status (in_progress | completed | planned) or progress percentage."""
+    data = load_roadmap_data()
+    phase = next((p for p in data.get("phases", []) if p["id"] == phase_id), None)
+    if not phase:
+        raise HTTPException(status_code=404, detail=f"Phase {phase_id} introuvable.")
+
+    if payload.status is not None:
+        phase["status"] = payload.status
+        if payload.status == "completed":
+            phase["progress"] = 100
+            for liv in phase.get("livrables", []):
+                liv["completed"] = True
+    if payload.progress is not None:
+        phase["progress"] = max(0, min(100, payload.progress))
+        if phase["progress"] == 100:
+            phase["status"] = "completed"
+
+    save_roadmap_data(data)
+    return {"success": True, "phase": phase, "roadmap": data}
+
+
+@app.put("/api/roadmap/{phase_id}/livrable/{livrable_id}")
+def api_toggle_roadmap_livrable(phase_id: str, livrable_id: str, payload: UpdateLivrableInput):
+    """Toggles or sets deliverable completion and automatically recalculates phase progress."""
+    data = load_roadmap_data()
+    phase = next((p for p in data.get("phases", []) if p["id"] == phase_id), None)
+    if not phase:
+        raise HTTPException(status_code=404, detail=f"Phase {phase_id} introuvable.")
+
+    livrable = next((l for l in phase.get("livrables", []) if l["id"] == livrable_id), None)
+    if not livrable:
+        raise HTTPException(status_code=404, detail=f"Livrable {livrable_id} introuvable dans {phase_id}.")
+
+    livrable["completed"] = payload.completed
+
+    # Recalculate progress automatically
+    livs = phase.get("livrables", [])
+    if livs:
+        completed_count = sum(1 for l in livs if l.get("completed"))
+        phase["progress"] = int(round((completed_count / len(livs)) * 100))
+
+    if phase["progress"] == 100:
+        phase["status"] = "completed"
+    elif phase["progress"] > 0 and phase["status"] == "planned":
+        phase["status"] = "in_progress"
+    elif phase["progress"] == 0 and phase["status"] == "completed":
+        phase["status"] = "in_progress"
+
+    save_roadmap_data(data)
+    return {"success": True, "phase": phase, "livrable": livrable, "roadmap": data}
+
+
