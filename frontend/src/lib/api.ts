@@ -669,6 +669,8 @@ export async function fetchAnalytics(): Promise<AnalyticsResponse> {
     stats_csv_path: "/backend/ml/outputs/burn_stats.csv",
     top_wilayas: DEFAULT_WILAYA_STATS,
   };
+}
+
 // -------------------------------------------------------------
 // Live History & Refresh System API
 // -------------------------------------------------------------
