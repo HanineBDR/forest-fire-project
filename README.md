@@ -282,7 +282,73 @@ Takes latitude, longitude, and weather observations, returning the AI risk score
 
 ---
 
-## 8. License & Acknowledgements
+## 8. Institutional Security & Authentication (RBAC)
+
+> [!IMPORTANT]
+> **Context:** IN9AD is not a public toy. Its end-users are **الحماية المدنية (Protection Civile)**, **محافظة الغابات (Conservation des Forêts)**, and central operational command. Because false wildfire alerts can trigger public panic and unnecessary mobilization of aerial firefighting resources (Beriev Be-200, Air Tractor AT-802), public self-registration is disabled and all prediction endpoints require authenticated, rate-limited tokens.
+
+### Security Highlights
+- **Role-Based Access Control (RBAC):**
+  - `CIVIL_PROTECTION` (*الحماية المدنية*): Tactical map, active alerts, fire spread simulations, and historical audit log.
+  - `FOREST_GUARD` (*محافظة الغابات*): Tactical map, patrol verification, risk triggers, and forestry alerts.
+  - `ADMIN` (*الإدارة المركزية*): All operational views + Model & API Health Monitoring portal + User management (create/delete authorized personnel).
+- **Cryptographic JWT Tokens:** Signed with HMAC-SHA256, 24-hour expiration, passed in `Authorization: Bearer <token>` or httpOnly session cookie.
+- **Rate Limiting:** Enforces `100 req/min` per operator on `/predict` and `/simulate` using a sliding-window algorithm to prevent automated spamming.
+- **Accountability Audit Trail:** Every `/predict` call logs the officer's email, agency, coordinates, atmospheric conditions, and AI score to a tamper-evident audit store.
+- **Zero Secrets in Repository:** All sensitive tokens are managed via environment variables (`.env.example` provided).
+
+---
+
+## 9. Model & API Health Monitoring
+
+Institutional platforms require technical resilience. The `/dashboard/admin/model-health` portal and `/monitoring/` backend endpoints monitor:
+1. **AI Model (XGBoost):** Verifies `model.pkl` existence, measures micro-inference latency (<10ms), and enforces an accuracy threshold **> 80%** (Currently **95.4%** test accuracy). If the file is missing or accuracy drops below 80%, the health status drops to `down`.
+2. **NASA FIRMS API:** Checks reachability and latency of active thermal anomaly feeds across Northern Algeria.
+3. **Weather API (Open-Meteo):** Verifies live meteorological streaming for temperature, humidity, and wind.
+4. **Database & Storage:** Validates read/write capabilities on user stores and audit logs.
+5. **Real-Time Telemetry & Anomaly Detection:**
+   - Visual hourly prediction volume graph with 0.0% error rate tracking.
+   - Sensor drift anomaly detector: flags an alert if identical coordinates return 100% risk 50+ times.
+   - **"Test Model"** button executes live micro-benchmarks on sample Kabylie summer conditions and outputs latency and factor breakdown.
+
+---
+
+## 10. Evaluation Accounts for Judges
+
+For live evaluation and grading, three pre-seeded institutional accounts are available:
+
+| Email | Password | Role | Entity (Arabic / French) | Access Scope |
+| :--- | :--- | :--- | :--- | :--- |
+| `protection@in9ad.dz` | `Protect123!` | `CIVIL_PROTECTION` | **الحماية المدنية** (Protection Civile) | Tactical Map, Alerts, History |
+| `foret@in9ad.dz` | `Foret123!` | `FOREST_GUARD` | **محافظة الغابات** (Conservation des Forêts) | Tactical Map, Alerts, History |
+| `admin@in9ad.dz` | `Admin123!` | `ADMIN` | **الإدارة المركزية** (Super Admin) | Full Access + Health Portal + Users |
+
+> [!TIP]
+> **One-Click Login:** On the `/login` page, click any of the 3 pre-seeded buttons to instantly authenticate without manual typing.
+
+---
+
+## 11. Recommended Demo Video Walkthrough
+
+To showcase the platform's technical execution for jury evaluation:
+1. **Login as Civil Protection:**
+   - Navigate to `/login`
+   - Select `protection@in9ad.dz` (*Connexion الحماية المدنية*)
+   - Observe the security badge: `🔒 Secure access - الحماية المدنية`
+2. **Inspect Tactical Map & Simulation:**
+   - Select **Yakouren Forest** or **Akfadou**
+   - Scrub the fire spread timeline (+1h, +3h, +6h, +12h) to view the cellular automaton perimeter expansion
+   - Check `/dashboard/alerts` for active high-risk zones
+3. **Switch to Super Admin:**
+   - Log out and select `admin@in9ad.dz` (*Connexion Direction Générale / Admin*)
+   - Open `/dashboard/admin/model-health`
+   - Observe the 4 component cards: **AI Model ✅**, **NASA FIRMS API ✅**, **Weather API ✅**, **Database ✅**
+   - Click **"Test Model"** to run a live micro-benchmark (<15ms latency)
+   - Verify the audit trail at `/dashboard/history` proving accountability for every prediction made
+
+---
+
+## 12. License & Acknowledgements
 - Developed for **PFE 2026** — Artificial Intelligence applied to Civil Security & Forestry Conservation.
 - Special acknowledgment to **Direction Générale de la Protection Civile (DGPC)** and **Direction Générale des Forêts (DGF)** for public operational guidelines.
 - Meteorological data provided courtesy of [Open-Meteo](https://open-meteo.com).

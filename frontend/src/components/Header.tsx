@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Flame, ShieldAlert, Satellite, Wind, Layers, PhoneCall } from "lucide-react";
+import Link from "next/link";
+import { Flame, ShieldAlert, Satellite, Wind, Layers, PhoneCall, BarChart3 } from "lucide-react";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -55,6 +56,24 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
             <ShieldAlert className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="font-mono text-[11px]">XGBoost + FWI</span>
           </div>
+
+          {/* Analytics Page Link */}
+          <Link
+            href="/analytics"
+            className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 hover:text-white font-medium transition-colors"
+          >
+            <BarChart3 className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
+            <span>Model Analytics</span>
+          </Link>
+
+          {/* Secure Access Portal Link */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 px-3 py-1 bg-red-600 hover:bg-red-500 border border-red-500 rounded-lg text-white font-semibold shadow-sm transition-colors"
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-white" aria-hidden="true" />
+            <span>Portail Sécurisé</span>
+          </Link>
 
           {/* Emergency Alert Hotline */}
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-red-950/50 border border-red-700/60 rounded-lg text-red-200 font-semibold">

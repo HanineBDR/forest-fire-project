@@ -87,3 +87,34 @@ export interface RegionPreset {
   canopy_type: string;
   description: string;
 }
+
+export interface WilayaBurnStat {
+  wilaya_code: number;
+  wilaya_name: string;
+  region: string;
+  total_burned_points: number;
+  estimated_burned_area_ha: number;
+  risk_category: string;
+  top_vegetation_type: string;
+}
+
+export interface AnalyticsDiagramInfo {
+  title: string;
+  description: string;
+  static_url: string;
+  interactive_url?: string;
+  file_path: string;
+}
+
+export interface AnalyticsResponse {
+  title: string;
+  model_architecture: string;
+  diagrams: {
+    model_performance: AnalyticsDiagramInfo;
+    feature_importance: AnalyticsDiagramInfo;
+    algeria_burn_map: AnalyticsDiagramInfo;
+  };
+  stats_csv_path: string;
+  top_wilayas: WilayaBurnStat[];
+}
+

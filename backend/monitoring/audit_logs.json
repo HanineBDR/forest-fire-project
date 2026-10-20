@@ -1,0 +1,19 @@
+[
+  {
+    "id": "aud-107e92ac",
+    "timestamp": "2026-10-20T20:50:53.688053Z",
+    "user_email": "protection@in9ad.dz",
+    "user_name": "Commandant Protection Civile",
+    "user_role": "CIVIL_PROTECTION",
+    "user_org": "Direction G\u00e9n\u00e9rale de la Protection Civile (DGPC)",
+    "lat": 36.735,
+    "lon": 4.435,
+    "wilaya": "Tizi Ouzou",
+    "temp": 38.0,
+    "humidity": 20.0,
+    "wind": 30.0,
+    "risk_score": 90.2,
+    "risk_level": "Very High",
+    "latency_ms": 25.63
+  }
+]
