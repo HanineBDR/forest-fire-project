@@ -2,7 +2,16 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { PredictionResult, FIRMSHotspot, RegionPreset, WilayaBurnStat } from "@/types";
-import { DEFAULT_WILAYA_STATS, submitCommunityReport } from "@/lib/api";
+import {
+  DEFAULT_WILAYA_STATS,
+  submitCommunityReport,
+  fetchDGFWatchtowers,
+  fetchSiroccoCorridors,
+  fetchDronePatrols,
+  DGFWatchtower,
+  SiroccoCorridor,
+  DronePatrol,
+} from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   Flame,
@@ -16,6 +25,10 @@ import {
   Navigation2,
   Camera,
   Send,
+  Radio,
+  Shield,
+  Eye,
+  Plane,
 } from "lucide-react";
 
 interface MapProps {
@@ -32,6 +45,8 @@ interface MapProps {
   // Feature 5: Wind speed & direction from weather
   windSpeed?: number;
   windDirection?: number;
+  // Roadmap ideas focus drilldown
+  initialFocus?: "vigies" | "sirocco" | "drones" | null;
 }
 
 export const Map: React.FC<MapProps> = ({
@@ -46,6 +61,7 @@ export const Map: React.FC<MapProps> = ({
   currentSimStep = 1,
   windSpeed = 30.0,
   windDirection = 180.0,
+  initialFocus = null,
 }) => {
   const { t } = useLanguage();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -57,6 +73,9 @@ export const Map: React.FC<MapProps> = ({
   const regionsLayerGroupRef = useRef<any>(null);
   const algeriaBurnsLayerGroupRef = useRef<any>(null);
   const fineGrainSimGroupRef = useRef<any>(null);
+  const dgfLayerGroupRef = useRef<any>(null);
+  const siroccoLayerGroupRef = useRef<any>(null);
+  const dronesLayerGroupRef = useRef<any>(null);
 
   // View Scope & Layers
   const [viewScope, setViewScope] = useState<"northern" | "all_algeria">("northern");
@@ -64,6 +83,15 @@ export const Map: React.FC<MapProps> = ({
   const [showFirms, setShowFirms] = useState<boolean>(true);
   const [showRegions, setShowRegions] = useState<boolean>(true);
   const [selectedWilaya, setSelectedWilaya] = useState<WilayaBurnStat | null>(null);
+
+  // ROADMAP IDEAS LAYERS STATE
+  const [showDgfVigies, setShowDgfVigies] = useState<boolean>(true);
+  const [showSiroccoCorridors, setShowSiroccoCorridors] = useState<boolean>(true);
+  const [showDronePatrols, setShowDronePatrols] = useState<boolean>(true);
+
+  const [dgfVigies, setDgfVigies] = useState<DGFWatchtower[]>([]);
+  const [siroccoCorridors, setSiroccoCorridors] = useState<SiroccoCorridor[]>([]);
+  const [dronePatrols, setDronePatrols] = useState<DronePatrol[]>([]);
 
   // FEATURE 5: Wind particle animation toggle
   const [showWindAnimation, setShowWindAnimation] = useState<boolean>(true);
@@ -85,6 +113,13 @@ export const Map: React.FC<MapProps> = ({
   const [reportSuccessToast, setReportSuccessToast] = useState<string | null>(null);
 
   const tileLayersRef = useRef<{ [key: string]: any }>({});
+
+  // Fetch Roadmap live features telemetry on mount
+  useEffect(() => {
+    fetchDGFWatchtowers().then((data) => setDgfVigies(data));
+    fetchSiroccoCorridors().then((data) => setSiroccoCorridors(data));
+    fetchDronePatrols().then((data) => setDronePatrols(data));
+  }, []);
 
   // Initialize Leaflet Map
   useEffect(() => {
@@ -134,12 +169,18 @@ export const Map: React.FC<MapProps> = ({
       const regGroup = L.layerGroup().addTo(map);
       const macroGroup = L.layerGroup().addTo(map);
       const fineGroup = L.layerGroup().addTo(map);
+      const dgfGroup = L.layerGroup().addTo(map);
+      const siroccoGroup = L.layerGroup().addTo(map);
+      const dronesGroup = L.layerGroup().addTo(map);
 
       simulationLayerGroupRef.current = simGroup;
       firmsLayerGroupRef.current = firmsGroup;
       regionsLayerGroupRef.current = regGroup;
       algeriaBurnsLayerGroupRef.current = macroGroup;
       fineGrainSimGroupRef.current = fineGroup;
+      dgfLayerGroupRef.current = dgfGroup;
+      siroccoLayerGroupRef.current = siroccoGroup;
+      dronesLayerGroupRef.current = dronesGroup;
 
       map.on("click", (e: any) => {
         const { lat, lng } = e.latlng;
@@ -188,6 +229,23 @@ export const Map: React.FC<MapProps> = ({
       map.flyTo([36.65, 4.50], 9, { duration: 1.0 });
     }
   }, [viewScope]);
+
+  // Handle Initial Focus from Roadmap drilldown
+  useEffect(() => {
+    if (!mapInstanceRef.current || !initialFocus) return;
+    const map = mapInstanceRef.current;
+
+    if (initialFocus === "vigies") {
+      setShowDgfVigies(true);
+      map.flyTo([36.735, 4.435], 10, { duration: 1.2 });
+    } else if (initialFocus === "sirocco") {
+      setShowSiroccoCorridors(true);
+      map.flyTo([36.650, 4.580], 9.5, { duration: 1.2 });
+    } else if (initialFocus === "drones") {
+      setShowDronePatrols(true);
+      map.flyTo([36.744, 4.442], 11, { duration: 1.2 });
+    }
+  }, [initialFocus]);
 
   // Render Target Click Marker
   useEffect(() => {
@@ -289,6 +347,168 @@ export const Map: React.FC<MapProps> = ({
       });
     });
   }, [regions, showRegions, onMapClick, viewScope]);
+
+  // ROADMAP IDEA 1: Render DGF Forest Watchtowers & Terrestrial Sensors
+  useEffect(() => {
+    if (!mapInstanceRef.current || !dgfLayerGroupRef.current) return;
+    const group = dgfLayerGroupRef.current;
+    group.clearLayers();
+    if (!showDgfVigies || viewScope === "all_algeria") return;
+
+    import("leaflet").then((L) => {
+      dgfVigies.forEach((v) => {
+        const isWarning = v.status === "WARNING_THERMAL";
+        const icon = L.divIcon({
+          className: "custom-dgf-vigie",
+          html: `
+            <div class="relative flex items-center justify-center w-8 h-8 rounded-lg border-2 ${
+              isWarning ? "bg-amber-950/95 border-amber-500 shadow-amber-900/50" : "bg-emerald-950/95 border-emerald-500 shadow-emerald-900/50"
+            } shadow-lg text-white font-bold text-xs cursor-pointer hover:scale-110 transition">
+              <span class="text-sm">🗼</span>
+              <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ${
+                isWarning ? "bg-amber-400 animate-ping" : "bg-emerald-400"
+              }"></span>
+            </div>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+
+        const marker = L.marker([v.lat, v.lon], { icon });
+        marker.bindPopup(`
+          <div style="font-family: sans-serif; min-width: 260px; color: #f8fafc; font-size: 11px;">
+            <div style="border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 6px;">
+              <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: ${isWarning ? '#f59e0b' : '#34d399'}; font-weight: bold;">
+                Direction Générale des Forêts · Poste de Vigie
+              </span>
+              <div style="font-size: 13px; font-weight: bold; color: #ffffff;">${v.name}</div>
+              <div style="color: #94a3b8; font-size: 10px;">${v.wilaya} · Altitude : <b>${v.elevation_m}m</b></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;">
+              <div><b>Statut :</b> <span style="color: ${isWarning ? '#f59e0b' : '#34d399'}; font-weight: bold;">${v.status_label}</span></div>
+              <div><b>Guetteur :</b> ${v.observer}</div>
+              <div><b>Couverture optique :</b> ${v.line_of_sight}</div>
+              <div style="background: rgba(15,23,42,0.8); padding: 4px 6px; border-radius: 4px; border: 1px solid #334155;">
+                <div style="color: #38bdf8; font-weight: bold; font-size: 10px;">Télémétrie Capteurs Terrestres :</div>
+                <div>Temp : <b>${v.temp_sensor}°C</b> · Humidité : <b>${v.humidity_sensor}%</b> · Vent : <b>${v.wind_sensor} km/h</b></div>
+              </div>
+              <div style="color: #cbd5e1; font-size: 10px;"><b>Liaison Radio :</b> ${v.radio_channel}</div>
+            </div>
+          </div>
+        `, { className: "bg-slate-900 border border-slate-700 text-white rounded-xl" });
+
+        group.addLayer(marker);
+      });
+    });
+  }, [dgfVigies, showDgfVigies, viewScope]);
+
+  // ROADMAP IDEA 3: Render Sirocco Mountain Pass Channels
+  useEffect(() => {
+    if (!mapInstanceRef.current || !siroccoLayerGroupRef.current) return;
+    const group = siroccoLayerGroupRef.current;
+    group.clearLayers();
+    if (!showSiroccoCorridors || viewScope === "all_algeria") return;
+
+    import("leaflet").then((L) => {
+      siroccoCorridors.forEach((c) => {
+        const polyline = L.polyline(c.path_coords, {
+          color: "#f59e0b",
+          weight: 4,
+          opacity: 0.85,
+          dashArray: "8, 8",
+          lineCap: "round",
+        });
+
+        polyline.bindTooltip(`
+          <div style="font-family: sans-serif; font-size: 11px;">
+            <div style="color: #f59e0b; font-weight: bold;">🌪️ ${c.name}</div>
+            <div style="color: #ffffff; font-weight: bold;">${c.multiplier_label}</div>
+            <div style="color: #cbd5e1; font-size: 10px;">Axe : ${c.wind_axis}</div>
+          </div>
+        `, { sticky: true, className: "bg-amber-950 text-white border border-amber-700 rounded p-1 text-xs" });
+
+        group.addLayer(polyline);
+
+        const midIdx = Math.floor(c.path_coords.length / 2);
+        const midPoint = c.path_coords[midIdx];
+        const corridorBadge = L.divIcon({
+          className: "custom-sirocco-badge",
+          html: `
+            <div class="px-2 py-0.5 rounded bg-amber-950/90 border border-amber-500 text-amber-300 font-mono text-[9px] font-bold shadow-md animate-pulse">
+              🌪️ SIROCCO ${c.propagation_multiplier}x
+            </div>
+          `,
+          iconSize: [80, 20],
+          iconAnchor: [40, 10],
+        });
+        group.addLayer(L.marker(midPoint, { icon: corridorBadge }));
+      });
+    });
+  }, [siroccoCorridors, showSiroccoCorridors, viewScope]);
+
+  // ROADMAP IDEA 4: Render FLIR Thermal Drone Patrols
+  useEffect(() => {
+    if (!mapInstanceRef.current || !dronesLayerGroupRef.current) return;
+    const group = dronesLayerGroupRef.current;
+    group.clearLayers();
+    if (!showDronePatrols || viewScope === "all_algeria") return;
+
+    import("leaflet").then((L) => {
+      dronePatrols.forEach((d) => {
+        if (d.flight_path && d.flight_path.length > 0) {
+          const orbit = L.polygon(d.flight_path, {
+            color: "#8b5cf6",
+            weight: 2,
+            opacity: 0.7,
+            dashArray: "4, 6",
+            fillColor: "#7c3aed",
+            fillOpacity: 0.08,
+          });
+          orbit.bindTooltip(`Circuit de Surveillance : ${d.mission_name}`, { sticky: true });
+          group.addLayer(orbit);
+        }
+
+        const droneIcon = L.divIcon({
+          className: "custom-drone-icon",
+          html: `
+            <div class="relative flex items-center justify-center w-8 h-8 rounded-full bg-slate-950 border-2 border-violet-500 shadow-xl cursor-pointer hover:scale-110 transition">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-60"></span>
+              <span class="text-sm">🛸</span>
+              <span class="absolute -bottom-1 px-1 rounded bg-black/80 text-[8px] font-mono font-bold text-violet-300 border border-violet-700">FLIR</span>
+            </div>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+
+        const marker = L.marker([d.lat, d.lon], { icon: droneIcon });
+        marker.bindPopup(`
+          <div style="font-family: sans-serif; min-width: 270px; color: #f8fafc; font-size: 11px;">
+            <div style="border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 6px;">
+              <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: #a78bfa; font-weight: bold;">
+                Patrouille Aérienne Infrarouge (UAV Recon)
+              </span>
+              <div style="font-size: 13px; font-weight: bold; color: #ffffff;">${d.drone_id}</div>
+              <div style="color: #94a3b8; font-size: 10px;">${d.model}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div><b>Mission :</b> ${d.mission_name}</div>
+              <div><b>Statut Vol :</b> <span style="color: #34d399; font-weight: bold;">${d.status_label}</span></div>
+              <div style="background: rgba(15,23,42,0.8); padding: 5px 8px; border-radius: 6px; border: 1px solid #334155; margin: 4px 0;">
+                <div style="color: #a78bfa; font-weight: bold; font-size: 10px;">Télémétrie Avionique & Capteur :</div>
+                <div>Altitude : <b>${d.altitude_m_agl}m AGL</b> · Vitesse : <b>${d.speed_kmh} km/h</b></div>
+                <div>Batterie : <b>${d.battery_pct}% (${d.flight_time_remaining})</b></div>
+                <div>Caméra : <b>${d.thermal_sensor}</b></div>
+                <div>Liaison Vidéo : <b>${d.video_link}</b></div>
+              </div>
+            </div>
+          </div>
+        `, { className: "bg-slate-900 border border-violet-800 text-white rounded-xl" });
+
+        group.addLayer(marker);
+      });
+    });
+  }, [dronePatrols, showDronePatrols, viewScope]);
 
   // FEATURE 4: Render Fine-Grained 6h Simulation Playback Polygon
   useEffect(() => {
@@ -392,16 +612,32 @@ export const Map: React.FC<MapProps> = ({
     };
   }, [showWindAnimation, windSpeed, windDirection]);
 
-  // Handle Offline Map Download Simulation
+  // Handle Offline Map Download and Service Worker Precaching
   const handleDownloadOfflineZone = (zoneKey: string, zoneLabel: string, size: string) => {
     setDownloadingZone(zoneKey);
+
+    // Notify PWA Service Worker to cache area tiles
+    if (typeof window !== "undefined" && "serviceWorker" in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: "CACHE_ZONE_TILES",
+        zoneName: zoneLabel,
+        urls: [
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/9/198/312",
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/396/624",
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/11/792/1248",
+          "https://tile.openstreetmap.org/9/261/195.png",
+          "https://tile.openstreetmap.org/10/523/391.png"
+        ]
+      });
+    }
+
     setTimeout(() => {
       try {
         localStorage.setItem(`in9ad_offline_${zoneKey}`, "cached_true");
       } catch {}
       setDownloadingZone(null);
       setShowOfflineMenu(false);
-      setOfflineToast(`Carte ${zoneLabel} téléchargée (${size}) - Utilisable sans internet.`);
+      setOfflineToast(`Carte ${zoneLabel} mise en cache (${size}) - Consultable hors-ligne via PWA.`);
       setTimeout(() => setOfflineToast(null), 5000);
     }, 1200);
   };
@@ -445,6 +681,26 @@ export const Map: React.FC<MapProps> = ({
     <div className="relative w-full h-full min-h-[500px]">
       {/* Leaflet Map DOM Container */}
       <div ref={mapContainerRef} className="w-full h-full min-h-[500px]" />
+
+      {/* ROADMAP IDEA 3: Sirocco Aerological Warning Overlay */}
+      {simulation6hData?.sirocco_corridor_active && (
+        <div className="absolute top-16 left-4 z-[400] max-w-sm p-2.5 rounded-xl bg-amber-950/95 border border-amber-500/90 shadow-2xl backdrop-blur-md text-amber-200 text-xs animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span className="text-base animate-pulse">🌪️</span>
+            <div>
+              <div className="font-bold text-white text-[11px] flex items-center gap-1.5">
+                <span>{simulation6hData.sirocco_corridor.name}</span>
+                <span className="px-1.5 py-0.2 rounded bg-amber-500 text-black font-mono font-black text-[9px]">
+                  +{Math.round((simulation6hData.sirocco_corridor.multiplier - 1) * 100)}%
+                </span>
+              </div>
+              <div className="text-[10px] text-amber-300/80 font-mono">
+                {simulation6hData.sirocco_corridor.label}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* FEATURE 5: Canvas Wind Overlay */}
       {showWindAnimation && (
@@ -491,6 +747,48 @@ export const Map: React.FC<MapProps> = ({
         >
           <Wind className="w-3.5 h-3.5" />
           <span>Vent Animé : {showWindAnimation ? "ON" : "OFF"}</span>
+        </button>
+
+        {/* ROADMAP IDEA 1: DGF Watchtowers Layer Toggle */}
+        <button
+          onClick={() => setShowDgfVigies(!showDgfVigies)}
+          className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition flex items-center gap-1.5 ${
+            showDgfVigies
+              ? "bg-emerald-950/90 border-emerald-600/80 text-emerald-300"
+              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
+          }`}
+          title="Afficher/masquer les 6 postes de vigie DGF interconnectés"
+        >
+          <span className="text-xs">🗼</span>
+          <span>Vigies DGF : {showDgfVigies ? "ACTIF" : "OFF"}</span>
+        </button>
+
+        {/* ROADMAP IDEA 3: Sirocco Mountain Pass Corridors Toggle */}
+        <button
+          onClick={() => setShowSiroccoCorridors(!showSiroccoCorridors)}
+          className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition flex items-center gap-1.5 ${
+            showSiroccoCorridors
+              ? "bg-amber-950/90 border-amber-600/80 text-amber-300"
+              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
+          }`}
+          title="Afficher/masquer les couloirs aérologiques de Sirocco"
+        >
+          <span className="text-xs">🌪️</span>
+          <span>Couloirs Sirocco : {showSiroccoCorridors ? "ACTIF" : "OFF"}</span>
+        </button>
+
+        {/* ROADMAP IDEA 4: FLIR Thermal Drone Patrols Toggle */}
+        <button
+          onClick={() => setShowDronePatrols(!showDronePatrols)}
+          className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition flex items-center gap-1.5 ${
+            showDronePatrols
+              ? "bg-violet-950/90 border-violet-600/80 text-violet-300"
+              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
+          }`}
+          title="Afficher/masquer la télémétrie des patrouilles de drones thermiques"
+        >
+          <span className="text-xs">🛸</span>
+          <span>Drones FLIR : {showDronePatrols ? "ACTIF" : "OFF"}</span>
         </button>
 
         {/* FEATURE 8: Offline Map Download Button & Dropdown */}

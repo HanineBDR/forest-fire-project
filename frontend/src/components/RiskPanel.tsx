@@ -416,6 +416,22 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
                 Recalculer
               </button>
             </div>
+
+            {/* ROADMAP IDEA 3: Live Sirocco Mountain Pass Aerodynamic Coupling */}
+            {simulation6hData?.sirocco_corridor_active && (
+              <div className="p-2 rounded bg-amber-950/80 border border-amber-600/70 text-amber-200 text-xs flex items-center justify-between animate-fadeIn">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm">🌪️</span>
+                  <div>
+                    <div className="font-bold text-white text-[11px]">{simulation6hData.sirocco_corridor.name}</div>
+                    <div className="text-[10px] text-amber-300 font-mono">{simulation6hData.sirocco_corridor.label}</div>
+                  </div>
+                </div>
+                <span className="px-1.5 py-0.5 rounded bg-amber-500 text-black text-[10px] font-mono font-black">
+                  x{simulation6hData.sirocco_corridor.multiplier}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>

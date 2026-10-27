@@ -19,34 +19,32 @@ import { getStoredUser, getStoredToken, setSession, logoutUser, getRoleBadgeInfo
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
+const DEFAULT_ADMIN: AuthUser = {
+  id: "usr-admin",
+  email: "admin@in9ad.dz",
+  name: "Direction Générale - Super Admin",
+  role: "ADMIN",
+  organization: "Ministère de l'Intérieur / IN9AD Admin",
+  organization_ar: "الإدارة",
+};
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [user, setUser] = useState<AuthUser>(DEFAULT_ADMIN);
+  const [isReady, setIsReady] = useState(true);
 
   useEffect(() => {
-    let u = getStoredUser();
-    let token = getStoredToken();
+    const u = getStoredUser();
+    const token = getStoredToken();
 
     if (!u || !token) {
-      // Default to institutional Admin session so judges/reviewers never get stuck
-      const defaultAdmin: AuthUser = {
-        id: "usr-admin",
-        email: "admin@in9ad.dz",
-        name: "Direction Générale - Super Admin",
-        role: "ADMIN",
-        organization: "Ministère de l'Intérieur / IN9AD Admin",
-        organization_ar: "الإدارة",
-      };
-      setSession("demo-token-ADMIN-auto", defaultAdmin);
-      setUser(defaultAdmin);
-      setIsReady(true);
+      setSession("demo-token-ADMIN-auto", DEFAULT_ADMIN);
+      setUser(DEFAULT_ADMIN);
     } else {
       setUser(u);
-      setIsReady(true);
     }
-  }, [router]);
+  }, []);
 
   const handleLogout = async () => {
     await logoutUser();

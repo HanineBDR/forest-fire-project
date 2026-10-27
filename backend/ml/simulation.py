@@ -71,7 +71,12 @@ def simulate_fire_spread(
     # Base spread rate driven by risk score and wind speed
     # Average Mediterranean wildfire spreads between 200m/h (moderate) to 1800m/h (extreme Sirocco)
     normalized_risk = max(0.1, min(1.0, risk_score / 100.0))
-    rate_of_spread_m_h = (180.0 + (wind_speed * 18.0) + (normalized_risk * 450.0))
+    base_spread = (180.0 + (wind_speed * 18.0) + (normalized_risk * 450.0))
+
+    # ROADMAP IDEA 3: Sirocco Mountain Pass Aerological Coupling
+    sirocco_corridor = _detect_sirocco_corridor(center_lat, center_lon, wind_direction)
+    sirocco_multiplier = sirocco_corridor["multiplier"] if sirocco_corridor else 1.0
+    rate_of_spread_m_h = base_spread * sirocco_multiplier
 
     # Cellular Automaton simulation over 6 hours
     timesteps = []
@@ -170,9 +175,66 @@ def simulate_fire_spread(
         "risk_score": risk_score,
         "total_hours": hours,
         "total_burned_area_ha": timesteps[-1]["burned_area_hectares"] if timesteps else 0.0,
+        "sirocco_corridor_active": sirocco_corridor is not None,
+        "sirocco_corridor": sirocco_corridor,
         "all_coordinates": all_coordinates,
         "timesteps": timesteps
     }
+
+
+def _detect_sirocco_corridor(lat: float, lon: float, wind_dir: float) -> Optional[Dict[str, Any]]:
+    """
+    Detects if coordinates fall within known Northern Algeria mountain pass Sirocco corridors
+    and if wind blows from the southern quadrant (120° - 240°).
+    """
+    # Check if wind is coming from Southern/Sirocco quadrant
+    normalized_dir = wind_dir % 360.0
+    if not (115.0 <= normalized_dir <= 245.0):
+        return None
+
+    corridors = [
+        {
+            "id": "corridor_sebaou",
+            "name": "Couloir Vallée du Sebaou - Yakouren",
+            "center": (36.735, 4.435),
+            "max_dist_deg": 0.22,
+            "multiplier": 1.45,
+            "label": "+45% vitesse de propagation vers la crête",
+            "wilaya": "Tizi Ouzou"
+        },
+        {
+            "id": "corridor_soummam",
+            "name": "Couloir Venturi Soummam - Akfadou",
+            "center": (36.671, 4.582),
+            "max_dist_deg": 0.25,
+            "multiplier": 1.60,
+            "label": "+60% effet venturi de crête",
+            "wilaya": "Bejaia"
+        },
+        {
+            "id": "corridor_djurdjura",
+            "name": "Couloir Orographique Tizi N'Kouilal - Tikjda",
+            "center": (36.452, 4.132),
+            "max_dist_deg": 0.20,
+            "multiplier": 1.40,
+            "label": "+40% turbulence ascendante de versant",
+            "wilaya": "Bouira"
+        }
+    ]
+
+    for c in corridors:
+        clat, clon = c["center"]
+        dist = math.hypot(lat - clat, lon - clon)
+        if dist <= c["max_dist_deg"]:
+            return {
+                "id": c["id"],
+                "name": c["name"],
+                "multiplier": c["multiplier"],
+                "label": c["label"],
+                "wilaya": c["wilaya"]
+            }
+
+    return None
 
 
 def _generate_boundary_polygon(

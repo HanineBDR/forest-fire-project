@@ -29,6 +29,7 @@ export const metadata: Metadata = {
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 export default function RootLayout({
   children,
@@ -46,12 +47,15 @@ export default function RootLayout({
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#dc2626" />
         <link
           href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
       <body className="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-red-600 selection:text-white">
+        <ServiceWorkerRegister />
         <LanguageProvider>
           {children}
         </LanguageProvider>

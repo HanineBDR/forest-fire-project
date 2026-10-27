@@ -1,0 +1,50 @@
+{
+  "name": "IN9AD (إنقاذ) - Colonnes Mobiles Protection Civile Algérienne",
+  "short_name": "IN9AD Mobile",
+  "description": "Système tactique d'alerte, de propagation et de guidage pour les colonnes mobiles de la Protection Civile et les Vigies DGF dans le Tell algérien.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#020617",
+  "theme_color": "#dc2626",
+  "lang": "fr-DZ",
+  "categories": ["government", "utilities", "weather", "navigation"],
+  "icons": [
+    {
+      "src": "/images/protection_civile_algeria.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/protection_civile_truck.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Carte Tactique",
+      "short_name": "Carte",
+      "description": "Accès direct à la carte opérationnelle et aux vigies DGF",
+      "url": "/dashboard",
+      "icons": [{ "src": "/images/forest_watchtower.jpg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Alertes CODIS",
+      "short_name": "Alertes",
+      "description": "File des alertes et diffusion SMS d'urgence",
+      "url": "/dashboard/alerts",
+      "icons": [{ "src": "/images/protection_civile_truck.jpg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Feuille de Route",
+      "short_name": "Roadmap",
+      "description": "Statut des jalons DGF, SMS et Sirocco",
+      "url": "/dashboard/admin/roadmap",
+      "icons": [{ "src": "/images/satellite_firms.jpg", "sizes": "96x96" }]
+    }
+  ]
+}

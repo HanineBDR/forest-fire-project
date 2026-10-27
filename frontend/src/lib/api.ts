@@ -67,6 +67,16 @@ export const DEFAULT_REGIONS: RegionPreset[] = [
     description: "Coastal Mediterranean woodland with high interface between wildland and rural villages.",
   },
   {
+    id: "babors",
+    name: "Babor-Tababor Massif",
+    wilaya: "Setif (19) / Jijel (18)",
+    lat: 36.55,
+    lon: 5.48,
+    elevation_m: 2004,
+    canopy_type: "Numidian Fir (Sapin de Numidie) & Montane Oak",
+    description: "Cloud forest enclave with endemic flora, vulnerable to severe dry Sirocco spells.",
+  },
+  {
     id: "chrea",
     name: "Chréa National Park",
     wilaya: "Blida (09)",
@@ -89,12 +99,62 @@ export const DEFAULT_REGIONS: RegionPreset[] = [
   {
     id: "aures",
     name: "Aurès - Chelia",
-    wilaya: "Batna (05)",
+    wilaya: "Batna (05) / Khenchela (40)",
     lat: 35.31,
     lon: 6.64,
     elevation_m: 1800,
     canopy_type: "Atlas Cedar & Dry Mountain Oak",
     description: "Semi-arid high mountain massif in eastern Algeria subject to rapid moisture vaporization.",
+  },
+  {
+    id: "guerrouche",
+    name: "Forêt de Guerrouche & Taza",
+    wilaya: "Jijel (18)",
+    lat: 36.69,
+    lon: 5.58,
+    elevation_m: 900,
+    canopy_type: "Subhumid Cork Oak & Zeen Oak Massif",
+    description: "Dense coastal mountains of Petite Kabylie with steep ravines and heavy biomass fuel.",
+  },
+  {
+    id: "chenoua",
+    name: "Mont Chenoua & Sidi Amar",
+    wilaya: "Tipaza (42)",
+    lat: 36.595,
+    lon: 2.418,
+    elevation_m: 905,
+    canopy_type: "Aleppo Pine & Coastal Garrigue",
+    description: "Coastal mountain barrier separating Mediterranean from Mitidja agricultural plains.",
+  },
+  {
+    id: "tlemcen",
+    name: "Forêt des Zarifet & Hafir",
+    wilaya: "Tlemcen (13)",
+    lat: 34.882,
+    lon: -1.315,
+    elevation_m: 1100,
+    canopy_type: "Western Aleppo Pine & Thuja (Cyprès de Duprez)",
+    description: "Western Algerian forest reserve exposed to dry continental winds from High Plateaux.",
+  },
+  {
+    id: "collo",
+    name: "Massif de Collo - Beni Toufout",
+    wilaya: "Skikda (21)",
+    lat: 37.01,
+    lon: 6.55,
+    elevation_m: 1180,
+    canopy_type: "Temperate Cork Oak & Heather Scrub",
+    description: "Rugged peninsula with dense forest canopy and difficult access for ground fire trucks.",
+  },
+  {
+    id: "zaccar",
+    name: "Massif du Mont Zaccar",
+    wilaya: "Ain Defla (44)",
+    lat: 36.31,
+    lon: 1.95,
+    elevation_m: 1550,
+    canopy_type: "Oak Woodland & Mountain Conifer",
+    description: "High ridge dominating Chelif valley, exposed to intense summer heat and katabatic winds.",
   },
 ];
 
@@ -956,4 +1016,158 @@ export async function toggleRoadmapLivrable(
   return await res.json();
 }
 
+export async function addRoadmapLivrable(
+  phaseId: string,
+  payload: { name: string; description?: string } | string
+): Promise<any> {
+  const body = typeof payload === "string" ? { name: payload } : payload;
+  const res = await fetch(`${API_BASE}/api/roadmap/${phaseId}/livrable`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error("Failed to add roadmap deliverable");
+  return await res.json();
+}
 
+export async function deleteRoadmapLivrable(phaseId: string, livrableId: string): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/roadmap/${phaseId}/livrable/${livrableId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete roadmap deliverable");
+  return await res.json();
+}
+
+export async function resetRoadmapData(): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/roadmap/reset`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to reset roadmap");
+  return await res.json();
+}
+
+export async function updateCommunityReportStatus(
+  reportId: string,
+  status: string,
+  verifiedBy: string = "Officier CODIS Central"
+): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/community/reports/${reportId}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status, verified_by: verifiedBy }),
+  });
+  if (!res.ok) throw new Error("Failed to update report status");
+  return await res.json();
+}
+
+// -------------------------------------------------------------
+// ROADMAP IDEAS: DGF VIGIES, EMERGENCY SMS, SIROCCO & DRONES
+// -------------------------------------------------------------
+
+export interface DGFWatchtower {
+  id: string;
+  name: string;
+  wilaya: string;
+  lat: number;
+  lon: number;
+  elevation_m: number;
+  status: "ACTIVE_SURVEILLANCE" | "WARNING_THERMAL" | "STANDBY";
+  status_label: string;
+  observer: string;
+  line_of_sight: string;
+  smoke_detector: "CLEAR" | "SMOKE_SUSPECTED" | "ALERT";
+  optical_status: string;
+  temp_sensor: number;
+  humidity_sensor: number;
+  wind_sensor: number;
+  radio_channel: string;
+}
+
+export async function fetchDGFWatchtowers(): Promise<DGFWatchtower[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/dgf/vigies`);
+    if (res.ok) {
+      const data = await res.json();
+      return data.vigies || [];
+    }
+  } catch (e) {
+    console.warn("Could not fetch DGF vigies:", e);
+  }
+  return [];
+}
+
+export interface BroadcastSMSPayload {
+  alert_id?: string;
+  wilaya: string;
+  commune?: string;
+  radius_km?: number;
+  message: string;
+  target_group?: string;
+}
+
+export async function broadcastEmergencySMS(payload: BroadcastSMSPayload): Promise<any> {
+  const res = await fetch(`${API_BASE}/api/sms/broadcast`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Emergency SMS broadcast failed");
+  return await res.json();
+}
+
+export interface SiroccoCorridor {
+  id: string;
+  name: string;
+  wilaya: string;
+  wind_axis: string;
+  propagation_multiplier: number;
+  multiplier_label: string;
+  description: string;
+  path_coords: [number, number][];
+}
+
+export async function fetchSiroccoCorridors(): Promise<SiroccoCorridor[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/sirocco/corridors`);
+    if (res.ok) {
+      const data = await res.json();
+      return data.corridors || [];
+    }
+  } catch (e) {
+    console.warn("Could not fetch Sirocco corridors:", e);
+  }
+  return [];
+}
+
+export interface DronePatrol {
+  drone_id: string;
+  model: string;
+  home_base: string;
+  mission_name: string;
+  status: "AIRBORNE_PATROL" | "STANDBY_READY";
+  status_label: string;
+  lat: number;
+  lon: number;
+  altitude_m_agl: number;
+  speed_kmh: number;
+  battery_pct: number;
+  flight_time_remaining: string;
+  thermal_sensor: string;
+  max_temperature_detected_c: number;
+  hotspots_detected_count: number;
+  video_link: string;
+  flight_path: [number, number][];
+}
+
+export async function fetchDronePatrols(): Promise<DronePatrol[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/drones/patrols`);
+    if (res.ok) {
+      const data = await res.json();
+      return data.patrols || [];
+    }
+  } catch (e) {
+    console.warn("Could not fetch drone patrols:", e);
+  }
+  return [];
+}

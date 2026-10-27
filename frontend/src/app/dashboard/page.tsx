@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { QuickPresets } from "@/components/QuickPresets";
 import { RiskPanel } from "@/components/RiskPanel";
@@ -30,7 +31,9 @@ const DynamicMap = dynamic(() => import("@/components/Map").then((mod) => mod.Ma
   ),
 });
 
-export default function DashboardMapPage() {
+function DashboardMapInner() {
+  const searchParams = useSearchParams();
+  const focusParam = searchParams ? (searchParams.get("focus") as "vigies" | "sirocco" | "drones" | null) : null;
   const { t, language } = useLanguage();
   const [regions, setRegions] = useState<RegionPreset[]>(DEFAULT_REGIONS);
   const [firmsHotspots, setFirmsHotspots] = useState<FIRMSHotspot[]>([]);
@@ -300,6 +303,7 @@ export default function DashboardMapPage() {
               currentSimStep={currentSimStep}
               windSpeed={prediction?.input.wind ?? 30.0}
               windDirection={prediction?.input.wind_direction ?? 180.0}
+              initialFocus={focusParam}
             />
           </div>
 
@@ -332,5 +336,20 @@ export default function DashboardMapPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardMapPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full h-screen flex flex-col items-center justify-center space-y-3 bg-slate-950 text-slate-400">
+          <div className="w-8 h-8 rounded-full border-2 border-red-500 border-t-transparent animate-spin"></div>
+          <span className="text-xs font-mono">Chargement du Système Cartographique Opérationnel…</span>
+        </div>
+      }
+    >
+      <DashboardMapInner />
+    </Suspense>
   );
 }

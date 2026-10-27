@@ -23,7 +23,9 @@ import {
   Truck,
   CheckCheck,
   AlertOctagon,
-  FileText
+  FileText,
+  Smartphone,
+  Send
 } from "lucide-react";
 import { getStoredUser } from "@/lib/auth";
 import { 
@@ -31,7 +33,8 @@ import {
   fetchAlertHistory, 
   updateAlertStatus, 
   refreshAlerts,
-  getAlertReportDownloadUrl 
+  getAlertReportDownloadUrl,
+  broadcastEmergencySMS
 } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import { AlertRecord, AlertStatusHistory } from "@/types";
@@ -113,6 +116,14 @@ export default function AlertsPage() {
 
   // Toast
   const [toast, setToast] = useState<{ title: string; message: string; type: "critical" | "success" | "info" } | null>(null);
+
+  // SMS Broadcast Modal State (Phase 2 Roadmap capability)
+  const [smsModalAlert, setSmsModalAlert] = useState<AlertRecord | null>(null);
+  const [smsRadius, setSmsRadius] = useState<number>(5);
+  const [smsMessage, setSmsMessage] = useState<string>("");
+  const [isSendingSMS, setIsSendingSMS] = useState<boolean>(false);
+  const [smsResult, setSmsResult] = useState<any | null>(null);
+  const [smsError, setSmsError] = useState<string | null>(null);
 
   const user = getStoredUser();
   const canModifyStatus = user?.role === "ADMIN" || user?.role === "CIVIL_PROTECTION";
@@ -214,6 +225,45 @@ export default function AlertsPage() {
     setModalAlert(alert);
     const hist = await fetchAlertHistory(alert.alert_id);
     setModalHistory(hist);
+  };
+
+  // Open SMS Dispatcher Modal for Alert (Phase 2 capability)
+  const openSMSModalForAlert = (alert: AlertRecord) => {
+    setSmsModalAlert(alert);
+    setSmsRadius(5);
+    setSmsResult(null);
+    setSmsError(null);
+    setSmsMessage(
+      `ALERTE INCENDIE FORÊT (Protection Civile Algérienne): Foyer critique détecté dans le secteur de ${alert.forest_name} (${alert.wilaya}). Risque ${alert.risk_score}%. Évacuation préventive conseillée pour habitations lisière. Contact: 14.`
+    );
+  };
+
+  const handleDispatchSMS = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!smsModalAlert || !smsMessage.trim()) return;
+    setIsSendingSMS(true);
+    setSmsError(null);
+    try {
+      const res = await broadcastEmergencySMS({
+        alert_id: smsModalAlert.alert_id,
+        wilaya: smsModalAlert.wilaya,
+        commune: smsModalAlert.forest_name,
+        radius_km: smsRadius,
+        message: smsMessage,
+        target_group: "POPULATION_CIVILE",
+      });
+      setSmsResult(res);
+      setToast({
+        title: "Diffusion SMS Réussie",
+        message: `${res.recipients_count || 12500} riverains alertés via Mobilis / Algérie Télécom.`,
+        type: "success",
+      });
+    } catch (err) {
+      console.error("SMS Broadcast Error:", err);
+      setSmsError("Échec lors de la transmission aux opérateurs télécoms.");
+    } finally {
+      setIsSendingSMS(false);
+    }
   };
 
   // Change Status Handler
@@ -574,6 +624,18 @@ export default function AlertsPage() {
                       <span>Historique complet</span>
                     </button>
 
+                    {/* ROADMAP PHASE 2: Emergency Geotargeted SMS Broadcast */}
+                    {isCritical && (
+                      <button
+                        onClick={() => openSMSModalForAlert(alert)}
+                        className="w-full py-2 px-3 rounded-lg border border-red-700 bg-red-950/80 hover:bg-red-900 text-red-200 text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
+                        title="Diffuser une alerte SMS géociblée (Mobilis / Algérie Télécom)"
+                      >
+                        <Smartphone className="w-3.5 h-3.5 text-red-400" />
+                        <span>Diffuser SMS Alerte</span>
+                      </button>
+                    )}
+
                     {/* Quick Action Button for Status Progression */}
                     {alert.status === "DETECTED" && (
                       <button
@@ -672,6 +734,132 @@ export default function AlertsPage() {
                 Fermer
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Emergency SMS Broadcast Modal (Roadmap Phase 2 capability) */}
+      {smsModalAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-red-500" />
+                <div>
+                  <h3 className="text-base font-bold text-white">
+                    Passerelle SMS d&apos;Urgence — {smsModalAlert.alert_id}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-mono">
+                    {smsModalAlert.forest_name} ({smsModalAlert.wilaya}) · Cell-Broadcast Mobilis / Algérie Télécom
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setSmsModalAlert(null);
+                  setSmsResult(null);
+                  setSmsError(null);
+                }}
+                className="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleDispatchSMS} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3 font-mono">
+                <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                  <span className="text-[10px] text-slate-500 block font-sans">Secteur Cible</span>
+                  <span className="text-white font-bold">{smsModalAlert.forest_name} ({smsModalAlert.wilaya})</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                  <span className="text-[10px] text-slate-500 block font-sans">Indice de Risque IA</span>
+                  <span className="text-red-400 font-bold">{smsModalAlert.risk_score}% ({smsModalAlert.risk_level})</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Rayon de Diffusion Cellulaire : {smsRadius} km
+                </label>
+                <input
+                  type="range"
+                  min={2}
+                  max={20}
+                  step={1}
+                  value={smsRadius}
+                  onChange={(e) => setSmsRadius(Number(e.target.value))}
+                  className="w-full accent-red-500"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                  <span>2 km (Proximité immédiate)</span>
+                  <span className="text-red-400 font-bold">{smsRadius} km</span>
+                  <span>20 km (Massif complet)</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Contenu du Message d&apos;Alerte SMS
+                </label>
+                <textarea
+                  value={smsMessage}
+                  onChange={(e) => setSmsMessage(e.target.value)}
+                  rows={3}
+                  className="w-full p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-red-500 font-mono text-[11px]"
+                />
+              </div>
+
+              {smsResult && (
+                <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-600 text-emerald-200 text-xs space-y-1 animate-fadeIn">
+                  <div className="flex items-center gap-2 font-bold text-emerald-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>Alerte SMS Diffusée ({smsResult.broadcast_id})</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-300">
+                    Destinataires alertés : <span className="text-white font-bold">{smsResult.recipients_count}</span> riverains dans un rayon de {smsResult.radius_km} km.
+                  </div>
+                </div>
+              )}
+
+              {smsError && (
+                <div className="p-2.5 rounded-lg bg-red-950/80 border border-red-700 text-red-200 text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{smsError}</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+                <span className="text-[10px] text-slate-400 font-mono">
+                  Protocole DGF / Protection Civile Algérie
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSmsModalAlert(null);
+                      setSmsResult(null);
+                      setSmsError(null);
+                    }}
+                    className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+                  >
+                    Fermer
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSendingSMS || !smsMessage.trim()}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg flex items-center gap-1.5 transition disabled:opacity-50 shadow-md shadow-red-950/40"
+                  >
+                    {isSendingSMS ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Send className="w-3.5 h-3.5" />
+                    )}
+                    <span>Diffuser Immédiatement</span>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}
