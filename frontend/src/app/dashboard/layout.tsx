@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${isRTL ? "font-arabic" : ""}`}>
       {/* Top Security Header */}
-      <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50">
+      <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* Left: Brand Logo & Role Badge */}
@@ -269,7 +269,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Mobile Navigation Bar */}
-        <nav aria-label="Navigation mobile" className="md:hidden flex items-center gap-1 px-4 py-2 border-t border-slate-800 overflow-x-auto">
+        <nav aria-label="Navigation mobile" className="md:hidden flex items-center gap-1 px-4 py-2 border-t border-slate-800 overflow-x-auto bg-slate-900">
           {primaryNavItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href;

@@ -11,7 +11,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
   return (
-    <header className="relative z-30 bg-slatebg-900/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60 px-4 py-3 sm:px-6">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
         {/* Brand Logo & Name */}
         <div className="flex items-center gap-3">
