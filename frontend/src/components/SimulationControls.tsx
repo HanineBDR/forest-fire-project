@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { SimulationResult, SimulationStep } from "@/types";
 import { Play, Pause, Clock } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface SimulationControlsProps {
   simulation: SimulationResult | null;
@@ -15,6 +16,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
   activeHorizonIndex,
   onSelectHorizon,
 }) => {
+  const { t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
@@ -39,13 +41,13 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-bold text-sm text-slate-100 flex items-center gap-1.5">
-            <span>Huygens elliptical spread simulation</span>
+            <span>{t("sim_huygens_title")}</span>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700/60">
-              {simulation.timesteps.length} horizons
+              {t("sim_horizons_count", { n: simulation.timesteps.length })}
             </span>
           </h3>
           <p className="text-[11px] text-slate-400">
-            Fire perimeter projection aligned with wind azimuth ({simulation.spread_azimuth_deg}°)
+            {t("sim_wind_aligned", { deg: simulation.spread_azimuth_deg })}
           </p>
         </div>
 
@@ -62,12 +64,12 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
           {isPlaying ? (
             <>
               <Pause className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
-              <span>Pause</span>
+              <span>{t("sim_pause")}</span>
             </>
           ) : (
             <>
               <Play className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
-              <span>Play</span>
+              <span>{t("sim_play")}</span>
             </>
           )}
         </button>
@@ -106,28 +108,28 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
       {/* Dynamic Telemetry for the active timestep */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-800/80">
         <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40">
-          <span className="text-[10px] text-slate-400 block mb-0.5">Projected burned area</span>
+          <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_burned_area_label")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
             {activeStep.burned_area_hectares} <span className="text-xs font-normal text-slate-300">ha</span>
           </span>
         </div>
 
         <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40">
-          <span className="text-[10px] text-slate-400 block mb-0.5">Rate of spread (head)</span>
+          <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_rate_of_spread")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
             {activeStep.rate_of_spread_m_h} <span className="text-xs font-normal text-slate-300">m/h</span>
           </span>
         </div>
 
         <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40">
-          <span className="text-[10px] text-slate-400 block mb-0.5">Flame length est.</span>
+          <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_flame_length")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
             {simulation.estimated_flame_height_m} <span className="text-xs font-normal text-slate-300">m</span>
           </span>
         </div>
 
         <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40">
-          <span className="text-[10px] text-slate-400 block mb-0.5">Evacuation radius</span>
+          <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_evacuation_radius")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
             {simulation.recommended_evacuation_radius_km} <span className="text-xs font-normal text-slate-300">km</span>
           </span>

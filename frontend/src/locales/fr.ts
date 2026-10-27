@@ -130,5 +130,77 @@ export const fr = {
   phase3_title: "Mois 6 : Calibrage Haute Résolution Saison 2025-2026",
   phase3_desc: "Réentraînement sur les microclimats 2025. Réduction du temps de réaction opérationnel de 45 min à 15 min.",
   phase4_title: "Long Terme : Couverture Nationale & Flotte de Drones de Reconnaissance",
-  phase4_desc: "Extension aux 14 wilayas forestières du Tell algérien et intégration des flux télémétriques de drones thermiques."
+  phase4_desc: "Extension aux 14 wilayas forestières du Tell algérien et intégration des flux télémétriques de drones thermiques.",
+
+  // Feature 11: Weather, Telemetry & What-If
+  temperature: "Température",
+  humidity: "Humidité",
+  relative_humidity: "Humidité relative",
+  wind_speed: "Vitesse Vent",
+  wind_direction: "Direction",
+  weather_observations: "Observations Météo (Open-Meteo)",
+  simulated_scenario: "Scénario simulé",
+  live_satellite: "Satellite en direct",
+  risk_index: "Indice de risque incendie",
+  sirocco_alert: "Alerte Sirocco",
+  target_coordinates: "Coordonnées cibles",
+  model_accuracy: "Précision Modèle",
+  no_point_selected: "Point non sélectionné",
+  click_map_prompt: "Cliquez sur la carte ou choisissez un massif forestier pour lancer l'analyse.",
+  loading_telemetry: "Interrogation des flux atmosphériques et calcul de l'indice XGBoost.",
+  simulation_6h_title: "Simulation Propagation 6h",
+  recalculate: "Recalculer",
+  what_if_simulator: "Simulateur What-If Météo",
+  hide_what_if: "Masquer simulation météo",
+  reset_to_live: "Réinitialiser direct",
+  apply_crisis_conditions: "Appliquer les conditions de crise",
+
+  // Feature 12: Strategic Presets & Legend
+  strategic_massifs_title: "Massifs forestiers stratégiques (Nord Algérie)",
+  legend_title: "Légende :",
+  legend_wilaya_code: "Code Wilaya",
+  click_to_inspect: "(Cliquer pour inspecter)",
+
+  // Feature 13: Map Controls & Layers
+  scope_northern_algeria: "Nord Algérie",
+  scope_national_view: "Vue Nationale",
+  map_satellite: "Satellite",
+  map_dark: "Sombre",
+  map_streets: "Rues (OSM)",
+  layer_wind: "Vent",
+  layer_vigies: "Vigies DGF",
+  layer_sirocco: "Sirocco",
+  layer_drones: "Drones FLIR",
+  offline_zones_title: "Zones pour intervention hors-ligne",
+  map_processing: "Traitement satellitaire et simulation IA...",
+
+  // Feature 14: Tactical Ribbon & Dashboard
+  operational_watch_active: "Veille Opérationnelle Active",
+  coverage_corridor: "Couverture: Massifs Forestiers de Kabylie & Nord-Est Algérien",
+  pilot_tizi_active: "Pilote Tizi Ouzou Actif",
+  sms_gateway_active: "Passerelle SMS 24/7 Active",
+  hotspots_count_label: "foyers",
+  connected: "Connecté",
+  accuracy: "Précision",
+  loading_cartography: "Chargement du Système Cartographique Opérationnel…",
+  admin_system: "Administration Système",
+
+  // Feature 15: Simulation Controls (Huygens)
+  sim_huygens_title: "Simulation de propagation elliptique de Huygens",
+  sim_horizons_count: "{n} horizons",
+  sim_wind_aligned: "Projection du périmètre alignée sur l'azimut du vent ({deg}°)",
+  sim_burned_area_label: "Surface brûlée projetée",
+  sim_rate_of_spread: "Vitesse de propagation (front)",
+  sim_flame_length: "Hauteur de flamme estimée",
+  sim_evacuation_radius: "Rayon d'évacuation conseillé",
+
+  // Feature 16: Public Header & Shared Labels
+  national_corridor: "Couloir national prioritaire :",
+  model_analytics: "Analytics Modèle",
+  secure_portal: "Portail Sécurisé",
+  emergency_hotline: "Protection Civile : 14",
+  filter_all_levels: "Tous Niveaux",
+  filter_all_statuses: "Tous Statuts",
+  last_check: "Dernier contrôle :"
 };
+

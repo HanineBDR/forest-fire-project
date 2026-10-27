@@ -247,33 +247,33 @@ function DashboardMapInner() {
       >
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" aria-hidden="true" />
-            <span className="font-semibold text-slate-200">Veille Opérationnelle Active</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" aria-hidden="true" />
+            <span className="font-semibold text-slate-200">{t("operational_watch_active")}</span>
           </div>
           <span className="text-slate-700" aria-hidden="true">|</span>
           <span className="text-slate-400">
-            Couverture: Massifs Forestiers de Kabylie & Nord-Est Algérien
+            {t("coverage_corridor")}
           </span>
 
           {/* Connected Roadmap Badges */}
           {roadmapPhases.find((p) => p.id === "phase1")?.status === "completed" && (
             <span className="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 font-semibold border border-emerald-800 flex items-center gap-1.5 text-[11px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" aria-hidden="true" />
-              Pilote Tizi Ouzou Actif
+              {t("pilot_tizi_active")}
             </span>
           )}
 
           {roadmapPhases.find((p) => p.id === "phase2")?.status === "completed" && (
             <span className="px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-semibold border border-slate-700 flex items-center gap-1.5 text-[11px]">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" aria-hidden="true" />
-              Passerelle SMS 24/7 Active
+              {t("sms_gateway_active")}
             </span>
           )}
         </div>
         <div className="flex items-center gap-4 text-slate-400 font-mono text-[11px] tabular-nums">
-          <span>NASA FIRMS: <strong className="text-slate-200">{firmsHotspots.length}</strong> foyers</span>
-          <span>Open-Meteo: <strong className="text-emerald-400">Connecté</strong></span>
-          <span>Modèle IA: <strong className="text-slate-200">95.4%</strong> Acc</span>
+          <span>NASA FIRMS: <strong className="text-slate-200">{firmsHotspots.length}</strong> {t("hotspots_count_label")}</span>
+          <span>Open-Meteo: <strong className="text-emerald-400">{t("connected")}</strong></span>
+          <span>Modèle IA: <strong className="text-slate-200">95.4%</strong> {t("accuracy")}</span>
         </div>
       </div>
 

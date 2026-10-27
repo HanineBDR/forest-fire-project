@@ -3,6 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { Flame, ShieldAlert, Satellite, Wind, Layers, PhoneCall, BarChart3 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -10,6 +12,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
+  const { t } = useLanguage();
+
   return (
     <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60 px-4 py-3 sm:px-6">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
@@ -24,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
               </h1>
             </div>
             <p className="text-xs text-slate-400 font-medium">
-              Forest fire risk and elliptical spread simulation, Northern Algeria
+              {t("platform_sub")}
             </p>
           </div>
         </div>
@@ -33,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {/* Target Wilayas */}
           <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-slate-800/60 border border-slate-700/60 rounded-lg text-slate-300">
-            <span className="text-slate-400 font-semibold">National corridor:</span>
+            <span className="text-slate-400 font-semibold">{t("national_corridor")}</span>
             <span className="font-semibold text-slate-200">Kabylie (15, 06, 10), Blida (09), El Tarf (36), Batna (05)</span>
           </div>
 
@@ -63,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
             className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 hover:text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <BarChart3 className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
-            <span>Model Analytics</span>
+            <span>{t("model_analytics")}</span>
           </Link>
 
           {/* Secure Access Portal Link */}
@@ -72,14 +76,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
             className="flex items-center gap-1.5 px-3 py-1 bg-red-600 hover:bg-red-500 border border-red-500 rounded-lg text-white font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <ShieldAlert className="w-3.5 h-3.5 text-white" aria-hidden="true" />
-            <span>Portail Sécurisé</span>
+            <span>{t("secure_portal")}</span>
           </Link>
 
           {/* Emergency Alert Hotline */}
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-red-950/50 border border-red-700/60 rounded-lg text-red-200 font-semibold">
             <PhoneCall className="w-3.5 h-3.5 text-red-400" aria-hidden="true" />
-            <span>Protection Civile: 14</span>
+            <span>{t("emergency_hotline")}</span>
           </div>
+
+          {/* Language Switcher */}
+          <LanguageSwitcher />
 
           {/* Mobile toggle button */}
           {onToggleSidebar && (

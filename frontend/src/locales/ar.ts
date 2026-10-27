@@ -130,5 +130,77 @@ export const ar = {
   phase3_title: "الشهر 6 : إعادة التدريب على بيانات موسم الحرائق 2025-2026",
   phase3_desc: "إدخال بيانات التغير المناخي والحرائق الأخيرة لتقليص زمن الاستجابة والتحقق من 45 دقيقة إلى 15 دقيقة.",
   phase4_title: "المدى الطويل : التغطية الوطنية الشاملة وإدماج الطائرات المسيرة (الدرونز)",
-  phase4_desc: "تعميم المنظومة على كافة الولايات الغابية الـ 14 شمال الوطن وربطها المباشر بطائرات الرصد الحراري."
+  phase4_desc: "تعميم المنظومة على كافة الولايات الغابية الـ 14 شمال الوطن وربطها المباشر بطائرات الرصد الحراري.",
+
+  // Feature 11: Weather, Telemetry & What-If
+  temperature: "درجة الحرارة",
+  humidity: "الرطوبة",
+  relative_humidity: "الرطوبة النسبية",
+  wind_speed: "سرعة الرياح",
+  wind_direction: "الاتجاه",
+  weather_observations: "الأرصاد الجوية (Open-Meteo)",
+  simulated_scenario: "سيناريو محاكى",
+  live_satellite: "قمر صناعي مباشر",
+  risk_index: "مؤشر خطر الحرائق",
+  sirocco_alert: "إنذار الشهيلي",
+  target_coordinates: "الإحداثيات المستهدفة",
+  model_accuracy: "دقة النموذج",
+  no_point_selected: "لم يتم تحديد موقع",
+  click_map_prompt: "انقر على الخريطة أو اختر كتلة غابية لبدء التحليل.",
+  loading_telemetry: "جلب التدفقات الجوية وحساب مؤشر الخطر عبر نموذج XGBoost.",
+  simulation_6h_title: "محاكاة انتشار الحريق (6 ساعات)",
+  recalculate: "إعادة الحساب",
+  what_if_simulator: "محاكي الفرضيات الجوية",
+  hide_what_if: "إخفاء محاكي الطقس",
+  reset_to_live: "إعادة ضبط للمباشر",
+  apply_crisis_conditions: "تطبيق ظروف الأزمة",
+
+  // Feature 12: Strategic Presets & Legend
+  strategic_massifs_title: "الكتل الغابية الاستراتيجية (شمال الجزائر)",
+  legend_title: "دليل الرموز:",
+  legend_wilaya_code: "رمز الولاية",
+  click_to_inspect: "(انقر للفحص)",
+
+  // Feature 13: Map Controls & Layers
+  scope_northern_algeria: "شمال الجزائر",
+  scope_national_view: "نظرة وطنية شاملة",
+  map_satellite: "قمر صناعي",
+  map_dark: "ليلي داكن",
+  map_streets: "طرق وخريطة",
+  layer_wind: "الرياح",
+  layer_vigies: "أبراج المراقبة",
+  layer_sirocco: "الشهيلي",
+  layer_drones: "طائرات الدرون",
+  offline_zones_title: "المناطق المتاحة للتدخل دون إنترنت",
+  map_processing: "المعالجة الفضائية ومحاكاة الذكاء الاصطناعي...",
+
+  // Feature 14: Tactical Ribbon & Dashboard
+  operational_watch_active: "نظام اليقظة العملياتية نشط",
+  coverage_corridor: "التغطية: الكتل الغابية لمنطقة القبائل والشمال الشرقي الجزائري",
+  pilot_tizi_active: "مشروع تيزي وزو النموذجي نشط",
+  sms_gateway_active: "بوابة الرسائل القصيرة 24/7 نشطة",
+  hotspots_count_label: "بؤر حرارية",
+  connected: "متصل",
+  accuracy: "الدقة",
+  loading_cartography: "جاري تحميل المنظومة الخرائطية العملياتية...",
+  admin_system: "إدارة النظام",
+
+  // Feature 15: Simulation Controls (Huygens)
+  sim_huygens_title: "محاكاة الانتشار البيضاوي وفق مبدأ هيغنز",
+  sim_horizons_count: "{n} آفاق زمنية",
+  sim_wind_aligned: "إسقاط محيط الحريق موجّه حسب اتجاه الرياح ({deg}°)",
+  sim_burned_area_label: "المساحة المحترقة المتوقعة",
+  sim_rate_of_spread: "سرعة انتشار جبهة اللهب",
+  sim_flame_length: "الارتفاع التقديري للهب",
+  sim_evacuation_radius: "نطاق الإخلاء الموصى به",
+
+  // Feature 16: Public Header & Shared Labels
+  national_corridor: "الرواق الوطني ذو الأولوية:",
+  model_analytics: "تحليلات النموذج",
+  secure_portal: "البوابة الآمنة",
+  emergency_hotline: "الحماية المدنية: 14",
+  filter_all_levels: "جميع المستويات",
+  filter_all_statuses: "جميع الحالات",
+  last_check: "آخر فحص:"
 };
+

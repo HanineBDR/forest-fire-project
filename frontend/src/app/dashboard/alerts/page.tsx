@@ -338,15 +338,15 @@ export default function AlertsPage() {
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" aria-hidden="true" />
-              <span>Vigilance feux de forêt : Centre des alertes opérationnelles</span>
+              <span>{t("alerts_title")}</span>
             </h1>
             <span className="px-2 py-0.5 rounded bg-red-950/80 border border-red-800 text-red-300 text-xs font-mono font-bold flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" aria-hidden="true" />
-              {criticalCount} CRITIQUE{criticalCount > 1 ? "S" : ""}
+              {criticalCount} {t("risk_extreme").toUpperCase()}
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Détection IA XGBoost couplée au flux satellitaire NASA FIRMS (VIIRS 375m) pour la Protection Civile et la Conservation des Forêts.
+            {t("alerts_subtitle")}
           </p>
         </div>
 
@@ -354,7 +354,7 @@ export default function AlertsPage() {
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 font-mono tabular-nums">
             <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
-            <span className="text-slate-400">Dernier contrôle:</span>
+            <span className="text-slate-400">{t("last_check")}</span>
             <span className="font-semibold text-white">{relativeTime}</span>
           </div>
 
@@ -369,7 +369,7 @@ export default function AlertsPage() {
             }`}
           >
             <Radio className={`w-3.5 h-3.5 shrink-0 ${autoRefresh ? "text-emerald-400" : "text-slate-500"}`} aria-hidden="true" />
-            <span>Auto-refresh (30s): <strong className={autoRefresh ? "text-white" : "text-slate-500"}>{autoRefresh ? "ACTIF" : "OFF"}</strong></span>
+            <span>{t("auto_refresh")}: <strong className={autoRefresh ? "text-white" : "text-slate-500"}>{autoRefresh ? "ON" : "OFF"}</strong></span>
           </button>
 
           <button
@@ -379,7 +379,7 @@ export default function AlertsPage() {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-red-600 hover:bg-red-500 text-white font-semibold text-xs transition-colors duration-150 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true" />
-            <span>{isRefreshing ? "Analyse Satellitaire..." : "Rafraîchir Alertes"}</span>
+            <span>{isRefreshing ? t("loading") : t("refresh_alerts")}</span>
           </button>
         </div>
       </div>
@@ -392,7 +392,7 @@ export default function AlertsPage() {
       >
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-slate-400 flex items-center gap-1 font-medium">
-            <Filter className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> Niveau de Risque:
+            <Filter className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> {t("filter_level")}:
           </span>
           {["ALL", "CRITIQUE", "VERY_HIGH", "HIGH"].map((lvl) => (
             <button
@@ -406,13 +406,13 @@ export default function AlertsPage() {
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
               }`}
             >
-              {lvl === "ALL" ? "Tous Niveaux" : lvl === "CRITIQUE" ? "Critique (>85%)" : lvl === "VERY_HIGH" ? "Très Élevé" : "Élevé"}
+              {lvl === "ALL" ? t("filter_all_levels") : lvl === "CRITIQUE" ? `${t("risk_extreme")} (>85%)` : lvl === "VERY_HIGH" ? t("risk_very_high") : t("risk_high")}
             </button>
           ))}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-slate-400 font-medium">Statut :</span>
+          <span className="text-slate-400 font-medium">{t("filter_status")} :</span>
           {["ALL", "DETECTED", "PRISE_EN_COMPTE", "UNITES_DEPLOYEES", "MAITRISE"].map((st) => (
             <button
               key={st}
@@ -425,7 +425,17 @@ export default function AlertsPage() {
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
               }`}
             >
-              {st === "ALL" ? "Tous Statuts" : STATUS_LABELS[st]?.label.split(" ")[0] || st}
+              {st === "ALL"
+                ? t("filter_all_statuses")
+                : st === "DETECTED"
+                ? t("status_detected")
+                : st === "PRISE_EN_COMPTE"
+                ? t("status_acknowledged")
+                : st === "UNITES_DEPLOYEES"
+                ? t("status_deployed")
+                : st === "MAITRISE"
+                ? t("status_controlled")
+                : st}
             </button>
           ))}
         </div>

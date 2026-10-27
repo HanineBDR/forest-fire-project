@@ -76,7 +76,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
         <div>
           <h3 className="font-bold text-base text-slate-100">{t("loading")}</h3>
           <p className="text-xs text-slate-400 mt-1 max-w-xs">
-            Querying atmospheric feeds and calculating XGBoost risk index.
+            {t("loading_telemetry")}
           </p>
         </div>
       </div>
@@ -86,9 +86,9 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
   if (!prediction) {
     return (
       <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-lg p-6 text-center flex flex-col items-center justify-center min-h-[380px] space-y-3">
-        <h3 className="font-bold text-slate-200">Point non sélectionné</h3>
+        <h3 className="font-bold text-slate-200">{t("no_point_selected")}</h3>
         <p className="text-xs text-slate-400 max-w-xs">
-          Cliquez sur la carte ou choisissez un massif forestier pour lancer l&apos;analyse.
+          {t("click_map_prompt")}
         </p>
       </div>
     );
@@ -169,10 +169,10 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
       <div className="flex items-center justify-between border-b border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-slate-400">Wildfire risk index</span>
+            <span className="text-[11px] font-mono text-slate-400">{t("risk_index")}</span>
             {is_sirocco && (
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/90 text-red-400 border border-red-800/60 animate-pulse">
-                Sirocco Alert
+                {t("sirocco_alert")}
               </span>
             )}
           </div>
@@ -217,13 +217,13 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
       {/* Target Location Metadata */}
       <div className="bg-slate-800/40 p-2.5 rounded-lg border border-slate-700/40 flex items-center justify-between text-slate-300">
         <div>
-          <span className="text-[10px] text-slate-400 font-semibold block">Coordonnées cibles</span>
+          <span className="text-[10px] text-slate-400 font-semibold block">{t("target_coordinates")}</span>
           <span className="font-mono tabular-nums text-xs font-semibold text-slate-200">
             {prediction.input.lat.toFixed(4)}° N, {prediction.input.lon.toFixed(4)}° E
           </span>
         </div>
         <div className="text-right">
-          <span className="text-[10px] text-slate-400 font-semibold block">Précision Modèle</span>
+          <span className="text-[10px] text-slate-400 font-semibold block">{t("model_accuracy")}</span>
           <span className="font-mono text-[11px] text-emerald-400 font-semibold">95.4% ROC-AUC</span>
         </div>
       </div>
@@ -287,17 +287,17 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
       <div>
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-bold text-slate-300">
-            Observations Météo (Open-Meteo)
+            {t("weather_observations")}
           </span>
           <span className="text-[10px] font-mono text-slate-400">
-            {isCustomOverrideActive ? "Scénario simulé" : "Satellite en direct"}
+            {isCustomOverrideActive ? t("simulated_scenario") : t("live_satellite")}
           </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div className="bg-slate-800/60 p-2 rounded-lg border border-slate-700/50">
             <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
-              <span>Température</span>
+              <span>{t("temperature")}</span>
               <Thermometer className="w-3 h-3 text-red-400" />
             </div>
             <div className="text-sm font-bold font-mono tabular-nums text-slate-100">{prediction.input.temp}°C</div>
@@ -305,7 +305,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
 
           <div className="bg-slate-800/60 p-2 rounded-lg border border-slate-700/50">
             <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
-              <span>Humidité</span>
+              <span>{t("humidity")}</span>
               <Droplets className="w-3 h-3 text-cyan-400" />
             </div>
             <div className="text-sm font-bold font-mono tabular-nums text-slate-100">{prediction.input.humidity}%</div>
@@ -313,7 +313,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
 
           <div className="bg-slate-800/60 p-2 rounded-lg border border-slate-700/50">
             <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
-              <span>Vitesse Vent</span>
+              <span>{t("wind_speed")}</span>
               <Wind className="w-3 h-3 text-amber-400" />
             </div>
             <div className="text-sm font-bold font-mono tabular-nums text-slate-100">{prediction.input.wind} km/h</div>
@@ -321,7 +321,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
 
           <div className="bg-slate-800/60 p-2 rounded-lg border border-slate-700/50">
             <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
-              <span>Direction</span>
+              <span>{t("wind_direction")}</span>
               <Compass className="w-3 h-3 text-slate-400" />
             </div>
             <div className="text-sm font-bold font-mono tabular-nums text-slate-100">
@@ -356,7 +356,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 font-bold text-slate-200">
             <Flame className="w-4 h-4 text-red-500" />
-            <span>Simulation Propagation 6h</span>
+            <span>{t("simulation_6h_title")}</span>
           </div>
           {simulation6hData && (
             <span className="text-xs font-mono font-bold text-red-400">
@@ -419,7 +419,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
                 onClick={onRunSimulation6h}
                 className="text-[10px] text-slate-400 hover:text-slate-200 underline"
               >
-                Recalculer
+                {t("recalculate")}
               </button>
             </div>
 
@@ -471,7 +471,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
             className="flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition rounded"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>{showWhatIf ? "Masquer simulation météo" : "Simulateur What-If Météo"}</span>
+            <span>{showWhatIf ? t("hide_what_if") : t("what_if_simulator")}</span>
           </button>
 
           {isCustomOverrideActive && (
@@ -480,7 +480,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
               className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-white transition rounded"
             >
               <RotateCcw className="w-3 h-3" />
-              <span>Réinitialiser direct</span>
+              <span>{t("reset_to_live")}</span>
             </button>
           )}
         </div>
@@ -489,7 +489,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
           <div className="mt-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/60 space-y-3">
             <div>
               <div className="flex justify-between text-[11px] mb-1 font-mono">
-                <label htmlFor="temp-slider">Température :</label>
+                <label htmlFor="temp-slider">{t("temperature")} :</label>
                 <span className="font-bold tabular-nums text-slate-200">{customTemp}°C</span>
               </div>
               <input
@@ -506,7 +506,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
 
             <div>
               <div className="flex justify-between text-[11px] mb-1 font-mono">
-                <label htmlFor="wind-slider">Vitesse du vent :</label>
+                <label htmlFor="wind-slider">{t("wind_speed")} :</label>
                 <span className="font-bold tabular-nums text-slate-200">{customWind} km/h</span>
               </div>
               <input
@@ -523,7 +523,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
 
             <div>
               <div className="flex justify-between text-[11px] mb-1 font-mono">
-                <label htmlFor="humidity-slider">Humidité relative :</label>
+                <label htmlFor="humidity-slider">{t("relative_humidity")} :</label>
                 <span className="font-bold tabular-nums text-slate-200">{customHumidity}%</span>
               </div>
               <input
@@ -542,7 +542,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
               onClick={handleApplyCustom}
               className="w-full py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded transition"
             >
-              Appliquer les conditions de crise
+              {t("apply_crisis_conditions")}
             </button>
           </div>
         )}

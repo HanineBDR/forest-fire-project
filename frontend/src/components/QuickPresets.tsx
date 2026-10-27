@@ -3,6 +3,7 @@
 import React from "react";
 import { RegionPreset } from "@/types";
 import { MapPin, Info } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface QuickPresetsProps {
   regions: RegionPreset[];
@@ -33,6 +34,8 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
   onSelectRegion,
   isLoading,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <section 
       aria-label="Sélection rapide des massifs forestiers stratégiques"
@@ -43,7 +46,7 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 animate-pulse" aria-hidden="true" />
           <h2 className="text-xs sm:text-sm font-bold text-slate-100 tracking-wide uppercase">
-            Massifs forestiers stratégiques (Nord Algérie)
+            {t("strategic_massifs_title")}
           </h2>
         </div>
 
@@ -54,13 +57,13 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
             title="Le numéro indiqué en haut à droite de chaque carte correspond au matricule officiel de la Wilaya (ex: 15 = Tizi Ouzou, 06 = Béjaïa, 09 = Blida, 36 = El Tarf)"
           >
             <Info className="w-3.5 h-3.5 text-red-400 shrink-0" aria-hidden="true" />
-            <span className="text-slate-400">Légende :</span>
+            <span className="text-slate-400">{t("legend_title")}</span>
             <span className="font-mono text-white font-semibold">[W. N°]</span>
-            <span className="text-slate-400 font-normal">Code Wilaya</span>
+            <span className="text-slate-400 font-normal">{t("legend_wilaya_code")}</span>
           </div>
 
           <span className="text-[11px] text-slate-400 hidden md:inline font-medium">
-            (Cliquer pour inspecter)
+            {t("click_to_inspect")}
           </span>
         </div>
       </div>

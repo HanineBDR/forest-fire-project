@@ -732,7 +732,7 @@ export const Map: React.FC<MapProps> = ({
             }`}
           >
             <Flame className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>Nord Algérie</span>
+            <span>{t("scope_northern_algeria")}</span>
           </button>
 
           <button
@@ -744,7 +744,7 @@ export const Map: React.FC<MapProps> = ({
             }`}
           >
             <Globe2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>Vue Nationale</span>
+            <span>{t("scope_national_view")}</span>
           </button>
         </div>
 
@@ -767,7 +767,7 @@ export const Map: React.FC<MapProps> = ({
             title="Fond satellite haute résolution (Esri World Imagery)"
           >
             <Satellite className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
-            <span>Satellite</span>
+            <span>{t("map_satellite")}</span>
           </button>
 
           <button
@@ -783,7 +783,7 @@ export const Map: React.FC<MapProps> = ({
             title="Fond sombre tactique nocturne (Dark Mode)"
           >
             <Layers className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
-            <span>Sombre</span>
+            <span>{t("map_dark")}</span>
           </button>
 
           <button
@@ -799,7 +799,7 @@ export const Map: React.FC<MapProps> = ({
             title="Fond cartographique topographique / routier (OpenStreetMap)"
           >
             <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
-            <span>Rues (OSM)</span>
+            <span>{t("map_streets")}</span>
           </button>
         </div>
 
@@ -817,7 +817,7 @@ export const Map: React.FC<MapProps> = ({
           title="Afficher/masquer les particules de vent Open-Meteo"
         >
           <Wind className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
-          <span>Vent</span>
+          <span>{t("layer_wind")}</span>
           <span
             aria-hidden="true"
             className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
@@ -846,7 +846,7 @@ export const Map: React.FC<MapProps> = ({
           title="Afficher/masquer les 6 postes de vigie DGF interconnectés"
         >
           <Radio className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
-          <span>Vigies DGF</span>
+          <span>{t("layer_vigies")}</span>
           <span
             aria-hidden="true"
             className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
@@ -875,7 +875,7 @@ export const Map: React.FC<MapProps> = ({
           title="Afficher/masquer les couloirs aérologiques de Sirocco"
         >
           <Wind className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
-          <span>Sirocco</span>
+          <span>{t("layer_sirocco")}</span>
           <span
             aria-hidden="true"
             className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
@@ -904,7 +904,7 @@ export const Map: React.FC<MapProps> = ({
           title="Afficher/masquer la télémétrie des patrouilles de drones thermiques"
         >
           <Plane className="w-3.5 h-3.5 text-violet-400 shrink-0" aria-hidden="true" />
-          <span>Drones FLIR</span>
+          <span>{t("layer_drones")}</span>
           <span
             aria-hidden="true"
             className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
@@ -928,13 +928,13 @@ export const Map: React.FC<MapProps> = ({
             className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <Download className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
-            <span>Carte Hors-Ligne</span>
+            <span>{t("offline_map_btn")}</span>
           </button>
 
           {showOfflineMenu && (
             <div className="absolute left-0 mt-1.5 w-72 bg-slate-900 border border-slate-700 rounded-lg p-2 z-50 space-y-1.5 text-xs shadow-lg">
               <div className="font-bold text-slate-200 px-2 py-1 border-b border-slate-800 flex justify-between items-center">
-                <span>Zones pour intervention hors-ligne</span>
+                <span>{t("offline_zones_title")}</span>
                 <button 
                   type="button"
                   onClick={() => setShowOfflineMenu(false)} 
@@ -1007,7 +1007,7 @@ export const Map: React.FC<MapProps> = ({
             <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
           </span>
           <Smartphone className="w-4 h-4 shrink-0" aria-hidden="true" />
-          <span>Signalement Citoyen</span>
+          <span>{t("citizen_report_btn")}</span>
         </button>
       </div>
 
@@ -1193,7 +1193,7 @@ export const Map: React.FC<MapProps> = ({
           <div className="bg-slate-900/95 border border-slate-800 px-5 py-3 rounded-lg shadow-sm flex items-center gap-3">
             <div className="w-5 h-5 rounded-full border-2 border-red-500 border-t-transparent animate-spin"></div>
             <span className="text-xs font-semibold text-slate-200">
-              Traitement satellitaire et simulation IA...
+              {t("map_processing")}
             </span>
           </div>
         </div>

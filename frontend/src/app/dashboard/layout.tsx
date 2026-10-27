@@ -224,7 +224,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {isAdmin && secondaryNavItems.length > 0 && (
                     <div className="py-1.5">
                       <div className="px-3.5 py-1 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                        Administration Système
+                        {t("admin_system")}
                       </div>
                       {secondaryNavItems.map((item) => {
                         const Icon = item.icon;

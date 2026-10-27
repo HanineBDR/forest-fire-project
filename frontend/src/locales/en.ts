@@ -130,5 +130,77 @@ export const en = {
   phase3_title: "Month 6: High-Resolution 2025-2026 Season Model Retraining",
   phase3_desc: "Incorporate latest 2025 burn scars. Reduce operational alert verification lag from 45 min to 15 min.",
   phase4_title: "Long Term: Full National Coverage & Autonomous Thermal Drones",
-  phase4_desc: "Scale to all 14 forested Mediterranean wilayas and stream real-time drone telemetry."
+  phase4_desc: "Scale to all 14 forested Mediterranean wilayas and stream real-time drone telemetry.",
+
+  // Feature 11: Weather, Telemetry & What-If
+  temperature: "Temperature",
+  humidity: "Humidity",
+  relative_humidity: "Relative Humidity",
+  wind_speed: "Wind Speed",
+  wind_direction: "Direction",
+  weather_observations: "Weather Observations (Open-Meteo)",
+  simulated_scenario: "Simulated scenario",
+  live_satellite: "Live satellite",
+  risk_index: "Wildfire risk index",
+  sirocco_alert: "Sirocco Alert",
+  target_coordinates: "Target Coordinates",
+  model_accuracy: "Model Accuracy",
+  no_point_selected: "No location selected",
+  click_map_prompt: "Click on the map or select a forest massif to run analysis.",
+  loading_telemetry: "Querying atmospheric feeds and calculating XGBoost risk index.",
+  simulation_6h_title: "6h Fire Spread Simulation",
+  recalculate: "Recalculate",
+  what_if_simulator: "What-If Weather Simulator",
+  hide_what_if: "Hide Weather Simulation",
+  reset_to_live: "Reset to Live",
+  apply_crisis_conditions: "Apply Crisis Conditions",
+
+  // Feature 12: Strategic Presets & Legend
+  strategic_massifs_title: "Strategic Forest Massifs (Northern Algeria)",
+  legend_title: "Legend:",
+  legend_wilaya_code: "Wilaya Code",
+  click_to_inspect: "(Click to inspect)",
+
+  // Feature 13: Map Controls & Layers
+  scope_northern_algeria: "Northern Algeria",
+  scope_national_view: "National View",
+  map_satellite: "Satellite",
+  map_dark: "Dark",
+  map_streets: "Streets (OSM)",
+  layer_wind: "Wind",
+  layer_vigies: "DGF Towers",
+  layer_sirocco: "Sirocco",
+  layer_drones: "FLIR Drones",
+  offline_zones_title: "Zones for offline intervention",
+  map_processing: "Satellite processing & AI simulation...",
+
+  // Feature 14: Tactical Ribbon & Dashboard
+  operational_watch_active: "Operational Watch Active",
+  coverage_corridor: "Coverage: Forest Massifs of Kabylie & NE Algeria",
+  pilot_tizi_active: "Tizi Ouzou Pilot Active",
+  sms_gateway_active: "24/7 SMS Gateway Active",
+  hotspots_count_label: "hotspots",
+  connected: "Connected",
+  accuracy: "Accuracy",
+  loading_cartography: "Loading Operational Tactical Mapping System…",
+  admin_system: "System Administration",
+
+  // Feature 15: Simulation Controls (Huygens)
+  sim_huygens_title: "Huygens elliptical spread simulation",
+  sim_horizons_count: "{n} horizons",
+  sim_wind_aligned: "Fire perimeter projection aligned with wind azimuth ({deg}°)",
+  sim_burned_area_label: "Projected burned area",
+  sim_rate_of_spread: "Rate of spread (head)",
+  sim_flame_length: "Flame length est.",
+  sim_evacuation_radius: "Evacuation radius",
+
+  // Feature 16: Public Header & Shared Labels
+  national_corridor: "National corridor:",
+  model_analytics: "Model Analytics",
+  secure_portal: "Secure Portal",
+  emergency_hotline: "Civil Protection: 14",
+  filter_all_levels: "All Levels",
+  filter_all_statuses: "All Statuses",
+  last_check: "Last check:"
 };
+
