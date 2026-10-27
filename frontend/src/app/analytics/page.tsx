@@ -258,7 +258,6 @@ export default function AnalyticsPage() {
               </div>
             </div>
           </div>
-        </div>
 
           {/* Top Bar Refresh Controls & Language Switcher */}
           <div className="flex flex-wrap items-center gap-2.5 text-xs">
