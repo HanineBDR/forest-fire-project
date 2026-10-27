@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { 
   Shield, 
   Map, 
@@ -123,9 +124,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               href="/dashboard" 
               className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded-lg p-1 transition-colors hover:bg-slate-800/60"
             >
-              <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white font-black text-sm select-none shadow-sm">
-                إنقاذ
-              </div>
+              <Image
+                src="/logo.png"
+                alt="IN9AD Logo"
+                width={36}
+                height={36}
+                className="w-9 h-9 shrink-0 select-none object-contain"
+                priority
+              />
               <div>
                 <div className="text-base font-bold tracking-tight text-white flex items-center gap-1.5 leading-none">
                   <span>IN9AD</span>

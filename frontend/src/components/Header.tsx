@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Flame, ShieldAlert, Satellite, Wind, Layers, PhoneCall, BarChart3 } from "lucide-react";
+import Image from "next/image";
+import { ShieldAlert, Satellite, Wind, Layers, PhoneCall, BarChart3 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -19,7 +20,14 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
         {/* Brand Logo & Name */}
         <div className="flex items-center gap-3">
-          <Flame className="w-6 h-6 text-ember-500 shrink-0" />
+          <Image
+            src="/logo.png"
+            alt="IN9AD Logo"
+            width={40}
+            height={40}
+            className="w-10 h-10 shrink-0 select-none object-contain"
+            priority
+          />
 
           <div>
             <div className="flex items-center gap-2">

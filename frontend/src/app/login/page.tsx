@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Shield, KeyRound, AlertCircle, CheckCircle2, Lock, ArrowRight, Building2, UserCheck } from "lucide-react";
 import { loginUser, DEMO_ACCOUNTS, UserRole } from "@/lib/auth";
 
@@ -84,8 +85,15 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-6">
           {/* Header Card */}
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-slate-900 border border-slate-800 mb-2">
-              <Shield className="w-8 h-8 text-red-500" />
+            <div className="inline-flex items-center justify-center mb-2">
+              <Image
+                src="/logo.png"
+                alt="IN9AD Official Emblem"
+                width={76}
+                height={76}
+                className="w-20 h-20 select-none object-contain drop-shadow"
+                priority
+              />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-white">
               Portail Opérationnel IN9AD

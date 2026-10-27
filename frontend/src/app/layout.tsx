@@ -26,6 +26,11 @@ export const metadata: Metadata = {
     "Protection Civile"
   ],
   authors: [{ name: "IN9AD PFE Research Team" }],
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/logo.png",
+  },
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   Download,
@@ -223,11 +224,20 @@ export default function AnalyticsPage() {
               <span>Carte Tactique</span>
             </Link>
 
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold tracking-tight text-white">
-                  IN9AD Analytics & Évaluation Modèle
-                </h1>
+            <div className="flex items-center gap-2.5">
+              <Image
+                src="/logo.png"
+                alt="IN9AD Logo"
+                width={36}
+                height={36}
+                className="w-9 h-9 shrink-0 select-none object-contain"
+                priority
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base sm:text-lg font-bold tracking-tight text-white">
+                    IN9AD Analytics & Évaluation Modèle
+                  </h1>
                 <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800 font-mono font-medium flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Système Dynamique Live
@@ -238,6 +248,7 @@ export default function AnalyticsPage() {
               </p>
             </div>
           </div>
+        </div>
 
           {/* Top Bar Refresh Controls */}
           <div className="flex flex-wrap items-center gap-2.5 text-xs">
