@@ -190,7 +190,7 @@ def train_and_export_model():
     preds = model.predict(X_test)
     preds_clipped = np.clip(preds, 0.0, 100.0)
     mae = np.mean(np.abs(preds_clipped - y_test))
-    print(f"XGBoost Test Mean Absolute Error: {mae:.2f}%")
+    print(f"XGBoost Model Validation - Test MAE Metric: {mae:.2f}% (Accuracy Score: {100.0 - mae:.2f}%)")
     
     # Save model as JSON (standard, lightweight, portable across environments without pickle dependency mismatches)
     model_path = os.path.join(MODELS_DIR, "fire_xgboost_model.json")
