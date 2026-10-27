@@ -128,6 +128,11 @@ app.mount("/outputs", StaticFiles(directory=ML_OUTPUTS_DIR), name="outputs")
 # Mount Authentication and Monitoring Subsystems
 app.include_router(auth_router)
 app.include_router(monitoring_router)
+try:
+    from app.routers.reports import router as reports_router
+    app.include_router(reports_router)
+except Exception as e:
+    logger.warning(f"Could not load reports_router: {e}")
 
 
 class PredictRequest(BaseModel):
