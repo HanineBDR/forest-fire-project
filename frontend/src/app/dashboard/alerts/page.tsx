@@ -36,8 +36,9 @@ import {
   getAlertReportDownloadUrl,
   broadcastEmergencySMS
 } from "@/lib/api";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage, Language } from "@/context/LanguageContext";
 import { AlertRecord, AlertStatusHistory } from "@/types";
+import { PdfLanguageModal } from "@/components/PdfLanguageModal";
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string; border: string }> = {
   DETECTED: {
@@ -97,7 +98,49 @@ export default function AlertsPage() {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date>(new Date());
-  const [relativeTime, setRelativeTime] = useState<string>("À l'instant");
+  const [relativeTime, setRelativeTime] = useState<string>(t("just_now"));
+  const [selectedAlertForPdf, setSelectedAlertForPdf] = useState<AlertRecord | null>(null);
+
+  const getLocalizedStatusLabel = (st: string) => {
+    switch (st) {
+      case "DETECTED":
+        return t("status_detected");
+      case "PRISE_EN_COMPTE":
+        return t("status_acknowledged");
+      case "UNITES_DEPLOYEES":
+        return t("status_deployed");
+      case "MAITRISE":
+        return t("status_controlled");
+      case "ETEINT":
+        return t("status_extinguished");
+      case "FAUSSE_ALERTE":
+        return t("status_false_alarm");
+      default:
+        return st;
+    }
+  };
+
+  const formatWindDir = (dirStr: string) => {
+    if (!dirStr) return "";
+    let res = dirStr;
+    if (language === "ar") {
+      res = res.replace(/Sud-Est/gi, "جنوب شرق")
+               .replace(/Sud-Ouest/gi, "جنوب غرب")
+               .replace(/Nord-Est/gi, "شمال شرق")
+               .replace(/Nord-Ouest/gi, "شمال غرب")
+               .replace(/Sud/gi, t("direction_sud"))
+               .replace(/Nord/gi, t("direction_nord"))
+               .replace(/Est/gi, t("direction_est"))
+               .replace(/Ouest/gi, t("direction_ouest"))
+               .replace(/Sirocco/gi, "الشهيلي");
+    } else if (language === "en") {
+      res = res.replace(/Sud/gi, "South")
+               .replace(/Nord/gi, "North")
+               .replace(/Est/gi, "East")
+               .replace(/Ouest/gi, "West");
+    }
+    return res;
+  };
   
   // Status dropdown toggle: alert_id -> boolean
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -161,22 +204,28 @@ export default function AlertsPage() {
 
   // Relative Time Timer
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateRelative = () => {
       const diffSec = Math.floor((Date.now() - lastRefreshTime.getTime()) / 1000);
       if (diffSec < 15) {
-        setRelativeTime("À l'instant");
-      } else if (diffSec < 60) {
-        setRelativeTime(`Il y a ${diffSec}s`);
-      } else if (diffSec < 3600) {
-        const mins = Math.floor(diffSec / 60);
-        setRelativeTime(`Il y a ${mins} min`);
+        setRelativeTime(t("just_now"));
+      } else if (language === "ar") {
+        if (diffSec < 60) setRelativeTime(`منذ ${diffSec} ثانية`);
+        else if (diffSec < 3600) setRelativeTime(`منذ ${Math.floor(diffSec / 60)} دقيقة`);
+        else setRelativeTime(`منذ ${Math.floor(diffSec / 3600)} ساعة`);
+      } else if (language === "en") {
+        if (diffSec < 60) setRelativeTime(`${diffSec}s ago`);
+        else if (diffSec < 3600) setRelativeTime(`${Math.floor(diffSec / 60)}m ago`);
+        else setRelativeTime(`${Math.floor(diffSec / 3600)}h ago`);
       } else {
-        const hours = Math.floor(diffSec / 3600);
-        setRelativeTime(`Il y a ${hours}h`);
+        if (diffSec < 60) setRelativeTime(`Il y a ${diffSec}s`);
+        else if (diffSec < 3600) setRelativeTime(`Il y a ${Math.floor(diffSec / 60)} min`);
+        else setRelativeTime(`Il y a ${Math.floor(diffSec / 3600)}h`);
       }
-    }, 10000);
+    };
+    updateRelative();
+    const interval = setInterval(updateRelative, 10000);
     return () => clearInterval(interval);
-  }, [lastRefreshTime]);
+  }, [lastRefreshTime, language, t]);
 
   // Auto-refresh polling every 30s
   useEffect(() => {
@@ -508,7 +557,7 @@ export default function AlertsPage() {
                           className={`px-3 py-1 rounded-md text-xs font-bold border transition-all flex items-center gap-1.5 ${statusMeta.bg} ${statusMeta.color} ${statusMeta.border} hover:brightness-110`}
                           title={canModifyStatus ? "Cliquez pour changer le statut opérationnel" : "Statut d'intervention"}
                         >
-                          <span>Statut : {statusMeta.label}</span>
+                          <span>{t("status_label_prefix")} {getLocalizedStatusLabel(alert.status)}</span>
                           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
                         </button>
 
@@ -561,20 +610,20 @@ export default function AlertsPage() {
                     {/* Meteorological Conditions Strip */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
                       <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                        <div className="text-[10px] text-slate-500 font-sans uppercase">Température</div>
+                        <div className="text-[10px] text-slate-500 font-sans uppercase">{t("temperature")}</div>
                         <div className="font-bold text-rose-400 mt-0.5 text-sm">{alert.temp}°C</div>
                       </div>
                       <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                        <div className="text-[10px] text-slate-500 font-sans uppercase">Humidité Relative</div>
+                        <div className="text-[10px] text-slate-500 font-sans uppercase">{t("relative_humidity")}</div>
                         <div className="font-bold text-amber-400 mt-0.5 text-sm">{alert.humidity}%</div>
                       </div>
                       <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                        <div className="text-[10px] text-slate-500 font-sans uppercase">Vitesse du Vent</div>
+                        <div className="text-[10px] text-slate-500 font-sans uppercase">{t("wind_speed")}</div>
                         <div className="font-bold text-white mt-0.5 text-sm">{alert.wind} km/h</div>
                       </div>
                       <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                        <div className="text-[10px] text-slate-500 font-sans uppercase">Direction</div>
-                        <div className="font-bold text-slate-200 mt-0.5 text-sm">{alert.wind_dir}</div>
+                        <div className="text-[10px] text-slate-500 font-sans uppercase">{t("wind_direction")}</div>
+                        <div className="font-bold text-slate-200 mt-0.5 text-sm">{formatWindDir(alert.wind_dir)}</div>
                       </div>
                     </div>
 
@@ -585,7 +634,7 @@ export default function AlertsPage() {
                         className="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 font-medium"
                       >
                         <HistoryIcon className="w-3.5 h-3.5 text-ember-400" />
-                        <span>Historique du statut ({historyList.length > 0 ? historyList.length : "Charger"})</span>
+                        <span>{t("status_history_load")} ({historyList.length > 0 ? historyList.length : t("load_data")})</span>
                         {isHistoryExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                       </button>
 
@@ -623,18 +672,18 @@ export default function AlertsPage() {
                       href={`/dashboard?lat=${alert.lat}&lon=${alert.lon}`}
                       className="w-full py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
                     >
-                      <span>Voir sur la carte</span>
+                      <span>{t("view_on_map")}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
 
-                    {/* FEATURE 3: Generate Official PV PDF */}
+                    {/* FEATURE 3: Generate Official PV PDF with Language Selection */}
                     <button
-                      onClick={() => window.open(getAlertReportDownloadUrl(alert.alert_id, language), "_blank")}
+                      onClick={() => setSelectedAlertForPdf(alert)}
                       className="w-full py-2 px-3 rounded-lg border border-red-800/80 bg-red-950/70 hover:bg-red-900 text-red-200 text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
                       title="Télécharger le Procès-Verbal officiel d'alerte incendie (PDF)"
                     >
                       <FileText className="w-3.5 h-3.5 text-red-400" />
-                      <span>📄 Générer PV</span>
+                      <span>📄 {t("export_pv")}</span>
                     </button>
 
                     <button
@@ -642,7 +691,7 @@ export default function AlertsPage() {
                       className="w-full py-2 px-3 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium text-center transition flex items-center justify-center gap-1.5"
                     >
                       <FileText className="w-3.5 h-3.5" />
-                      <span>Historique complet</span>
+                      <span>{t("full_history")}</span>
                     </button>
 
                     {/* ROADMAP PHASE 2: Emergency Geotargeted SMS Broadcast */}
@@ -653,7 +702,7 @@ export default function AlertsPage() {
                         title="Diffuser une alerte SMS géociblée (Mobilis / Algérie Télécom)"
                       >
                         <Smartphone className="w-3.5 h-3.5 text-red-400" />
-                        <span>Diffuser SMS Alerte</span>
+                        <span>{t("broadcast_sms")}</span>
                       </button>
                     )}
 
@@ -663,7 +712,7 @@ export default function AlertsPage() {
                         onClick={() => handleStatusChange(alert.alert_id, "PRISE_EN_COMPTE")}
                         className="w-full py-2 px-3 rounded-lg border border-amber-700 bg-amber-950/80 hover:bg-amber-900 text-amber-200 text-xs font-semibold transition"
                       >
-                        Prise en Compte CODIS
+                        {t("codis_acknowledge")}
                       </button>
                     )}
 
@@ -673,7 +722,7 @@ export default function AlertsPage() {
                         className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-md"
                       >
                         <Truck className="w-3.5 h-3.5" />
-                        <span>Déployer Colonne Mobile</span>
+                        <span>{t("deploy_mobile_column")}</span>
                       </button>
                     )}
 
@@ -683,7 +732,7 @@ export default function AlertsPage() {
                         className="w-full py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-md"
                       >
                         <CheckCheck className="w-3.5 h-3.5" />
-                        <span>Déclarer Maîtrisé</span>
+                        <span>{t("declare_controlled")}</span>
                       </button>
                     )}
 
@@ -692,7 +741,7 @@ export default function AlertsPage() {
                         onClick={() => handleStatusChange(alert.alert_id, "ETEINT")}
                         className="w-full py-2 px-3 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition"
                       >
-                        Clôturer (Éteint)
+                        {t("close_extinguished")}
                       </button>
                     )}
                   </div>
@@ -884,6 +933,22 @@ export default function AlertsPage() {
           </div>
         </div>
       )}
+
+      {/* PDF Language Selection Modal */}
+      <PdfLanguageModal
+        isOpen={!!selectedAlertForPdf}
+        onClose={() => setSelectedAlertForPdf(null)}
+        onConfirm={(chosenLang: Language) => {
+          if (!selectedAlertForPdf) return;
+          window.open(getAlertReportDownloadUrl(selectedAlertForPdf.alert_id, chosenLang), "_blank");
+          setSelectedAlertForPdf(null);
+        }}
+        documentTitle={
+          selectedAlertForPdf
+            ? `${selectedAlertForPdf.forest_name} (${selectedAlertForPdf.wilaya}) — ${selectedAlertForPdf.alert_id}`
+            : undefined
+        }
+      />
     </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage, Language } from "@/context/LanguageContext";
 import { fetchUnifiedAudit } from "@/lib/api";
+import { PdfLanguageModal } from "@/components/PdfLanguageModal";
 import {
   History as HistoryIcon,
   Download,
@@ -39,7 +40,8 @@ const TYPE_BADGES: Record<string, { label: string; colorClass: string }> = {
 };
 
 export default function HistoriqueAuditPage() {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
+  const [showPdfModal, setShowPdfModal] = useState<boolean>(false);
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [hourlyDistribution, setHourlyDistribution] = useState<{ hour: string; count: number }[]>([]);
   const [stats, setStats] = useState({
@@ -93,7 +95,17 @@ export default function HistoriqueAuditPage() {
   };
 
   const handleExportPDF = () => {
-    window.print();
+    setShowPdfModal(true);
+  };
+
+  const handleConfirmPdf = (selectedLang: Language) => {
+    setShowPdfModal(false);
+    if (selectedLang !== language) {
+      setLanguage(selectedLang);
+    }
+    setTimeout(() => {
+      window.print();
+    }, 400);
   };
 
   const maxHourCount = useMemo(() => {
@@ -109,12 +121,12 @@ export default function HistoriqueAuditPage() {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
-              Gouvernance & Transparence Algorithmique
+              {t("governance_transparency")}
             </span>
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-1">
             <HistoryIcon className="w-6 h-6 text-red-500" />
-            <span>Historique & Audit Opérationnel</span>
+            <span>{t("audit_title")}</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1 max-w-2xl">
             {t("audit_subtitle")}
@@ -171,7 +183,7 @@ export default function HistoriqueAuditPage() {
 
         <div className="p-4 rounded-lg border border-slate-800 bg-slate-900/60 flex items-center justify-between">
           <div>
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">Total Événements Archivés</div>
+            <div className="text-[11px] text-slate-400 font-semibold uppercase">{t("total_archived_events")}</div>
             <div className="text-2xl font-black text-slate-200 font-mono tabular-nums mt-1">{stats.totalEvents}</div>
           </div>
           <Clock className="w-5 h-5 text-slate-400 shrink-0" aria-hidden="true" />
@@ -183,9 +195,9 @@ export default function HistoriqueAuditPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
-            <h2 className="font-bold text-slate-200 text-xs">Fréquence des Actions par Heure (24h)</h2>
+            <h2 className="font-bold text-slate-200 text-xs">{t("hourly_frequency_title")}</h2>
           </div>
-          <span className="text-[10px] text-slate-400 font-mono">Heure UTC</span>
+          <span className="text-[10px] text-slate-400 font-mono">{t("utc_time")}</span>
         </div>
 
         <div className="h-24 flex items-end gap-1.5 pt-4 border-b border-slate-800 pb-2 overflow-x-auto">
@@ -215,7 +227,7 @@ export default function HistoriqueAuditPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
             <Filter className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-400 font-semibold">Filtres :</span>
+            <span className="text-slate-400 font-semibold">{t("filter_label")} :</span>
           </div>
 
           {/* Type Filter */}
@@ -224,12 +236,12 @@ export default function HistoriqueAuditPage() {
             onChange={(e) => setFilterType(e.target.value)}
             className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"
           >
-            <option value="Tous">Tous les types d&apos;actions</option>
-            <option value="ALERT_CREATED">Alertes créées</option>
-            <option value="STATUS_CHANGED">Statut modifié</option>
-            <option value="MODEL_REFRESHED">Modèle réentraîné</option>
-            <option value="COMMUNITY_REPORT">Signalements citoyens</option>
-            <option value="DATA_SYNC">Synchronisation FIRMS</option>
+            <option value="Tous">{t("all_action_types")}</option>
+            <option value="ALERT_CREATED">{t("action_alert_created")}</option>
+            <option value="STATUS_CHANGED">{t("action_status_changed")}</option>
+            <option value="MODEL_REFRESHED">{t("action_model_refreshed")}</option>
+            <option value="COMMUNITY_REPORT">{t("action_community_report")}</option>
+            <option value="DATA_SYNC">{t("action_data_sync")}</option>
           </select>
 
           {/* Wilaya Filter */}
@@ -238,7 +250,7 @@ export default function HistoriqueAuditPage() {
             onChange={(e) => setFilterWilaya(e.target.value)}
             className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"
           >
-            <option value="Tous">Toutes les wilayas</option>
+            <option value="Tous">{t("all_wilayas")}</option>
             <option value="Tizi Ouzou">Tizi Ouzou</option>
             <option value="Bejaia">Bejaia</option>
             <option value="Bouira">Bouira</option>
@@ -253,7 +265,7 @@ export default function HistoriqueAuditPage() {
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Rechercher intervenant..."
+              placeholder={t("search_user_placeholder")}
               value={searchUser}
               onChange={(e) => setSearchUser(e.target.value)}
               className="pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 text-xs w-48"
@@ -263,7 +275,7 @@ export default function HistoriqueAuditPage() {
             type="submit"
             className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200"
           >
-            Filtrer
+            {t("filter_label")}
           </button>
         </form>
       </div>
@@ -337,6 +349,14 @@ export default function HistoriqueAuditPage() {
           </table>
         </div>
       </div>
+
+      {/* PDF Language Selection Modal */}
+      <PdfLanguageModal
+        isOpen={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+        onConfirm={handleConfirmPdf}
+        documentTitle={t("audit_title")}
+      />
     </div>
   );
 }

@@ -1050,7 +1050,7 @@ export const Map: React.FC<MapProps> = ({
             <form onSubmit={handleSendCommunityReport} className="space-y-3 text-xs">
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Wilaya concernée
+                  {t("citizen_wilaya_label")}
                 </label>
                 <select
                   value={reportWilaya}
@@ -1067,7 +1067,7 @@ export const Map: React.FC<MapProps> = ({
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Coordonnées GPS (automatiques)
+                  {t("citizen_coords_auto")}
                 </label>
                 <input
                   type="text"
@@ -1075,7 +1075,7 @@ export const Map: React.FC<MapProps> = ({
                   value={
                     selectedLocation
                       ? `${selectedLocation.lat.toFixed(4)}° N, ${selectedLocation.lon.toFixed(4)}° E`
-                      : "36.7350° N, 4.4350° E (Centre carte)"
+                      : "36.7350° N, 4.4350° E"
                   }
                   className="w-full bg-slate-800/60 border border-slate-700/60 rounded-lg p-2 text-slate-400 font-mono"
                 />
@@ -1083,7 +1083,7 @@ export const Map: React.FC<MapProps> = ({
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Téléphone du déclarant (facultatif)
+                  {t("citizen_phone_optional")}
                 </label>
                 <input
                   type="tel"
@@ -1096,12 +1096,12 @@ export const Map: React.FC<MapProps> = ({
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Description de la fumée / flammes observées *
+                  {t("citizen_desc_label")}
                 </label>
                 <textarea
                   required
                   rows={3}
-                  placeholder="Ex : Épaisse fumée blanche au-dessus des crêtes de Yakouren, vent fort vers le nord."
+                  placeholder={t("citizen_desc_placeholder")}
                   value={reportNotes}
                   onChange={(e) => setReportNotes(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white placeholder-slate-500"
@@ -1110,7 +1110,7 @@ export const Map: React.FC<MapProps> = ({
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Photographie Témoin (Vérifiée Protection Civile)
+                  {t("witness_photo_title")}
                 </label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -1124,18 +1124,18 @@ export const Map: React.FC<MapProps> = ({
                       }`}
                     >
                       <Camera className="w-4 h-4" />
-                      <span>{reportPhotoSelected ? "✓ Photo terrain jointe" : "Joindre une photo du sinistre"}</span>
+                      <span>{reportPhotoSelected ? `✓ ${t("photo_attached")}` : t("attach_photo")}</span>
                     </button>
                   </div>
 
                   {reportPhotoSelected && (
                     <div className="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
                       {[
-                        { label: "Fumée Yakouren", path: "/reports/report_smoke_yakouren.jpg" },
-                        { label: "Feu Akfadou", path: "/reports/report_fire_akfadou.jpg" },
-                        { label: "Vigie Algérie", path: "/reports/report_vigie.jpg" },
-                        { label: "Zone Brûlée", path: "/reports/report_burned_zone.jpg" },
-                        { label: "Sirocco / Poussière", path: "/reports/report_sirocco.jpg" },
+                        { label: t("photo_smoke_yakouren"), path: "/reports/report_smoke_yakouren.jpg" },
+                        { label: t("photo_fire_akfadou"), path: "/reports/report_fire_akfadou.jpg" },
+                        { label: t("photo_vigie"), path: "/reports/report_vigie.jpg" },
+                        { label: t("photo_burned_zone"), path: "/reports/report_burned_zone.jpg" },
+                        { label: t("photo_sirocco"), path: "/reports/report_sirocco.jpg" },
                       ].map((item) => (
                         <button
                           key={item.path}
@@ -1165,7 +1165,7 @@ export const Map: React.FC<MapProps> = ({
                   onClick={() => setShowReportModal(false)}
                   className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
                 >
-                  Annuler
+                  {t("cancel")}
                 </button>
                 <button
                   type="submit"
@@ -1173,7 +1173,7 @@ export const Map: React.FC<MapProps> = ({
                   className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg flex items-center gap-1.5 transition"
                 >
                   {isSubmittingReport ? (
-                    <span>Envoi...</span>
+                    <span>{t("submitting")}</span>
                   ) : (
                     <>
                       <Send className="w-3.5 h-3.5" />

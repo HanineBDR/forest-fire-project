@@ -44,8 +44,11 @@ import {
   ModelDrift,
   RefreshAllResponse
 } from "@/types";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function AnalyticsPage() {
+  const { t, language } = useLanguage();
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
   const [wilayaStats, setWilayaStats] = useState<WilayaBurnStat[]>(DEFAULT_WILAYA_STATS);
   const [activeMapTab, setActiveMapTab] = useState<"static" | "interactive">("interactive");
@@ -61,7 +64,7 @@ export default function AnalyticsPage() {
   const [isRegeneratingModel, setIsRegeneratingModel] = useState<boolean>(false);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [relativeTime, setRelativeTime] = useState<string>("À l'instant");
+  const [relativeTime, setRelativeTime] = useState<string>(t("just_now"));
   const [activeKpiModal, setActiveKpiModal] = useState<"roc_auc" | "accuracy" | "burn_points" | "burned_area" | null>(null);
   const [toast, setToast] = useState<{ title: string; message: string; type: "success" | "info" | "warning" } | null>(null);
 
@@ -88,7 +91,7 @@ export default function AnalyticsPage() {
       if (driftData) setModelDrift(driftData);
 
       setLastUpdated(new Date());
-      setRelativeTime("À l'instant");
+      setRelativeTime(t("just_now"));
     } catch (err) {
       console.error("Failed to load analytics data:", err);
     } finally {
@@ -102,22 +105,28 @@ export default function AnalyticsPage() {
 
   // Relative Time Timer
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateRelative = () => {
       const diffSec = Math.floor((Date.now() - lastUpdated.getTime()) / 1000);
       if (diffSec < 15) {
-        setRelativeTime("À l'instant");
-      } else if (diffSec < 60) {
-        setRelativeTime(`Il y a ${diffSec}s`);
-      } else if (diffSec < 3600) {
-        const mins = Math.floor(diffSec / 60);
-        setRelativeTime(`Il y a ${mins} min`);
+        setRelativeTime(t("just_now"));
+      } else if (language === "ar") {
+        if (diffSec < 60) setRelativeTime(`منذ ${diffSec} ثانية`);
+        else if (diffSec < 3600) setRelativeTime(`منذ ${Math.floor(diffSec / 60)} دقيقة`);
+        else setRelativeTime(`منذ ${Math.floor(diffSec / 3600)} ساعة`);
+      } else if (language === "en") {
+        if (diffSec < 60) setRelativeTime(`${diffSec}s ago`);
+        else if (diffSec < 3600) setRelativeTime(`${Math.floor(diffSec / 60)}m ago`);
+        else setRelativeTime(`${Math.floor(diffSec / 3600)}h ago`);
       } else {
-        const hours = Math.floor(diffSec / 3600);
-        setRelativeTime(`Il y a ${hours}h`);
+        if (diffSec < 60) setRelativeTime(`Il y a ${diffSec}s`);
+        else if (diffSec < 3600) setRelativeTime(`Il y a ${Math.floor(diffSec / 60)} min`);
+        else setRelativeTime(`Il y a ${Math.floor(diffSec / 3600)}h`);
       }
-    }, 10000);
+    };
+    updateRelative();
+    const interval = setInterval(updateRelative, 10000);
     return () => clearInterval(interval);
-  }, [lastUpdated]);
+  }, [lastUpdated, language, t]);
 
   // Auto-Refresh Polling
   useEffect(() => {
@@ -221,7 +230,7 @@ export default function AnalyticsPage() {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-xs font-medium transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Carte Tactique</span>
+              <span>{t("nav_tactical_map")}</span>
             </Link>
 
             <div className="flex items-center gap-2.5">
@@ -236,26 +245,30 @@ export default function AnalyticsPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-base sm:text-lg font-bold tracking-tight text-white">
-                    IN9AD Analytics & Évaluation Modèle
+                    {t("analytics_title")}
                   </h1>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800 font-mono font-medium flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Système Dynamique Live
-                </span>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800 font-mono font-medium flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {t("dynamic_system_live")}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  {t("analytics_subtitle")}
+                </p>
               </div>
-              <p className="text-xs text-slate-400">
-                Télémétrie satellitaire continue NASA FIRMS, calibration XGBoost et historique persistant (SQLite).
-              </p>
             </div>
           </div>
         </div>
 
-          {/* Top Bar Refresh Controls */}
+          {/* Top Bar Refresh Controls & Language Switcher */}
           <div className="flex flex-wrap items-center gap-2.5 text-xs">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {/* Last updated indicator */}
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-mono">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
-              <span className="text-slate-400">Mise à jour:</span>
+              <span className="text-slate-400">{t("last_check")}</span>
               <span className="font-semibold text-white">{relativeTime}</span>
             </div>
 
@@ -269,7 +282,7 @@ export default function AnalyticsPage() {
               }`}
             >
               <Radio className={`w-3.5 h-3.5 ${autoRefresh ? "animate-pulse text-emerald-400" : ""}`} />
-              <span>Auto-refresh (60s): {autoRefresh ? "ACTIF" : "OFF"}</span>
+              <span>{t("auto_refresh")}: {autoRefresh ? "ON" : "OFF"}</span>
             </button>
 
             {/* Refresh All Button */}
@@ -279,7 +292,7 @@ export default function AnalyticsPage() {
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-ember-600 to-orange-600 hover:from-ember-500 hover:to-orange-500 text-white font-semibold text-xs transition-all shadow-md active:scale-95 disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingAll ? "animate-spin" : ""}`} />
-              <span>{isRefreshingAll ? "Synchronisation NASA..." : "Rafraîchir Toutes les Données"}</span>
+              <span>{isRefreshingAll ? t("syncing_nasa") : t("refresh_all_data")}</span>
             </button>
 
             <a
@@ -300,8 +313,8 @@ export default function AnalyticsPage() {
         {/* KPI Strip - Interactive & Clickable Cards */}
         <section className="space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-400">
-            <span className="font-medium uppercase tracking-wider text-[11px] text-slate-400">Indicateurs de Performance Clés (Cliquer pour voir l'historique)</span>
-            <span className="text-[11px] font-mono text-slate-400">Source: SQLite in9ad_history.db</span>
+            <span className="font-medium uppercase tracking-wider text-[11px] text-slate-400">{t("kpi_section_title")}</span>
+            <span className="text-[11px] font-mono text-slate-400">{t("source_sqlite")}</span>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
@@ -315,16 +328,16 @@ export default function AnalyticsPage() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Modèle ROC-AUC</span>
+                <span className="text-xs text-slate-400 font-medium">{t("model_roc_auc")}</span>
                 <TrendingUp className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
               </div>
               <div className="mt-1 text-2xl font-bold text-white font-mono">{rocValue}</div>
               <div className="mt-1 text-xs text-emerald-400 flex items-center gap-1 font-medium">
                 <CheckCircle2 className="w-3 h-3" />
-                <span>Calibré sur 7 entraînements</span>
+                <span>{t("calibrated_runs")}</span>
               </div>
               <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
-                <span>Cliquez pour courbe historique</span>
+                <span>{t("click_for_history_curve")}</span>
                 <ChevronRight className="w-3 h-3 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </div>
@@ -339,19 +352,19 @@ export default function AnalyticsPage() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Test Précision & F1</span>
+                <span className="text-xs text-slate-400 font-medium">{t("test_precision_f1")}</span>
                 <BarChart3 className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
               </div>
               <div className="mt-1 text-2xl font-bold text-white font-mono">{accuracyValue}% / {f1Value}</div>
               <div className="mt-1 text-xs text-slate-300 font-mono">
                 {modelDrift?.drift_detected ? (
-                  <span className="text-amber-400 font-semibold">Dérive détectée</span>
+                  <span className="text-amber-400 font-semibold">{t("drift_detected")}</span>
                 ) : (
-                  <span className="text-emerald-400 font-semibold">Aucune dérive ({modelDrift?.status || "stable"})</span>
+                  <span className="text-emerald-400 font-semibold">{t("no_drift_healthy")}</span>
                 )}
               </div>
               <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
-                <span>Cliquez pour analyse dérive</span>
+                <span>{t("click_for_drift_analysis")}</span>
                 <ChevronRight className="w-3 h-3 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </div>
@@ -366,13 +379,13 @@ export default function AnalyticsPage() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Foyers Thermiques Satellitaires</span>
+                <span className="text-xs text-slate-400 font-medium">{t("satellite_hotspots")}</span>
                 <Flame className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" />
               </div>
               <div className="mt-1 text-2xl font-bold text-white font-mono">{totalPoints.toLocaleString()}</div>
-              <div className="mt-1 text-xs text-rose-400 font-medium">NASA FIRMS VIIRS & MODIS</div>
+              <div className="mt-1 text-xs text-rose-400 font-medium">{t("nasa_firms_viirs_modis")}</div>
               <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
-                <span>Cliquez pour évolution</span>
+                <span>{t("click_for_evolution")}</span>
                 <ChevronRight className="w-3 h-3 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </div>
@@ -387,15 +400,15 @@ export default function AnalyticsPage() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Surface Brûlée Estimée</span>
+                <span className="text-xs text-slate-400 font-medium">{t("estimated_burned_area")}</span>
                 <Layers className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
               </div>
               <div className="mt-1 text-2xl font-bold text-white font-mono">
                 {Math.round(totalAreaHa).toLocaleString()} ha
               </div>
-              <div className="mt-1 text-xs text-orange-400 font-medium">88% dans l'Arc Tellien & Kabylie</div>
+              <div className="mt-1 text-xs text-orange-400 font-medium">{t("arc_tellien_kabylie")}</div>
               <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
-                <span>Cliquez pour détail mensuel</span>
+                <span>{t("click_for_monthly_detail")}</span>
                 <ChevronRight className="w-3 h-3 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </div>
@@ -491,15 +504,15 @@ export default function AnalyticsPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-white">
-                  1. Performance du Modèle : Fonctionnement du Modèle IN9AD
+                  1. {t("section_model_perf_title")}
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px] font-mono flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  Live - Généré {relativeTime.toLowerCase()}
+                  {t("live_just_generated")}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Matrice de confusion, courbe ROC et rapport de classification validés sur les régimes de feux de forêt du Nord algérien.
+                {t("section_model_perf_desc")}
               </p>
             </div>
 
@@ -511,7 +524,7 @@ export default function AnalyticsPage() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold transition-colors duration-150 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               >
                 <RefreshCw className={`w-3.5 h-3.5 text-slate-300 ${isRegeneratingModel ? "animate-spin" : ""}`} aria-hidden="true" />
-                <span>{isRegeneratingModel ? "Réentraînement..." : "Régénérer avec les dernières données"}</span>
+                <span>{isRegeneratingModel ? t("retraining") : t("regenerate_latest_data")}</span>
               </button>
 
               <a
@@ -520,7 +533,7 @@ export default function AnalyticsPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900/80 hover:bg-slate-800 text-slate-300 text-xs font-medium"
               >
-                <span>HD PNG</span>
+                <span>{t("hd_png")}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
@@ -545,10 +558,10 @@ export default function AnalyticsPage() {
                 <div>
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-emerald-400" />
-                    Statut Historique du Modèle (Précision vs Seuil d'Alerte 85%)
+                    {t("model_historic_status")}
                   </h3>
                   <p className="text-[11px] text-slate-400">
-                    Suivi de stabilité opérationnelle sur les 7 derniers réentraînements en base SQLite.
+                    {t("operational_stability_tracking")}
                   </p>
                 </div>
                 {modelDrift?.needs_retraining && (
@@ -615,10 +628,10 @@ export default function AnalyticsPage() {
                 <div>
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                     <BarChart3 className="w-4 h-4 text-slate-300 shrink-0" aria-hidden="true" />
-                    Poids des Paramètres & Importance des Variables (XGBoost)
+                    {t("feature_importance_title")}
                   </h3>
                   <p className="text-[11px] text-slate-400">
-                    Hiérarchie des facteurs météorologiques (Température, Humidité, Sirocco, FFMC) validée sur le terrain.
+                    {t("feature_importance_desc")}
                   </p>
                 </div>
                 <a
@@ -651,7 +664,7 @@ export default function AnalyticsPage() {
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <HistoryIcon className="w-4 h-4 text-ember-400" />
-              <span>2. Évolution Historique du Modèle</span>
+              <span>2. {t("section_historic_evolution")}</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               Historique des itérations d'entraînement persistant dans <code className="text-ember-400 font-mono">/backend/in9ad_history.db</code>.
@@ -831,7 +844,7 @@ export default function AnalyticsPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm sm:text-base font-bold text-white">
-                  Alertes Prédictives Actives Générées par ce Modèle
+                  {t("active_predictive_alerts")}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-red-950 text-red-300 border border-red-800 text-[11px] font-mono font-bold">
                   5 ALERTES
@@ -848,7 +861,7 @@ export default function AnalyticsPage() {
             href="/dashboard/alerts"
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition-all shadow-lg active:scale-95 shrink-0"
           >
-            <span>Accéder au Centre des Alertes en Direct</span>
+            <span>{t("access_live_alerts_center")}</span>
             <ChevronRight className="w-4 h-4" />
           </Link>
         </section>
@@ -858,7 +871,7 @@ export default function AnalyticsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-base font-bold text-white">
-                4. Répartition de l'Impact par Wilaya (Nord de l'Algérie)
+                4. {t("section_wilaya_impact")}
               </h2>
               <p className="text-xs text-slate-400">
                 Statistiques de feux recensés par satellite et superficies estimées pour les wilayas prioritaires.

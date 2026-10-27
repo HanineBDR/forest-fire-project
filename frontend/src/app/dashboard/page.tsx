@@ -19,8 +19,9 @@ import {
   DEFAULT_REGIONS,
 } from "@/lib/api";
 import { PredictionResult, WeatherData, FIRMSHotspot, RegionPreset } from "@/types";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage, Language } from "@/context/LanguageContext";
 import { MapSkeleton } from "@/components/MapSkeleton";
+import { PdfLanguageModal } from "@/components/PdfLanguageModal";
 
 // Dynamic import of Map to prevent SSR Leaflet window errors
 const DynamicMap = dynamic(() => import("@/components/Map").then((mod) => mod.Map), {
@@ -211,8 +212,14 @@ function DashboardMapInner() {
     setIsPlayingSim(!isPlayingSim);
   };
 
-  // FEATURE 3: Official Zone Report PDF Export
-  const handleExportZoneReport = async () => {
+  const [showPdfModal, setShowPdfModal] = useState<boolean>(false);
+
+  // FEATURE 3: Official Zone Report PDF Export - Prompt language first
+  const handleExportZoneReport = () => {
+    setShowPdfModal(true);
+  };
+
+  const handleConfirmPdfDownload = async (selectedLang: Language) => {
     setIsExportingReport(true);
     try {
       const currentWilaya = regions.find((r) => r.id === selectedRegionId)?.wilaya || "Tizi Ouzou";
@@ -228,8 +235,9 @@ function DashboardMapInner() {
           wind: prediction?.input.wind || weather?.wind_speed || 30.0,
           wind_dir: weather?.wind_direction ? `${weather.wind_direction}°` : "Sud (Sirocco)",
         },
-        language
+        selectedLang
       );
+      setShowPdfModal(false);
     } catch (err) {
       console.error("Export report error:", err);
     } finally {
@@ -334,6 +342,19 @@ function DashboardMapInner() {
           />
         </div>
       </div>
+
+      {/* PDF Language Selection Modal */}
+      <PdfLanguageModal
+        isOpen={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+        onConfirm={handleConfirmPdfDownload}
+        isGenerating={isExportingReport}
+        documentTitle={
+          prediction
+            ? `${regions.find((r) => r.id === selectedRegionId)?.name || "Massif Forestier"} (${regions.find((r) => r.id === selectedRegionId)?.wilaya || "Algérie"})`
+            : undefined
+        }
+      />
     </div>
   );
 }

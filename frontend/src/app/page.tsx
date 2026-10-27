@@ -16,6 +16,8 @@ import {
 } from "@/lib/api";
 import { PredictionResult, WeatherData, FIRMSHotspot, RegionPreset } from "@/types";
 import { MapSkeleton } from "@/components/MapSkeleton";
+import { PdfLanguageModal } from "@/components/PdfLanguageModal";
+import { Language } from "@/context/LanguageContext";
 
 // Dynamic import of Map to prevent SSR Leaflet window errors
 const DynamicMap = dynamic(() => import("@/components/Map").then((mod) => mod.Map), {
@@ -124,8 +126,14 @@ export default function Home() {
     runPredictionForLocation(selectedLocation);
   };
 
-  // Official Zone Report PDF Export
-  const handleExportZoneReport = async () => {
+  const [showPdfModal, setShowPdfModal] = useState<boolean>(false);
+
+  // Official Zone Report PDF Export - Prompt language first
+  const handleExportZoneReport = () => {
+    setShowPdfModal(true);
+  };
+
+  const handleConfirmPdfDownload = async (selectedLang: Language) => {
     setIsExportingReport(true);
     try {
       const currentWilaya = regions.find((r) => r.id === selectedRegionId)?.wilaya || "Tizi Ouzou";
@@ -141,8 +149,9 @@ export default function Home() {
           wind: weather?.wind_speed || prediction?.input.wind || 30.0,
           wind_dir: weather?.wind_direction ? `${weather.wind_direction}°` : "Sud (Sirocco)",
         },
-        "fr"
+        selectedLang
       );
+      setShowPdfModal(false);
     } catch (err) {
       console.error("Export report error:", err);
     } finally {
@@ -214,6 +223,19 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* PDF Language Selection Modal */}
+      <PdfLanguageModal
+        isOpen={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+        onConfirm={handleConfirmPdfDownload}
+        isGenerating={isExportingReport}
+        documentTitle={
+          prediction
+            ? `${regions.find((r) => r.id === selectedRegionId)?.name || "Massif Forestier"} (${regions.find((r) => r.id === selectedRegionId)?.wilaya || "Algérie"})`
+            : undefined
+        }
+      />
     </main>
   );
 }
