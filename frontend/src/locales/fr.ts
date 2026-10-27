@@ -114,9 +114,9 @@ export const fr = {
   offline_map_btn: "Carte Hors-Ligne",
   offline_map_title: "Téléchargement Cartographique Hors-Ligne",
   offline_map_desc: "Essentiel pour les colonnes mobiles et gardes forestiers en zones blanches sans réseau 4G.",
-  offline_zone_yakouren: "Zone 1: Massif de Yakouren (Forêt domaniale) — ~45 Mo",
-  offline_zone_akfadou: "Zone 2: Crête de l'Akfadou & Forêt de Mizrana — ~58 Mo",
-  offline_zone_kabylie: "Zone 3: Tout le massif de Grande Kabylie — ~125 Mo",
+  offline_zone_yakouren: "Zone 1: Massif de Yakouren (Forêt domaniale) (~45 Mo)",
+  offline_zone_akfadou: "Zone 2: Crête de l'Akfadou & Forêt de Mizrana (~58 Mo)",
+  offline_zone_kabylie: "Zone 3: Tout le massif de Grande Kabylie (~125 Mo)",
   offline_downloading: "Mise en cache des tuiles satellites et thermiques...",
   offline_ready: "Carte {zone} téléchargée ({size}) - Prête pour intervention hors-ligne !",
 

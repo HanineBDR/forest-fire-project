@@ -114,9 +114,9 @@ export const en = {
   offline_map_btn: "Offline Map",
   offline_map_title: "Offline Tactical Map Download",
   offline_map_desc: "Crucial for fire crews operating in deep forest canyons with no cellular coverage.",
-  offline_zone_yakouren: "Zone 1: Yakouren State Forest — ~45 MB",
-  offline_zone_akfadou: "Zone 2: Akfadou Ridge & Mizrana — ~58 MB",
-  offline_zone_kabylie: "Zone 3: Greater Kabylie Forest Corridors — ~125 MB",
+  offline_zone_yakouren: "Zone 1: Yakouren State Forest (~45 MB)",
+  offline_zone_akfadou: "Zone 2: Akfadou Ridge & Mizrana (~58 MB)",
+  offline_zone_kabylie: "Zone 3: Greater Kabylie Forest Corridors (~125 MB)",
   offline_downloading: "Caching satellite tiles and elevation grids...",
   offline_ready: "Map for {zone} downloaded ({size}) - Ready for offline tactical use!",
 

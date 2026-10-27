@@ -148,25 +148,25 @@ export function getRoleBadgeInfo(role?: UserRole): { text: string; subtext: stri
   switch (role) {
     case "CIVIL_PROTECTION":
       return {
-        text: "🔒 Secure access - الحماية المدنية",
+        text: "Protection Civile",
         subtext: "Protection Civile Algérienne",
         colorClass: "bg-red-950/80 text-red-300 border-red-800/80",
       };
     case "FOREST_GUARD":
       return {
-        text: "🔒 Secure access - محافظة الغابات",
+        text: "Conservation des Forêts",
         subtext: "Conservation des Forêts (DGF)",
         colorClass: "bg-emerald-950/80 text-emerald-300 border-emerald-800/80",
       };
     case "ADMIN":
       return {
-        text: "🔒 Secure access - Direction Générale",
+        text: "Direction Générale",
         subtext: "Administration Centrale",
         colorClass: "bg-blue-950/80 text-blue-300 border-blue-800/80",
       };
     default:
       return {
-        text: "🔒 Secure access - Personnel Autorisé",
+        text: "Personnel Autorisé",
         subtext: "Ministère de l'Intérieur",
         colorClass: "bg-slate-900 text-slate-300 border-slate-700",
       };

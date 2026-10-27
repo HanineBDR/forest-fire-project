@@ -545,28 +545,28 @@ export async function predictFireRisk(payload: {
 
   const factors: string[] = [];
   if (isSirocco) {
-    factors.push("💨 Sirocco (Chergui) desert wind active: extreme heat + rapid desiccation.");
+    factors.push("Sirocco (Chergui) desert wind active: extreme heat and rapid desiccation.");
   }
   if (temp >= 38.0) {
-    factors.push(`🔥 Severe heatwave anomaly: ${temp}°C accelerates moisture vaporization.`);
+    factors.push(`Severe heatwave anomaly: ${temp}°C accelerates moisture vaporization.`);
   }
   if (humidity <= 20.0) {
-    factors.push(`🌵 Critical dry air: ${humidity}% relative humidity leaves dead fuel hyper-flammable.`);
+    factors.push(`Critical dry air: ${humidity}% relative humidity leaves dead fuel hyper-flammable.`);
   }
   if (wind >= 35.0) {
-    factors.push(`🌪️ High wind velocity: ${wind} km/h fuels aggressive convective oxygen feed.`);
+    factors.push(`High wind velocity: ${wind} km/h fuels convective oxygen feed.`);
   }
   if (isi >= 15.0) {
-    factors.push(`⚡ High Initial Spread Index (ISI: ${isi.toFixed(1)}): rapid ignition potential.`);
+    factors.push(`High Initial Spread Index (ISI: ${isi.toFixed(1)}): rapid ignition potential.`);
   }
   if (inForest) {
-    factors.push("🌲 Dense Mediterranean forest canopy zone (Tell Atlas / coastal massifs).");
+    factors.push("Dense Mediterranean forest canopy zone (Tell Atlas / coastal massifs).");
   }
   if (rain > 0.0) {
-    factors.push(`🌧️ Dampening factor: ${rain} mm precipitation suppresses ignition.`);
+    factors.push(`Dampening factor: ${rain} mm precipitation suppresses ignition.`);
   }
   if (factors.length === 0) {
-    factors.push("✅ Ambient atmospheric parameters within seasonal safety baseline.");
+    factors.push("Ambient atmospheric parameters within seasonal safety baseline.");
   }
 
   let advisory = "NORMAL MONITORING: Continuous satellite observation via NASA FIRMS. Routine forestry patrols active.";

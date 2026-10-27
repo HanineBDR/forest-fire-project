@@ -266,7 +266,7 @@ export default function UsersManagementPage() {
                     </td>
 
                     <td className="py-3 px-4 text-slate-300">
-                      {u.organization || "—"}
+                      {u.organization || "N/A"}
                     </td>
 
                     <td className="py-3 px-4 text-right">
