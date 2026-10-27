@@ -948,8 +948,50 @@ export function getAlertReportDownloadUrl(alertId: string, lang: string = "fr"):
   return `${API_BASE}/api/alerts/${alertId}/report?lang=${lang}`;
 }
 
-export function getZoneReportDownloadUrl(zoneData: any, lang: string = "fr"): string {
-  return `${API_BASE}/api/reports/zone?lang=${lang}`;
+export function getZoneReportDownloadUrl(zoneData?: any, lang: string = "fr"): string {
+  const params = new URLSearchParams();
+  if (lang) params.append("lang", lang);
+  if (zoneData) {
+    if (zoneData.wilaya) params.append("wilaya", zoneData.wilaya);
+    if (zoneData.forest_name) params.append("forest_name", zoneData.forest_name);
+    if (zoneData.risk_score !== undefined) params.append("risk_score", String(zoneData.risk_score));
+    if (zoneData.temp !== undefined) params.append("temp", String(zoneData.temp));
+    if (zoneData.humidity !== undefined) params.append("humidity", String(zoneData.humidity));
+    if (zoneData.wind !== undefined) params.append("wind", String(zoneData.wind));
+    if (zoneData.wind_dir) params.append("wind_dir", zoneData.wind_dir);
+  }
+  const qs = params.toString();
+  return `${API_BASE}/api/reports/zone${qs ? `?${qs}` : ""}`;
+}
+
+export async function downloadZoneReportPDF(zoneData: any, lang: string = "fr"): Promise<void> {
+  try {
+    const res = await fetch(`${API_BASE}/api/reports/zone?lang=${lang}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(zoneData || {}),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to generate zone PDF report (${res.status})`);
+    }
+
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    const wilayaClean = zoneData?.wilaya ? zoneData.wilaya.replace(/[\s()]+/g, "_") : "Zone";
+    a.download = `RAPPORT_ZONE_${wilayaClean}_${Date.now()}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    console.warn("Direct blob download failed, falling back to direct URL:", err);
+    window.open(getZoneReportDownloadUrl(zoneData, lang), "_blank");
+  }
 }
 
 // Convenience Aliases

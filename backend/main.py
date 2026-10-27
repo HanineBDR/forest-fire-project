@@ -1000,6 +1000,39 @@ def api_generate_zone_report(payload: ZoneReportRequest, lang: str = Query("fr")
     )
 
 
+@app.get("/api/reports/zone")
+def api_generate_zone_report_get(
+    wilaya: str = Query("Tizi Ouzou"),
+    forest_name: str = Query("Massif de Yakouren"),
+    risk_score: float = Query(88.0),
+    temp: float = Query(38.5),
+    humidity: float = Query(16.0),
+    wind: float = Query(35.0),
+    wind_dir: str = Query("Sud-Est (Sirocco)"),
+    summary: str = Query("Zone sous vigilance renforcée. Fort risque de départ de feu."),
+    lang: str = Query("fr")
+):
+    """Generates official summary briefing PDF for an entire forest zone via GET query params."""
+    data = {
+        "wilaya": wilaya,
+        "forest_name": forest_name,
+        "risk_score": risk_score,
+        "temp": temp,
+        "humidity": humidity,
+        "wind": wind,
+        "wind_dir": wind_dir,
+        "summary": summary,
+    }
+    pdf_path = generate_zone_pdf_report(data, lang=lang)
+    filename = os.path.basename(pdf_path)
+    return FileResponse(
+        path=pdf_path,
+        media_type="application/pdf",
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+
 # ============================================================================
 # 20. COMMUNITY CITIZEN REPORTING (FEATURE 7)
 # ============================================================================

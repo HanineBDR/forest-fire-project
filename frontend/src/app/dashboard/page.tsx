@@ -13,6 +13,7 @@ import {
   predictFireRisk,
   simulateFireSpread,
   getZoneReportDownloadUrl,
+  downloadZoneReportPDF,
   fetchRoadmap,
   RoadmapPhase,
   DEFAULT_REGIONS,
@@ -217,20 +218,18 @@ function DashboardMapInner() {
       const currentWilaya = regions.find((r) => r.id === selectedRegionId)?.wilaya || "Tizi Ouzou";
       const currentForest = regions.find((r) => r.id === selectedRegionId)?.name || "Massif de Yakouren";
 
-      const url = getZoneReportDownloadUrl(
+      await downloadZoneReportPDF(
         {
           wilaya: currentWilaya,
           forest_name: currentForest,
           risk_score: prediction?.risk_score || 88.0,
-          temp: prediction?.input.temp || 38.0,
-          humidity: prediction?.input.humidity || 18.0,
-          wind: prediction?.input.wind || 30.0,
+          temp: prediction?.input.temp || weather?.temperature || 38.0,
+          humidity: prediction?.input.humidity || weather?.humidity || 18.0,
+          wind: prediction?.input.wind || weather?.wind_speed || 30.0,
+          wind_dir: weather?.wind_direction ? `${weather.wind_direction}°` : "Sud (Sirocco)",
         },
         language
       );
-
-      // Trigger direct browser download
-      window.open(url, "_blank");
     } catch (err) {
       console.error("Export report error:", err);
     } finally {

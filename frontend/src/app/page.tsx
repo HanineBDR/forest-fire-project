@@ -11,6 +11,7 @@ import {
   fetchFIRMSHotspots,
   fetchStrategicRegions,
   predictFireRisk,
+  downloadZoneReportPDF,
   DEFAULT_REGIONS,
 } from "@/lib/api";
 import { PredictionResult, WeatherData, FIRMSHotspot, RegionPreset } from "@/types";
@@ -35,6 +36,7 @@ export default function Home() {
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [activeHorizonIndex, setActiveHorizonIndex] = useState<number>(1); // Default to +3h view
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isExportingReport, setIsExportingReport] = useState<boolean>(false);
   const [isCustomOverride, setIsCustomOverride] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
@@ -122,6 +124,32 @@ export default function Home() {
     runPredictionForLocation(selectedLocation);
   };
 
+  // Official Zone Report PDF Export
+  const handleExportZoneReport = async () => {
+    setIsExportingReport(true);
+    try {
+      const currentWilaya = regions.find((r) => r.id === selectedRegionId)?.wilaya || "Tizi Ouzou";
+      const currentForest = regions.find((r) => r.id === selectedRegionId)?.name || "Massif de Yakouren";
+
+      await downloadZoneReportPDF(
+        {
+          wilaya: currentWilaya,
+          forest_name: currentForest,
+          risk_score: prediction?.risk_score || 88.0,
+          temp: weather?.temperature || prediction?.input.temp || 38.0,
+          humidity: weather?.humidity || prediction?.input.humidity || 18.0,
+          wind: weather?.wind_speed || prediction?.input.wind || 30.0,
+          wind_dir: weather?.wind_direction ? `${weather.wind_direction}°` : "Sud (Sirocco)",
+        },
+        "fr"
+      );
+    } catch (err) {
+      console.error("Export report error:", err);
+    } finally {
+      setIsExportingReport(false);
+    }
+  };
+
   return (
     <main className="min-h-screen flex flex-col bg-slatebg-950 text-slate-100">
       {/* Top Navigation Header */}
@@ -180,6 +208,8 @@ export default function Home() {
               onSimulateCustom={handleSimulateCustom}
               onResetToLiveWeather={handleResetToLive}
               isCustomOverrideActive={isCustomOverride}
+              onExportZoneReport={handleExportZoneReport}
+              isExportingReport={isExportingReport}
             />
           </div>
         </div>
