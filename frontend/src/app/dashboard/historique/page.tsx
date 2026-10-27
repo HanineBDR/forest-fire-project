@@ -124,18 +124,20 @@ export default function HistoriqueAuditPage() {
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/80 text-emerald-200 text-xs font-bold flex items-center gap-2 transition shadow-sm"
+            className="px-3.5 py-2 rounded-md bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/80 text-emerald-200 text-xs font-semibold flex items-center gap-2 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+            <FileSpreadsheet className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
             <span>{t("export_csv")}</span>
           </button>
 
           <button
+            type="button"
             onClick={handleExportPDF}
-            className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-bold flex items-center gap-2 transition"
+            className="px-3.5 py-2 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-semibold flex items-center gap-2 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
           >
-            <FileText className="w-4 h-4 text-slate-300" />
+            <FileText className="w-4 h-4 text-slate-300 shrink-0" aria-hidden="true" />
             <span>{t("export_journal_pdf")}</span>
           </button>
         </div>
@@ -143,53 +145,45 @@ export default function HistoriqueAuditPage() {
 
       {/* Stats Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+        <div className="p-4 rounded-lg border border-slate-800 bg-slate-900/60 flex items-center justify-between">
           <div>
             <div className="text-[11px] text-slate-400 font-semibold uppercase">{t("total_actions_today")}</div>
-            <div className="text-2xl font-black text-white font-mono mt-1">{stats.actionsToday}</div>
+            <div className="text-2xl font-black text-white font-mono tabular-nums mt-1">{stats.actionsToday}</div>
           </div>
-          <div className="p-2.5 rounded-lg bg-slate-800 text-slate-300">
-            <Activity className="w-5 h-5 text-emerald-400" />
-          </div>
+          <Activity className="w-5 h-5 text-emerald-400 shrink-0" aria-hidden="true" />
         </div>
 
-        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+        <div className="p-4 rounded-lg border border-slate-800 bg-slate-900/60 flex items-center justify-between">
           <div>
             <div className="text-[11px] text-slate-400 font-semibold uppercase">{t("alerts_created_count")}</div>
-            <div className="text-2xl font-black text-red-400 font-mono mt-1">{stats.alertsCreated}</div>
+            <div className="text-2xl font-black text-red-400 font-mono tabular-nums mt-1">{stats.alertsCreated}</div>
           </div>
-          <div className="p-2.5 rounded-lg bg-red-950/60 text-red-400 border border-red-900/40">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
+          <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" aria-hidden="true" />
         </div>
 
-        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+        <div className="p-4 rounded-lg border border-slate-800 bg-slate-900/60 flex items-center justify-between">
           <div>
             <div className="text-[11px] text-slate-400 font-semibold uppercase">{t("status_changes_count")}</div>
-            <div className="text-2xl font-black text-amber-400 font-mono mt-1">{stats.statusChanges}</div>
+            <div className="text-2xl font-black text-amber-400 font-mono tabular-nums mt-1">{stats.statusChanges}</div>
           </div>
-          <div className="p-2.5 rounded-lg bg-amber-950/60 text-amber-400 border border-amber-900/40">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
+          <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0" aria-hidden="true" />
         </div>
 
-        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+        <div className="p-4 rounded-lg border border-slate-800 bg-slate-900/60 flex items-center justify-between">
           <div>
             <div className="text-[11px] text-slate-400 font-semibold uppercase">Total Événements Archivés</div>
-            <div className="text-2xl font-black text-cyan-400 font-mono mt-1">{stats.totalEvents}</div>
+            <div className="text-2xl font-black text-slate-200 font-mono tabular-nums mt-1">{stats.totalEvents}</div>
           </div>
-          <div className="p-2.5 rounded-lg bg-cyan-950/60 text-cyan-400 border border-cyan-900/40">
-            <Clock className="w-5 h-5" />
-          </div>
+          <Clock className="w-5 h-5 text-slate-400 shrink-0" aria-hidden="true" />
         </div>
       </div>
 
       {/* Actions per Hour Chart */}
-      <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 space-y-3">
+      <div className="p-4 rounded-lg border border-slate-800 bg-slate-900/60 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-emerald-400" />
-            <h3 className="font-bold text-slate-200 text-xs">Fréquence des Actions par Heure (24h)</h3>
+            <Clock className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
+            <h2 className="font-bold text-slate-200 text-xs">Fréquence des Actions par Heure (24h)</h2>
           </div>
           <span className="text-[10px] text-slate-400 font-mono">Heure UTC</span>
         </div>

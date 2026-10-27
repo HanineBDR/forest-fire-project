@@ -337,11 +337,11 @@ export default function AlertsPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-500" />
-              <span>Vigilance Feux de Forêt — Centre des Alertes Opérationnelles</span>
+              <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" aria-hidden="true" />
+              <span>Vigilance feux de forêt : Centre des alertes opérationnelles</span>
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-red-950/80 border border-red-800 text-red-300 text-xs font-mono font-bold flex items-center gap-1.5 animate-pulse">
-              <span className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="px-2 py-0.5 rounded bg-red-950/80 border border-red-800 text-red-300 text-xs font-mono font-bold flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" aria-hidden="true" />
               {criticalCount} CRITIQUE{criticalCount > 1 ? "S" : ""}
             </span>
           </div>
@@ -352,48 +352,57 @@ export default function AlertsPage() {
 
         {/* Live Controls */}
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-mono">
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 font-mono tabular-nums">
+            <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
             <span className="text-slate-400">Dernier contrôle:</span>
             <span className="font-semibold text-white">{relativeTime}</span>
           </div>
 
           <button
+            type="button"
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+            aria-pressed={autoRefresh}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               autoRefresh
-                ? "bg-emerald-950/60 border-emerald-700/80 text-emerald-300 shadow-sm"
-                : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
+                ? "bg-slate-800 border-slate-600 text-white"
+                : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-850"
             }`}
           >
-            <Radio className={`w-3.5 h-3.5 ${autoRefresh ? "animate-pulse text-emerald-400" : ""}`} />
-            <span>Auto-refresh (30s): {autoRefresh ? "ACTIF" : "OFF"}</span>
+            <Radio className={`w-3.5 h-3.5 shrink-0 ${autoRefresh ? "text-emerald-400" : "text-slate-500"}`} aria-hidden="true" />
+            <span>Auto-refresh (30s): <strong className={autoRefresh ? "text-white" : "text-slate-500"}>{autoRefresh ? "ACTIF" : "OFF"}</strong></span>
           </button>
 
           <button
+            type="button"
             onClick={handleTriggerRefresh}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold text-xs transition-all shadow-md active:scale-95 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-red-600 hover:bg-red-500 text-white font-semibold text-xs transition-colors duration-150 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true" />
             <span>{isRefreshing ? "Analyse Satellitaire..." : "Rafraîchir Alertes"}</span>
           </button>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
+      <div 
+        role="region" 
+        aria-label="Filtres des alertes"
+        className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-slate-900/80 border border-slate-800 text-xs"
+      >
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-slate-400 flex items-center gap-1 font-medium">
-            <Filter className="w-3.5 h-3.5" /> Niveau de Risque:
+            <Filter className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> Niveau de Risque:
           </span>
           {["ALL", "CRITIQUE", "VERY_HIGH", "HIGH"].map((lvl) => (
             <button
               key={lvl}
+              type="button"
               onClick={() => setFilterLevel(lvl)}
-              className={`px-2.5 py-1 rounded-md font-medium transition ${
+              aria-pressed={filterLevel === lvl}
+              className={`px-2.5 py-1 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 filterLevel === lvl
-                  ? "bg-slate-800 text-white border border-slate-700"
+                  ? "bg-slate-800 text-white border border-slate-700 font-semibold"
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
               }`}
             >
@@ -407,10 +416,12 @@ export default function AlertsPage() {
           {["ALL", "DETECTED", "PRISE_EN_COMPTE", "UNITES_DEPLOYEES", "MAITRISE"].map((st) => (
             <button
               key={st}
+              type="button"
               onClick={() => setFilterStatus(st)}
-              className={`px-2.5 py-1 rounded-md font-medium transition ${
+              aria-pressed={filterStatus === st}
+              className={`px-2.5 py-1 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 filterStatus === st
-                  ? "bg-slate-800 text-white border border-slate-700"
+                  ? "bg-slate-800 text-white border border-slate-700 font-semibold"
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
               }`}
             >
@@ -423,8 +434,8 @@ export default function AlertsPage() {
       {/* Alert Cards Container */}
       <div className="space-y-4">
         {filteredAlerts.length === 0 ? (
-          <div className="p-12 text-center rounded-xl border border-slate-800 bg-slate-900/40 space-y-3">
-            <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto opacity-70" />
+          <div className="p-12 text-center rounded-lg border border-slate-800 bg-slate-900/40 space-y-3">
+            <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto opacity-70" aria-hidden="true" />
             <h3 className="text-sm font-bold text-white">Aucune alerte active ne correspond aux critères</h3>
             <p className="text-xs text-slate-400 font-mono">
               Dernière vérification satellitaire & météo : {lastRefreshTime.toLocaleTimeString("fr-FR")}
@@ -442,9 +453,9 @@ export default function AlertsPage() {
             return (
               <div
                 key={alert.alert_id}
-                className={`rounded-xl border p-5 transition-all shadow-md bg-slate-900/80 ${
+                className={`rounded-lg border p-5 transition-colors duration-150 bg-slate-900/80 ${
                   isCritical
-                    ? "border-red-900/90 shadow-red-950/20"
+                    ? "border-red-900/90"
                     : isVeryHigh
                     ? "border-amber-900/80"
                     : "border-slate-800"

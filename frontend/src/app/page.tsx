@@ -14,16 +14,12 @@ import {
   DEFAULT_REGIONS,
 } from "@/lib/api";
 import { PredictionResult, WeatherData, FIRMSHotspot, RegionPreset } from "@/types";
+import { MapSkeleton } from "@/components/MapSkeleton";
 
 // Dynamic import of Map to prevent SSR Leaflet window errors
 const DynamicMap = dynamic(() => import("@/components/Map").then((mod) => mod.Map), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full min-h-[500px] rounded-lg bg-slatebg-900 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-      <div className="w-8 h-8 rounded-full border-2 border-ember-500 border-t-transparent animate-spin"></div>
-      <span className="text-xs text-slate-400 font-mono">Initializing Northern Algeria Tactical Map…</span>
-    </div>
-  ),
+  loading: () => <MapSkeleton />,
 });
 
 export default function Home() {

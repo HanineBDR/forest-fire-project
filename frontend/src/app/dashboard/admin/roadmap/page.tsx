@@ -45,7 +45,6 @@ import {
   Square,
   RefreshCw,
   Upload,
-  Sparkles,
   Filter,
   CheckCircle,
   FileCheck,

@@ -266,11 +266,11 @@ export default function ModelHealthPage() {
 
       {/* Critical Alert Banner (if Degraded or Down) */}
       {currentStatus === "degraded" && (
-        <div className="p-4 rounded-lg border border-amber-900/80 bg-amber-950/40 text-amber-200 text-xs flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div role="alert" className="p-4 rounded-lg border border-amber-900/80 bg-amber-950/40 text-amber-200 text-xs flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="space-y-1">
             <div className="font-bold text-amber-300 text-sm">
-              ⚠️ Modèle IA Dégradé - {simulatedIssue || "Délai de réponse anormal sur l'API externe"}
+              Modèle IA Dégradé : {simulatedIssue || "Délai de réponse anormal sur l'API externe"}
             </div>
             <p className="text-amber-200/90 leading-relaxed">
               Le service météo ou satellitaire présente une latence inhabituelle. Les prédictions basculent automatiquement sur le moteur physique FWI et les archives météorologiques locales de Kabylie pour assurer la continuité opérationnelle.
@@ -280,14 +280,14 @@ export default function ModelHealthPage() {
       )}
 
       {currentStatus === "down" && (
-        <div className="p-4 rounded-lg border border-red-900 bg-red-950/50 text-red-200 text-xs flex items-start gap-3">
-          <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+        <div role="alert" className="p-4 rounded-lg border border-red-900 bg-red-950/50 text-red-200 text-xs flex items-start gap-3">
+          <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="space-y-1">
             <div className="font-bold text-red-300 text-sm">
-              🛑 INTERRUPTION CRITIQUE - Modèle IA Non Conforme
+              INTERRUPTION CRITIQUE : Modèle IA Non Conforme
             </div>
             <p>
-              Le fichier model.pkl est absent ou la précision ({health.model_accuracy * 100}%) est inférieure au seuil critique de 80%. Le système bloque les sorties non vérifiées.
+              Le fichier model.pkl est absent ou la précision ({(health.model_accuracy * 100).toFixed(1)}%) est inférieure au seuil critique de 80%. Le système bloque les sorties non vérifiées.
             </p>
           </div>
         </div>

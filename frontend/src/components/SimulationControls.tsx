@@ -50,6 +50,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
         </div>
 
         <button
+          type="button"
           onClick={() => setIsPlaying(!isPlaying)}
           aria-label={isPlaying ? "Pause simulation playback" : "Start simulation playback"}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
@@ -78,11 +79,13 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
           const isActive = idx === activeHorizonIndex;
           return (
             <button
+              type="button"
               key={step.hours}
               onClick={() => {
                 setIsPlaying(false);
                 onSelectHorizon(idx);
               }}
+              aria-pressed={isActive}
               aria-label={`Select +${step.hours} hour horizon, ${step.burned_area_hectares} hectares`}
               className={`py-2 px-1 rounded-lg border font-mono transition-colors duration-150 flex flex-col items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
                 isActive

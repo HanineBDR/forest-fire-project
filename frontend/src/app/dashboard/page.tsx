@@ -19,16 +19,12 @@ import {
 } from "@/lib/api";
 import { PredictionResult, WeatherData, FIRMSHotspot, RegionPreset } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
+import { MapSkeleton } from "@/components/MapSkeleton";
 
 // Dynamic import of Map to prevent SSR Leaflet window errors
 const DynamicMap = dynamic(() => import("@/components/Map").then((mod) => mod.Map), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full min-h-[500px] rounded-lg bg-slate-900 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-      <div className="w-8 h-8 rounded-full border-2 border-red-500 border-t-transparent animate-spin"></div>
-      <span className="text-xs text-slate-400 font-mono">Chargement du Système Cartographique Opérationnel…</span>
-    </div>
-  ),
+  loading: () => <MapSkeleton />,
 });
 
 function DashboardMapInner() {
@@ -245,36 +241,40 @@ function DashboardMapInner() {
   return (
     <div className="p-4 sm:p-6 max-w-[1720px] mx-auto space-y-4">
       {/* Tactical Status Ribbon */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/60 text-xs">
+      <div 
+        role="status" 
+        aria-label="Statut du système opérationnel"
+        className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/80 text-xs"
+      >
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" aria-hidden="true" />
             <span className="font-semibold text-slate-200">Veille Opérationnelle Active</span>
           </div>
-          <span className="text-slate-700">|</span>
+          <span className="text-slate-700" aria-hidden="true">|</span>
           <span className="text-slate-400">
             Couverture: Massifs Forestiers de Kabylie & Nord-Est Algérien
           </span>
 
           {/* Connected Roadmap Badges */}
           {roadmapPhases.find((p) => p.id === "phase1")?.status === "completed" && (
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 font-bold border border-emerald-600 flex items-center gap-1.5 shadow-sm text-[11px] animate-fadeIn">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              ✓ Pilote Tizi Ouzou Actif
+            <span className="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 font-semibold border border-emerald-800 flex items-center gap-1.5 text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" aria-hidden="true" />
+              Pilote Tizi Ouzou Actif
             </span>
           )}
 
           {roadmapPhases.find((p) => p.id === "phase2")?.status === "completed" && (
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-300 font-bold border border-blue-600 flex items-center gap-1.5 shadow-sm text-[11px] animate-fadeIn">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-              ✓ Passerelle SMS 24/7 Active
+            <span className="px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-semibold border border-slate-700 flex items-center gap-1.5 text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" aria-hidden="true" />
+              Passerelle SMS 24/7 Active
             </span>
           )}
         </div>
-        <div className="flex items-center gap-4 text-slate-400 font-mono">
-          <span>NASA FIRMS: {firmsHotspots.length} foyers</span>
-          <span>Open-Meteo: Connecté</span>
-          <span>Modèle IA: 95.4% Acc</span>
+        <div className="flex items-center gap-4 text-slate-400 font-mono text-[11px] tabular-nums">
+          <span>NASA FIRMS: <strong className="text-slate-200">{firmsHotspots.length}</strong> foyers</span>
+          <span>Open-Meteo: <strong className="text-emerald-400">Connecté</strong></span>
+          <span>Modèle IA: <strong className="text-slate-200">95.4%</strong> Acc</span>
         </div>
       </div>
 

@@ -29,6 +29,8 @@ import {
   Shield,
   Eye,
   Plane,
+  Satellite,
+  Layers,
 } from "lucide-react";
 
 interface MapProps {
@@ -684,9 +686,12 @@ export const Map: React.FC<MapProps> = ({
 
       {/* ROADMAP IDEA 3: Sirocco Aerological Warning Overlay */}
       {simulation6hData?.sirocco_corridor_active && (
-        <div className="absolute top-16 left-4 z-[400] max-w-sm p-2.5 rounded-xl bg-amber-950/95 border border-amber-500/90 shadow-2xl backdrop-blur-md text-amber-200 text-xs animate-fadeIn">
+        <aside 
+          aria-label="Alerte couloir aérologique Sirocco"
+          className="absolute top-16 left-4 z-[400] max-w-sm p-2.5 rounded-lg bg-amber-950/95 border border-amber-600/90 backdrop-blur-md text-amber-200 text-xs"
+        >
           <div className="flex items-center gap-2">
-            <span className="text-base animate-pulse">🌪️</span>
+            <Wind className="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
             <div>
               <div className="font-bold text-white text-[11px] flex items-center gap-1.5">
                 <span>{simulation6hData.sirocco_corridor.name}</span>
@@ -694,126 +699,257 @@ export const Map: React.FC<MapProps> = ({
                   +{Math.round((simulation6hData.sirocco_corridor.multiplier - 1) * 100)}%
                 </span>
               </div>
-              <div className="text-[10px] text-amber-300/80 font-mono">
+              <div className="text-[10px] text-amber-300 font-mono">
                 {simulation6hData.sirocco_corridor.label}
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       )}
 
       {/* FEATURE 5: Canvas Wind Overlay */}
       {showWindAnimation && (
         <canvas
           ref={canvasRef}
+          aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-20 w-full h-full"
         />
       )}
 
-      {/* Top Map Control Bar */}
-      <div className="absolute top-4 left-4 z-[400] flex flex-wrap items-center gap-2">
+      {/* Top Map Control Bar - Command Center Toolbar */}
+      <nav 
+        aria-label="Contrôles cartographiques opérationnels"
+        className="absolute top-3 left-3 z-[400] flex flex-wrap items-center gap-1.5 p-1 bg-slate-900/95 border border-slate-800 rounded-lg backdrop-blur-md"
+      >
         {/* View Scope Switcher */}
-        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-lg p-1 shadow flex items-center gap-1 text-xs">
+        <div className="flex items-center gap-1 p-0.5 bg-slate-950 rounded-md border border-slate-800 text-xs">
           <button
+            type="button"
             onClick={() => setViewScope("northern")}
-            className={`px-3 py-1.5 rounded-md font-semibold transition flex items-center gap-1.5 ${
-              viewScope === "northern" ? "bg-red-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
+            aria-pressed={viewScope === "northern"}
+            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              viewScope === "northern" ? "bg-red-600 text-white" : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Flame className="w-3.5 h-3.5" />
+            <Flame className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span>Nord Algérie</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setViewScope("all_algeria")}
-            className={`px-3 py-1.5 rounded-md font-semibold transition flex items-center gap-1.5 ${
-              viewScope === "all_algeria" ? "bg-red-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
+            aria-pressed={viewScope === "all_algeria"}
+            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              viewScope === "all_algeria" ? "bg-red-600 text-white" : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Globe2 className="w-3.5 h-3.5" />
+            <Globe2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span>Vue Nationale</span>
           </button>
         </div>
 
-        {/* FEATURE 5: Animated Wind Particle Toggle */}
+        {/* 3 Map Base Layer Types: Satellite, Dark, Street (OSM) */}
+        <div 
+          role="radiogroup"
+          aria-label="Fond de carte"
+          className="flex items-center gap-0.5 p-0.5 bg-slate-950 rounded-md border border-slate-800 text-xs"
+        >
+          <button
+            type="button"
+            role="radio"
+            aria-checked={activeTileLayer === "satellite"}
+            onClick={() => setActiveTileLayer("satellite")}
+            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              activeTileLayer === "satellite" 
+                ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+            title="Fond satellite haute résolution (Esri World Imagery)"
+          >
+            <Satellite className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
+            <span>Satellite</span>
+          </button>
+
+          <button
+            type="button"
+            role="radio"
+            aria-checked={activeTileLayer === "dark"}
+            onClick={() => setActiveTileLayer("dark")}
+            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              activeTileLayer === "dark" 
+                ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+            title="Fond sombre tactique nocturne (Dark Mode)"
+          >
+            <Layers className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
+            <span>Sombre</span>
+          </button>
+
+          <button
+            type="button"
+            role="radio"
+            aria-checked={activeTileLayer === "osm"}
+            onClick={() => setActiveTileLayer("osm")}
+            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              activeTileLayer === "osm" 
+                ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+            title="Fond cartographique topographique / routier (OpenStreetMap)"
+          >
+            <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
+            <span>Rues (OSM)</span>
+          </button>
+        </div>
+
+        {/* FEATURE 5: Animated Wind Particle Toggle Switch */}
         <button
+          type="button"
+          role="switch"
+          aria-checked={showWindAnimation}
           onClick={() => setShowWindAnimation(!showWindAnimation)}
-          className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
             showWindAnimation
-              ? "bg-cyan-950/90 border-cyan-700/80 text-cyan-300"
-              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
+              ? "bg-slate-800 border-slate-600 text-white shadow-sm"
+              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
           }`}
           title="Afficher/masquer les particules de vent Open-Meteo"
         >
-          <Wind className="w-3.5 h-3.5" />
-          <span>Vent Animé : {showWindAnimation ? "ON" : "OFF"}</span>
+          <Wind className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
+          <span>Vent</span>
+          <span
+            aria-hidden="true"
+            className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
+              showWindAnimation ? "bg-red-600" : "bg-slate-700"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                showWindAnimation ? "translate-x-3.5" : "translate-x-0.5"
+              } mt-0.5`}
+            />
+          </span>
         </button>
 
-        {/* ROADMAP IDEA 1: DGF Watchtowers Layer Toggle */}
+        {/* ROADMAP IDEA 1: DGF Watchtowers Layer Toggle Switch */}
         <button
+          type="button"
+          role="switch"
+          aria-checked={showDgfVigies}
           onClick={() => setShowDgfVigies(!showDgfVigies)}
-          className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
             showDgfVigies
-              ? "bg-emerald-950/90 border-emerald-600/80 text-emerald-300"
-              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
+              ? "bg-slate-800 border-slate-600 text-white shadow-sm"
+              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
           }`}
           title="Afficher/masquer les 6 postes de vigie DGF interconnectés"
         >
-          <span className="text-xs">🗼</span>
-          <span>Vigies DGF : {showDgfVigies ? "ACTIF" : "OFF"}</span>
+          <Radio className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
+          <span>Vigies DGF</span>
+          <span
+            aria-hidden="true"
+            className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
+              showDgfVigies ? "bg-red-600" : "bg-slate-700"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                showDgfVigies ? "translate-x-3.5" : "translate-x-0.5"
+              } mt-0.5`}
+            />
+          </span>
         </button>
 
-        {/* ROADMAP IDEA 3: Sirocco Mountain Pass Corridors Toggle */}
+        {/* ROADMAP IDEA 3: Sirocco Mountain Pass Corridors Toggle Switch */}
         <button
+          type="button"
+          role="switch"
+          aria-checked={showSiroccoCorridors}
           onClick={() => setShowSiroccoCorridors(!showSiroccoCorridors)}
-          className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
             showSiroccoCorridors
-              ? "bg-amber-950/90 border-amber-600/80 text-amber-300"
-              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
+              ? "bg-slate-800 border-slate-600 text-white shadow-sm"
+              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
           }`}
           title="Afficher/masquer les couloirs aérologiques de Sirocco"
         >
-          <span className="text-xs">🌪️</span>
-          <span>Couloirs Sirocco : {showSiroccoCorridors ? "ACTIF" : "OFF"}</span>
+          <Wind className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
+          <span>Sirocco</span>
+          <span
+            aria-hidden="true"
+            className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
+              showSiroccoCorridors ? "bg-red-600" : "bg-slate-700"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                showSiroccoCorridors ? "translate-x-3.5" : "translate-x-0.5"
+              } mt-0.5`}
+            />
+          </span>
         </button>
 
-        {/* ROADMAP IDEA 4: FLIR Thermal Drone Patrols Toggle */}
+        {/* ROADMAP IDEA 4: FLIR Thermal Drone Patrols Toggle Switch */}
         <button
+          type="button"
+          role="switch"
+          aria-checked={showDronePatrols}
           onClick={() => setShowDronePatrols(!showDronePatrols)}
-          className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md transition flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
             showDronePatrols
-              ? "bg-violet-950/90 border-violet-600/80 text-violet-300"
-              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
+              ? "bg-slate-800 border-slate-600 text-white shadow-sm"
+              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
           }`}
           title="Afficher/masquer la télémétrie des patrouilles de drones thermiques"
         >
-          <span className="text-xs">🛸</span>
-          <span>Drones FLIR : {showDronePatrols ? "ACTIF" : "OFF"}</span>
+          <Plane className="w-3.5 h-3.5 text-violet-400 shrink-0" aria-hidden="true" />
+          <span>Drones FLIR</span>
+          <span
+            aria-hidden="true"
+            className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
+              showDronePatrols ? "bg-red-600" : "bg-slate-700"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                showDronePatrols ? "translate-x-3.5" : "translate-x-0.5"
+              } mt-0.5`}
+            />
+          </span>
         </button>
 
         {/* FEATURE 8: Offline Map Download Button & Dropdown */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowOfflineMenu(!showOfflineMenu)}
-            className="px-2.5 py-1.5 bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md border border-slate-800 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5"
+            aria-expanded={showOfflineMenu}
+            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
-            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <Download className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
             <span>Carte Hors-Ligne</span>
           </button>
 
           {showOfflineMenu && (
-            <div className="absolute left-0 mt-1.5 w-72 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 z-50 space-y-1.5 text-xs">
+            <div className="absolute left-0 mt-1.5 w-72 bg-slate-900 border border-slate-700 rounded-lg p-2 z-50 space-y-1.5 text-xs shadow-lg">
               <div className="font-bold text-slate-200 px-2 py-1 border-b border-slate-800 flex justify-between items-center">
                 <span>Zones pour intervention hors-ligne</span>
-                <button onClick={() => setShowOfflineMenu(false)} className="text-slate-400 hover:text-white">
+                <button 
+                  type="button"
+                  onClick={() => setShowOfflineMenu(false)} 
+                  className="text-slate-400 hover:text-white p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                  aria-label="Fermer le menu hors-ligne"
+                >
                   <X className="w-3 h-3" />
                 </button>
               </div>
 
               <button
+                type="button"
                 onClick={() => handleDownloadOfflineZone("yakouren", "Yakouren", "45 Mo")}
                 disabled={downloadingZone !== null}
-                className="w-full text-left p-2 rounded hover:bg-slate-800 transition text-slate-300 hover:text-white flex justify-between items-center"
+                className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
               >
                 <div>
                   <div className="font-semibold text-white">Zone Yakouren (Tizi Ouzou)</div>
@@ -823,9 +959,10 @@ export const Map: React.FC<MapProps> = ({
               </button>
 
               <button
+                type="button"
                 onClick={() => handleDownloadOfflineZone("akfadou", "Akfadou", "58 Mo")}
                 disabled={downloadingZone !== null}
-                className="w-full text-left p-2 rounded hover:bg-slate-800 transition text-slate-300 hover:text-white flex justify-between items-center"
+                className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
               >
                 <div>
                   <div className="font-semibold text-white">Zone Akfadou (Bejaia)</div>
@@ -835,9 +972,10 @@ export const Map: React.FC<MapProps> = ({
               </button>
 
               <button
+                type="button"
                 onClick={() => handleDownloadOfflineZone("kabylie", "Grande Kabylie", "125 Mo")}
                 disabled={downloadingZone !== null}
-                className="w-full text-left p-2 rounded hover:bg-slate-800 transition text-slate-300 hover:text-white flex justify-between items-center"
+                className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
               >
                 <div>
                   <div className="font-semibold text-white">Tout le corridor Kabylie</div>
@@ -855,19 +993,20 @@ export const Map: React.FC<MapProps> = ({
             </div>
           )}
         </div>
-      </div>
+      </nav>
 
       {/* FEATURE 7: Citizen Reporting Floating Action Button */}
       <div className="absolute bottom-4 right-4 z-[400]">
         <button
+          type="button"
           onClick={() => setShowReportModal(true)}
-          className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-full shadow-lg shadow-red-950/80 flex items-center gap-2 transition transform hover:scale-105 active:scale-95"
+          className="px-3.5 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg flex items-center gap-2 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
-          <span className="relative flex h-2.5 w-2.5">
+          <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
           </span>
-          <Smartphone className="w-4 h-4" />
+          <Smartphone className="w-4 h-4 shrink-0" aria-hidden="true" />
           <span>Signalement Citoyen</span>
         </button>
       </div>

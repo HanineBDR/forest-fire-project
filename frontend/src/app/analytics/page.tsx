@@ -20,7 +20,7 @@ import {
   History as HistoryIcon,
   Layers,
   Calendar,
-  Sparkles,
+  Cpu,
   Radio,
   Sliders,
   Check,
@@ -494,11 +494,12 @@ export default function AnalyticsPage() {
 
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={handleRegenerateModel}
                 disabled={isRegeneratingModel}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold transition-all shadow-sm disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold transition-colors duration-150 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               >
-                <Sparkles className={`w-3.5 h-3.5 text-amber-400 ${isRegeneratingModel ? "animate-spin" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 text-slate-300 ${isRegeneratingModel ? "animate-spin" : ""}`} aria-hidden="true" />
                 <span>{isRegeneratingModel ? "Réentraînement..." : "Régénérer avec les dernières données"}</span>
               </button>
 
@@ -602,7 +603,7 @@ export default function AnalyticsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <BarChart3 className="w-4 h-4 text-slate-300 shrink-0" aria-hidden="true" />
                     Poids des Paramètres & Importance des Variables (XGBoost)
                   </h3>
                   <p className="text-[11px] text-slate-400">
@@ -646,9 +647,9 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          {/* Explanatory callout for judges */}
-          <div className="p-3.5 rounded-xl border border-ember-800/60 bg-ember-950/30 flex items-start gap-3">
-            <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+          {/* Explanatory callout */}
+          <div className="p-3.5 rounded-lg border border-slate-800 bg-slate-900/60 flex items-start gap-3">
+            <HistoryIcon className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" aria-hidden="true" />
             <div className="text-xs space-y-1">
               <span className="font-semibold text-white">Traçabilité & Calibration Opérationnelle :</span>
               <p className="text-slate-300 leading-relaxed">

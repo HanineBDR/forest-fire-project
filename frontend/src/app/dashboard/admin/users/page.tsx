@@ -11,7 +11,8 @@ import {
   Building, 
   AlertCircle, 
   CheckCircle2,
-  Lock
+  Lock,
+  X
 } from "lucide-react";
 import { getStoredUser, getStoredToken, AuthUser, UserRole } from "@/lib/auth";
 
@@ -197,10 +198,11 @@ export default function UsersManagementPage() {
         </div>
 
         <button
+          type="button"
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-red-600 hover:bg-red-500 text-white text-xs font-medium transition"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         >
-          <UserPlus className="w-3.5 h-3.5" />
+          <UserPlus className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
           <span>Créer un Compte Autorisé</span>
         </button>
       </div>
@@ -274,8 +276,10 @@ export default function UsersManagementPage() {
                         </span>
                       ) : (
                         <button
+                          type="button"
                           onClick={() => handleDeleteUser(u.email)}
-                          className="p-1.5 rounded hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-transparent hover:border-red-900 transition"
+                          aria-label={`Révoquer l'accès pour ${u.name}`}
+                          className="p-1.5 rounded-md hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-transparent hover:border-red-900 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                           title="Révoquer cet accès"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -296,14 +300,16 @@ export default function UsersManagementPage() {
           <div className="w-full max-w-md rounded-lg border border-slate-800 bg-slate-900 p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <UserPlus className="w-4 h-4 text-red-500" />
+                <UserPlus className="w-4 h-4 text-red-500 shrink-0" aria-hidden="true" />
                 <span>Créer un Compte Opérationnel</span>
               </h2>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-500 hover:text-slate-300 text-sm"
+                className="text-slate-400 hover:text-white p-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                aria-label="Fermer la boîte de dialogue"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
