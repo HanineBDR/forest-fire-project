@@ -58,7 +58,7 @@ const DEFAULT_USERS: ManagedUser[] = [
 ];
 
 export default function UsersManagementPage() {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const [users, setUsers] = useState<ManagedUser[]>(DEFAULT_USERS);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -187,15 +187,15 @@ export default function UsersManagementPage() {
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 text-[11px] font-semibold">
-              Administration Centrale (RBAC)
+              {t("users_admin_badge")}
             </span>
           </div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2 mt-1">
             <Users className="w-5 h-5 text-blue-400" />
-            <span>Gestion des Comptes & Accréditations Officielles</span>
+            <span>{t("users_title")}</span>
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Délivrance et révocation des accès opérationnels pour la Protection Civile et les Forêts
+            {t("users_subtitle")}
           </p>
         </div>
 
@@ -205,7 +205,7 @@ export default function UsersManagementPage() {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         >
           <UserPlus className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-          <span>Créer un Compte Autorisé</span>
+          <span>{t("users_create_btn")}</span>
         </button>
       </div>
 
@@ -229,11 +229,11 @@ export default function UsersManagementPage() {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 font-medium">
               <tr>
-                <th className="py-3 px-4">Personnel & Titre</th>
-                <th className="py-3 px-4">Identifiant E-mail</th>
-                <th className="py-3 px-4">Rôle Institutionnel</th>
-                <th className="py-3 px-4">Direction / Unité</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4">{t("users_col_personnel")}</th>
+                <th className="py-3 px-4">{t("users_col_email")}</th>
+                <th className="py-3 px-4">{t("users_col_role")}</th>
+                <th className="py-3 px-4">{t("users_col_org")}</th>
+                <th className="py-3 px-4 text-right">{language === "ar" ? "الإجراءات" : "Actions"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">

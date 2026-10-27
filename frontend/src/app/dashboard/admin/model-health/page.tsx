@@ -20,6 +20,8 @@ import {
   History as HistoryIcon
 } from "lucide-react";
 import { getStoredUser, getStoredToken } from "@/lib/auth";
+import { useLanguage } from "@/context/LanguageContext";
+import { getLocalizedAuditNote } from "@/lib/i18nAudit";
 
 interface HealthCheck {
   service: string;
@@ -87,6 +89,7 @@ const DEFAULT_HEALTH: SystemHealth = {
 };
 
 export default function ModelHealthPage() {
+  const { t, language } = useLanguage();
   const [health, setHealth] = useState<SystemHealth>(DEFAULT_HEALTH);
   const [loading, setLoading] = useState<boolean>(false);
   const [testResult, setTestResult] = useState<any | null>(null);
@@ -172,23 +175,25 @@ export default function ModelHealthPage() {
       const latMs = Math.round((performance.now() - t0) * 10) / 10;
       setTestResult({
         status: "success",
-        benchmark_target: "Forêt de Yakouren (Tizi Ouzou)",
+        benchmark_target: language === "ar" ? "غابة يعكورن (تيزي وزو)" : "Yakouren Forest (Tizi Ouzou)",
         input_conditions: {
           temperature: "38.5°C",
           humidity: "18.0%",
-          wind: "32.0 km/h (Sirocco)",
+          wind: language === "ar" ? "32.0 كم/س (الشهيلي)" : "32.0 km/h (Sirocco)",
           rain: "0.0 mm",
-          month: "Juillet (Pic estival)"
+          month: language === "ar" ? "جويلية (ذروة الصيف)" : language === "en" ? "July (Summer Peak)" : "Juillet (Pic estival)"
         },
         model_risk_score: 94.1,
-        risk_level: "Extreme (Crisis Alert)",
+        risk_level: language === "ar" ? "حرج (إنذار طوارئ)" : "Extreme (Crisis Alert)",
         contributing_factors: [
-          { factor: "Température Extrême", weight: 0.32, value: "38.5°C" },
-          { factor: "Humidité Critique", weight: 0.28, value: "18.0%" },
-          { factor: "Vent Sirocco", weight: 0.22, value: "32.0 km/h" }
+          { factor: language === "ar" ? "حرارة قصوى" : "Extreme Temperature", weight: 0.32, value: "38.5°C" },
+          { factor: language === "ar" ? "رطوبة حرجة" : "Critical Humidity", weight: 0.28, value: "18.0%" },
+          { factor: language === "ar" ? "رياح الشهيلي" : "Sirocco Wind", weight: 0.22, value: "32.0 km/h" }
         ],
         latency_ms: latMs,
-        verdict: "Modèle XGBoost opérationnel & inférence temps-réel optimale (<15ms)"
+        verdict: language === "ar" 
+          ? "نموذج XGBoost سليم وعمليات الاستدلال في الوقت الفعلي مثالية (<15ms)" 
+          : "XGBoost model operational & real-time inference optimal (<15ms)"
       });
     } finally {
       setTestingModel(false);
@@ -223,6 +228,23 @@ export default function ModelHealthPage() {
     return Database;
   };
 
+  const getLocalizedServiceName = (service: string) => {
+    if (language === "ar") {
+      if (service.includes("Model")) return "نموذج الذكاء الاصطناعي (XGBoost)";
+      if (service.includes("NASA")) return "واجهة أقمار ناسا (FIRMS)";
+      if (service.includes("Weather")) return "واجهة الطقس (Open-Meteo)";
+      return "قاعدة البيانات وسجل التدقيق";
+    }
+    if (language === "fr") {
+      if (service.includes("Model")) return "Modèle IA (XGBoost)";
+      if (service.includes("NASA")) return "API NASA FIRMS";
+      if (service.includes("Weather")) return "API Météo (Open-Meteo)";
+      return "Base de Données & Registre";
+    }
+    // Default English
+    return service;
+  };
+
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -230,16 +252,16 @@ export default function ModelHealthPage() {
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 text-[11px] font-semibold">
-              Supervision Administrateur
+              {t("mh_admin_supervision")}
             </span>
-            <span className="text-xs text-slate-500 font-mono">Uptime: {health.uptime_formatted}</span>
+            <span className="text-xs text-slate-500 font-mono">{t("mh_uptime")}: {health.uptime_formatted}</span>
           </div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2 mt-1">
             <Activity className="w-5 h-5 text-emerald-400" />
-            <span>Surveillance Technique & Santé de l'IA (Health Monitoring)</span>
+            <span>{t("mh_title")}</span>
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Surveillance continue du modèle XGBoost, de l'API NASA FIRMS, d'Open-Meteo et de l'intégrité des bases
+            {t("mh_subtitle")}
           </p>
         </div>
 
@@ -250,7 +272,7 @@ export default function ModelHealthPage() {
             className="px-2.5 py-1.5 rounded text-xs border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 transition"
             title="Tester le comportement de l'interface en cas d'incident"
           >
-            {simulatedIssue ? "Rétablir État Sain" : "Simuler Dégradation API"}
+            {simulatedIssue ? t("mh_restore_healthy") : t("mh_simulate_degradation")}
           </button>
 
           <button
@@ -259,7 +281,7 @@ export default function ModelHealthPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            <span>Actualiser</span>
+            <span>{t("mh_refresh_btn")}</span>
           </button>
         </div>
       </div>
@@ -270,10 +292,15 @@ export default function ModelHealthPage() {
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="space-y-1">
             <div className="font-bold text-amber-300 text-sm">
-              Modèle IA Dégradé : {simulatedIssue || "Délai de réponse anormal sur l'API externe"}
+              {language === "ar" ? "تدهور في النموذج: " : language === "en" ? "AI Model Degraded: " : "Modèle IA Dégradé : "}
+              {simulatedIssue || (language === "ar" ? "تأخير غير معتاد في استجابة الواجهة الخارجية" : "Abnormal external API response latency")}
             </div>
             <p className="text-amber-200/90 leading-relaxed">
-              Le service météo ou satellitaire présente une latence inhabituelle. Les prédictions basculent automatiquement sur le moteur physique FWI et les archives météorologiques locales de Kabylie pour assurer la continuité opérationnelle.
+              {language === "ar"
+                ? "تواجه خدمة الطقس أو الأقمار الصناعية تأخيراً غير معتاد. تتحول التوقعات تلقائياً إلى محرك FWI الفيزيائي والأرشيف المناخي المحلي لمنطقة القبائل لضمان استمرارية العمليات."
+                : language === "en"
+                ? "Weather or satellite service is experiencing abnormal latency. Predictions automatically fall back to the physical FWI engine and local Kabylie weather archives to ensure operational continuity."
+                : "Le service météo ou satellitaire présente une latence inhabituelle. Les prédictions basculent automatiquement sur le moteur physique FWI et les archives météorologiques locales de Kabylie pour assurer la continuité opérationnelle."}
             </p>
           </div>
         </div>
@@ -284,10 +311,14 @@ export default function ModelHealthPage() {
           <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="space-y-1">
             <div className="font-bold text-red-300 text-sm">
-              INTERRUPTION CRITIQUE : Modèle IA Non Conforme
+              {language === "ar" ? "انقطاع حرج: نموذج الذكاء الاصطناعي غير متوافق" : language === "en" ? "CRITICAL OUTAGE: AI Model Non-Compliant" : "INTERRUPTION CRITIQUE : Modèle IA Non Conforme"}
             </div>
             <p>
-              Le fichier model.pkl est absent ou la précision ({(health.model_accuracy * 100).toFixed(1)}%) est inférieure au seuil critique de 80%. Le système bloque les sorties non vérifiées.
+              {language === "ar"
+                ? `ملف model.pkl غير موجود أو الدقة (${(health.model_accuracy * 100).toFixed(1)}%) أقل من العتبة الحرجة 80%. النظام يوقف التوقعات غير المؤكدة.`
+                : language === "en"
+                ? `model.pkl file missing or accuracy (${(health.model_accuracy * 100).toFixed(1)}%) is below the critical 80% threshold. System blocks unverified outputs.`
+                : `Le fichier model.pkl est absent ou la précision (${(health.model_accuracy * 100).toFixed(1)}%) est inférieure au seuil critique de 80%. Le système bloque les sorties non vérifiées.`}
             </p>
           </div>
         </div>
@@ -298,11 +329,11 @@ export default function ModelHealthPage() {
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             <span className="font-semibold text-emerald-300">
-              Tous les sous-systèmes sont sains et opérationnels (100% conformité technique)
+              {t("mh_system_healthy")}
             </span>
           </div>
           <span className="text-[11px] text-emerald-400/80 font-mono">
-            Précision XGBoost: {(health.model_accuracy * 100).toFixed(1)}% &gt; Seuil 80%
+            {t("mh_xgboost_accuracy")}: {(health.model_accuracy * 100).toFixed(1)}% &gt; {t("mh_threshold_80")}
           </span>
         </div>
       )}
@@ -313,6 +344,7 @@ export default function ModelHealthPage() {
           const Icon = getServiceIcon(check.service);
           const isDegraded = simulatedIssue && check.service.includes("NASA");
           const status = isDegraded ? "degraded" : check.status;
+          const serviceTitle = getLocalizedServiceName(check.service);
 
           return (
             <div
@@ -330,32 +362,32 @@ export default function ModelHealthPage() {
                   <div className="p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-300">
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-xs font-semibold text-white">{check.service}</span>
+                  <span className="text-xs font-semibold text-white">{serviceTitle}</span>
                 </div>
 
                 {status === "healthy" && (
                   <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Sain</span>
+                    <span>{t("mh_status_healthy")}</span>
                   </span>
                 )}
                 {status === "degraded" && (
                   <span className="inline-flex items-center gap-1 text-[11px] text-amber-400 font-semibold">
                     <AlertTriangle className="w-3.5 h-3.5" />
-                    <span>Dégradé</span>
+                    <span>{t("mh_status_degraded")}</span>
                   </span>
                 )}
                 {status === "down" && (
                   <span className="inline-flex items-center gap-1 text-[11px] text-red-400 font-semibold">
                     <XCircle className="w-3.5 h-3.5" />
-                    <span>Arrêt</span>
+                    <span>{t("mh_status_down")}</span>
                   </span>
                 )}
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-[11px] text-slate-400">Latence moyenne:</span>
+                  <span className="text-[11px] text-slate-400">{t("mh_avg_latency")}</span>
                   <span className="text-xs font-mono font-bold text-slate-200">
                     {isDegraded ? "2450 ms" : `${check.latency_ms.toFixed(1)} ms`}
                   </span>
@@ -363,7 +395,7 @@ export default function ModelHealthPage() {
 
                 {check.accuracy !== undefined && (
                   <div className="flex items-baseline justify-between">
-                    <span className="text-[11px] text-slate-400">Précision vérifiée:</span>
+                    <span className="text-[11px] text-slate-400">{t("mh_verified_accuracy")}</span>
                     <span className="text-xs font-mono font-bold text-emerald-400">
                       {(check.accuracy * 100).toFixed(1)}%
                     </span>
@@ -373,8 +405,8 @@ export default function ModelHealthPage() {
 
               <p className="text-[11px] text-slate-400 leading-relaxed border-t border-slate-800/80 pt-2">
                 {isDegraded
-                  ? "Délai de connexion dépassé (Timeout simulation)"
-                  : check.details || "Service actif et conforme."}
+                  ? (language === "ar" ? "تجاوز مهلة الاتصال (محاكاة)" : "Connection timeout (simulation)")
+                  : getLocalizedAuditNote(check.details || "", language) || (language === "ar" ? "الخدمة نشطة وسليمة." : "Service active and healthy.")}
               </p>
             </div>
           );
@@ -389,11 +421,12 @@ export default function ModelHealthPage() {
             <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 shrink-0" />
             <div>
               <h3 className="text-sm font-bold text-red-200">
-                NASA API down — Mode Données en Cache Activé
+                {language === "ar" ? "توقف واجهة ناسا — تم تفعيل وضع البيانات المخزنة" : "NASA API Down — Cached Data Mode Active"}
               </h3>
               <p className="text-xs text-red-300/90 mt-0.5 leading-relaxed">
-                3 échecs consécutifs de synchronisation avec la constellation FIRMS (VIIRS/MODIS). 
-                Le système IN9AD a basculé automatiquement sur les observations historiques consolidées en base SQLite pour garantir la continuité des alertes.
+                {language === "ar"
+                  ? "3 محاولات فاشلة متتالية للمزامنة مع كوكبة FIRMS. قام نظام إنقاذ بالتبديل التلقائي إلى الملاحظات التاريخية الموحدة في قاعدة بيانات SQLite لضمان استمرارية التنبيهات."
+                  : "3 consecutive synchronization failures with FIRMS constellation. The IN9AD system automatically failed over to consolidated historical SQLite observations to maintain alert continuity."}
               </p>
             </div>
           </div>
@@ -406,35 +439,37 @@ export default function ModelHealthPage() {
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-4 h-4 text-emerald-400" />
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Télémétrie de Rafraîchissement Satellitaire
+                  {t("mh_telemetry_title")}
                 </h3>
               </div>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">
-                1 req/h max
+                {t("mh_quota_max")}
               </span>
             </div>
 
             <div className="space-y-2.5 text-xs font-mono">
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800">
-                <span className="text-slate-400">Dernier rafraîchissement:</span>
+                <span className="text-slate-400">{t("mh_last_refresh")}</span>
                 <span className="text-emerald-400 font-bold">
                   {refreshData.logs.length > 0 
-                    ? new Date(refreshData.logs[0].timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) 
-                    : "10 mins ago"}
+                    ? new Date(refreshData.logs[0].timestamp).toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", { hour: "2-digit", minute: "2-digit" }) 
+                    : (language === "ar" ? "منذ 10 دقائق" : "10 mins ago")}
                 </span>
               </div>
 
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800">
-                <span className="text-slate-400">Prochaine synchro NASA:</span>
+                <span className="text-slate-400">{t("mh_next_sync")}</span>
                 <span className="text-white font-bold">
-                  Dans {Math.max(1, Math.floor((refreshData.nasa_quota?.next_allowed_in_sec || 3000) / 60))} mins
+                  {language === "ar" 
+                    ? `خلال ${Math.max(1, Math.floor((refreshData.nasa_quota?.next_allowed_in_sec || 3000) / 60))} دقيقة` 
+                    : `In ${Math.max(1, Math.floor((refreshData.nasa_quota?.next_allowed_in_sec || 3000) / 60))} mins`}
                 </span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-sans text-slate-300">
-                <span className="font-semibold text-white">Gestion du Quota NASA :</span>
+                <span className="font-semibold text-white">{t("mh_quota_title")}</span>
                 <p className="text-slate-400 mt-0.5">
-                  {refreshData.nasa_quota?.message || "Cache actif (limite 1 req/h pour préserver le quota)."}
+                  {language === "ar" ? "ذاكرة التخزين المؤقت نشطة (حد أقصى طلب واحد/ساعة لحفظ الحصة)." : (refreshData.nasa_quota?.message || "Cache active (1 req/h limit to preserve quota).")}
                 </p>
               </div>
             </div>
@@ -445,10 +480,10 @@ export default function ModelHealthPage() {
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <HistoryIcon className="w-4 h-4 text-blue-400" />
-                <span>Journal Récent des Synchronisations (SQLite in9ad_history.db)</span>
+                <span>{t("mh_sync_log_title")}</span>
               </h3>
               <span className="text-[11px] font-mono text-slate-400">
-                {refreshData.logs.length} événements
+                {refreshData.logs.length} {t("mh_events_count")}
               </span>
             </div>
 
@@ -466,16 +501,16 @@ export default function ModelHealthPage() {
                     />
                     <div className="min-w-0">
                       <div className="font-semibold text-white truncate text-[11px]">
-                        {log.details || `Refresh ${log.refresh_type}`}
+                        {getLocalizedAuditNote(log.details || `Refresh ${log.refresh_type}`, language)}
                       </div>
                       <div className="text-[10px] text-slate-400 font-mono">
-                        Type: {log.refresh_type} · Latence: {log.duration_ms ? `${log.duration_ms}ms` : "<150ms"}
+                        Type: {log.refresh_type} · {language === "ar" ? "زمن الاستجابة" : "Latency"}: {log.duration_ms ? `${log.duration_ms}ms` : "<150ms"}
                       </div>
                     </div>
                   </div>
 
                   <span className="font-mono text-[10px] text-slate-400 shrink-0">
-                    {new Date(log.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(log.timestamp).toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
               ))}
@@ -492,15 +527,15 @@ export default function ModelHealthPage() {
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <BarChart2 className="w-4 h-4 text-blue-400" />
-                <span>Volume de Prédictions par Heure & Taux d'Erreur</span>
+                <span>{t("mh_hourly_volume_title")}</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Surveillance de la charge opérationnelle (12 dernières heures)
+                {t("mh_hourly_volume_sub")}
               </p>
             </div>
 
             <div className="text-right">
-              <span className="text-xs text-slate-400">Taux d'erreur:</span>
+              <span className="text-xs text-slate-400">{t("mh_error_rate")}</span>
               <span className="text-xs font-mono font-bold text-emerald-400 ml-1.5">0.0%</span>
             </div>
           </div>
@@ -529,8 +564,8 @@ export default function ModelHealthPage() {
           </div>
 
           <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-            <span>Total aujourd'hui: <strong>685 prédictions</strong></span>
-            <span>Régulation de débit: <strong>100 req/min/opérateur</strong></span>
+            <span>{t("mh_total_today")} <strong>685 {t("mh_predictions_count")}</strong></span>
+            <span>{t("mh_rate_limit")}</span>
           </div>
         </div>
 
@@ -540,14 +575,14 @@ export default function ModelHealthPage() {
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
-                <span>Test Live du Modèle IA</span>
+                <span>{t("mh_live_test_title")}</span>
               </h2>
               <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-mono">
-                Admin Exclusive
+                {t("mh_admin_exclusive")}
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Exécute une inférence instantanée avec un jeu de données d'essai calibré sur les massifs de Grande Kabylie pour vérifier la latence et l'exactitude des facteurs.
+              {t("mh_live_test_desc")}
             </p>
           </div>
 
@@ -558,14 +593,14 @@ export default function ModelHealthPage() {
               className="w-full py-2.5 px-4 rounded bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-medium text-xs transition flex items-center justify-center gap-2"
             >
               <Play className={`w-3.5 h-3.5 ${testingModel ? "animate-spin" : ""}`} />
-              <span>{testingModel ? "Exécution du benchmark…" : "Tester le Modèle (Test Model)"}</span>
+              <span>{testingModel ? t("mh_executing_benchmark") : t("mh_test_model_btn")}</span>
             </button>
 
             {testResult && (
               <div className="rounded border border-slate-800 bg-slate-950 p-3 space-y-2 text-xs">
                 <div className="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
                   <span className="font-semibold text-slate-200">
-                    Cible: {testResult.benchmark_target}
+                    {language === "ar" ? "الهدف: " : "Target: "}{testResult.benchmark_target}
                   </span>
                   <span className="font-mono text-emerald-400 font-bold">
                     {testResult.latency_ms} ms
@@ -573,15 +608,15 @@ export default function ModelHealthPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-400 font-mono">
-                  <div>Temp: {testResult.input_conditions?.temperature}</div>
-                  <div>Humidité: {testResult.input_conditions?.humidity}</div>
-                  <div>Vent: {testResult.input_conditions?.wind}</div>
-                  <div>Mois: {testResult.input_conditions?.month}</div>
+                  <div>{language === "ar" ? "الحرارة" : "Temp"}: {testResult.input_conditions?.temperature}</div>
+                  <div>{language === "ar" ? "الرطوبة" : "Humidity"}: {testResult.input_conditions?.humidity}</div>
+                  <div>{language === "ar" ? "الرياح" : "Wind"}: {testResult.input_conditions?.wind}</div>
+                  <div>{language === "ar" ? "الشهر" : "Month"}: {testResult.input_conditions?.month}</div>
                 </div>
 
                 <div className="p-2 rounded bg-red-950/40 border border-red-900/60 flex items-center justify-between">
                   <span className="text-[11px] text-red-300 font-semibold">
-                    Score Calculé: {testResult.model_risk_score}%
+                    {language === "ar" ? "المعدل المحسوب: " : "Calculated Score: "}{testResult.model_risk_score}%
                   </span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-900 text-red-100 font-bold">
                     {testResult.risk_level}

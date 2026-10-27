@@ -91,7 +91,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const badgeInfo = getRoleBadgeInfo(user.role, language);
   // Clean role text without duplicate emoji
-  const cleanRoleText = badgeInfo.text.replace(/^[🔒\s]+Secure\s+access\s*-\s*/i, "").trim() || "Sécurité Accréditée";
+  const fallbackRole = language === "ar" ? "المديرية العامة" : language === "en" ? "General Directorate" : "Direction Générale";
+  const cleanRoleText = badgeInfo.text.replace(/^[🔒\s]+Secure\s+access\s*-\s*/i, "").trim() || fallbackRole;
   const cleanUserName = getLocalizedUserName(user.name, user.role, language);
   const isAdmin = user.role === "ADMIN";
 

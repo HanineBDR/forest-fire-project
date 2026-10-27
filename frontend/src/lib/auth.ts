@@ -175,13 +175,17 @@ export function getRoleBadgeInfo(role?: UserRole, lang?: string): { text: string
 
 export function getLocalizedUserName(name: string, role?: UserRole, lang?: string): string {
   if (lang === "fr") return name;
-  if (role === "ADMIN") {
+  const isSuperAdmin = role === "ADMIN" || name?.includes("Direction") || name?.includes("Super Admin") || name?.includes("Administrateur");
+  const isCivilProtection = role === "CIVIL_PROTECTION" || name?.includes("Protection") || name?.includes("Commandant");
+  const isForestGuard = role === "FOREST_GUARD" || name?.includes("Forêt") || name?.includes("Garde") || name?.includes("Inspecteur");
+
+  if (isSuperAdmin) {
     return lang === "ar" ? "المديرية العامة - المشرف الرئيسي" : "General Directorate - Super Admin";
   }
-  if (role === "CIVIL_PROTECTION") {
+  if (isCivilProtection) {
     return lang === "ar" ? "قائد الحماية المدنية" : "Civil Protection Commander";
   }
-  if (role === "FOREST_GUARD") {
+  if (isForestGuard) {
     return lang === "ar" ? "المفتش الرئيسي للغابات" : "Chief Forest Inspector";
   }
   return name;

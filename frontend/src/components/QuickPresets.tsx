@@ -16,7 +16,41 @@ interface QuickPresetsProps {
  * Format massif name for optimal tactical readability:
  * Keeps the recognizable massif/forest name rather than generic prefixes.
  */
-function getDisplayMassifName(fullName: string): string {
+function getDisplayMassifName(fullName: string, lang: string): string {
+  if (lang === "ar") {
+    if (fullName.includes("Yakouren")) return "يعكورن";
+    if (fullName.includes("Akfadou")) return "أكفادو";
+    if (fullName.includes("Djurdjura") || fullName.includes("Tikjda")) return "تيكجدة (جرجرة)";
+    if (fullName.includes("Gouraya")) return "قورايا";
+    if (fullName.includes("Mizrana")) return "مزرانة";
+    if (fullName.includes("Babor")) return "البابور - طابابور";
+    if (fullName.includes("Chréa")) return "الشريعة";
+    if (fullName.includes("Beni Toufout")) return "بني توفوت";
+    if (fullName.includes("Zarifet")) return "الظريفات";
+    if (fullName.includes("Sidi Amar")) return "سيدي عمار";
+    if (fullName.includes("Taza") || fullName.includes("Guerrouche")) return "قروش وتازة";
+    if (fullName.includes("Chélia")) return "جبل شيلية";
+    if (fullName.includes("El Kala")) return "القالة";
+    if (fullName.includes("Zaccar")) return "جبل زكار";
+    if (fullName.includes("Theniet El Had")) return "ثنية الحد";
+  }
+
+  // English & Latin: Ensure clean concise names without truncation
+  if (fullName.includes("Mont Zaccar") || fullName.includes("Zaccar")) return "Mt. Zaccar";
+  if (fullName.includes("Zarifet")) return "Zarifet Forest";
+  if (fullName.includes("Chélia")) return "Mt. Chélia";
+  if (fullName.includes("Sidi Amar")) return "Sidi Amar";
+  if (fullName.includes("Taza") || fullName.includes("Guerrouche")) return "Guerrouche & Taza";
+  if (fullName.includes("Beni Toufout")) return "Beni Toufout";
+  if (fullName.includes("Akfadou")) return "Akfadou Forest";
+  if (fullName.includes("Yakouren")) return "Yakouren";
+  if (fullName.includes("Djurdjura") || fullName.includes("Tikjda")) return "Tikjda (Djurdjura)";
+  if (fullName.includes("Mizrana")) return "Mizrana";
+  if (fullName.includes("Babor")) return "Babor-Tababor";
+  if (fullName.includes("El Kala")) return "El Kala";
+  if (fullName.includes("Chréa")) return "Chréa";
+  if (fullName.includes("Theniet El Had")) return "Theniet El Had";
+
   let cleaned = fullName
     .replace(/^Forêt\s+(des\s+Cèdres\s+du|Domaniale\s+des|de|des|du)\s+/i, "")
     .replace(/^Massif\s+(des\s+Babors\s+-\s+|de|des|du)\s+/i, "")
@@ -27,16 +61,6 @@ function getDisplayMassifName(fullName: string): string {
     .replace(/\s+National Park$/i, "")
     .replace(/\s+Biosphere$/i, "");
 
-  if (cleaned.includes("Mont Zaccar") || cleaned.includes("Zaccar")) return "Mt. Zaccar";
-  if (cleaned.includes("Zarifet")) return "Zarifet";
-  if (cleaned.includes("Chélia")) return "Mt. Chélia";
-  if (cleaned.includes("Sidi Amar")) return "Sidi Amar";
-  if (cleaned.includes("Taza") || cleaned.includes("Guerrouche")) return "Guerrouche & Taza";
-  if (cleaned.includes("Beni Toufout")) return "Beni Toufout";
-  if (cleaned.includes("Akfadou")) return "Akfadou";
-  if (cleaned.includes("Yakouren")) return "Yakouren";
-  if (cleaned.includes("Djurdjura") || cleaned.includes("Tikjda")) return "Tikjda (Djurdjura)";
-
   return cleaned.trim() || fullName;
 }
 
@@ -46,7 +70,7 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
   onSelectRegion,
   isLoading,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <section 
@@ -84,7 +108,7 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 xl:grid-cols-7 gap-2.5">
         {regions.map((reg) => {
           const isSelected = selectedRegionId === reg.id;
-          const displayName = getDisplayMassifName(reg.name);
+          const displayName = getDisplayMassifName(reg.name, language);
           const wilayaCode = reg.wilaya.match(/\((.*?)\)/)?.[1] || reg.wilaya.split(" ")[0];
 
           return (

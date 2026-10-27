@@ -39,6 +39,7 @@ import {
 import { useLanguage, Language } from "@/context/LanguageContext";
 import { AlertRecord, AlertStatusHistory } from "@/types";
 import { PdfLanguageModal } from "@/components/PdfLanguageModal";
+import { getLocalizedStatusName, getLocalizedOperatorName, getLocalizedAuditNote } from "@/lib/i18nAudit";
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string; border: string }> = {
   DETECTED: {
@@ -667,10 +668,10 @@ export default function AlertsPage() {
                                     <span className="font-mono text-slate-400">
                                       {new Date(h.changed_at).toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
                                     </span>
-                                    <span className="font-bold text-white">{h.new_status}</span>
-                                    <span className="text-slate-400">{language === "ar" ? "بواسطة " : language === "en" ? "by " : "par "}{h.changed_by}</span>
+                                    <span className="font-bold text-white">{getLocalizedStatusName(h.new_status, language)}</span>
+                                    <span className="text-slate-400">{language === "ar" ? "بواسطة " : language === "en" ? "by " : "par "}{getLocalizedOperatorName(h.changed_by, language)}</span>
                                   </div>
-                                  <p className="text-slate-300 font-sans leading-relaxed">{h.note}</p>
+                                  <p className="text-slate-300 font-sans leading-relaxed">{getLocalizedAuditNote(h.note, language)}</p>
                                 </div>
                               </div>
                             ))
@@ -777,7 +778,7 @@ export default function AlertsPage() {
                   <span>{t("audit_history_modal_title")} — {modalAlert.alert_id}</span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {modalAlert.forest_name} ({modalAlert.wilaya}) · Coordonnées GPS: {modalAlert.lat}°N, {modalAlert.lon}°E
+                  {getLocalizedAuditNote(modalAlert.forest_name, language)} ({modalAlert.wilaya}) · {language === "ar" ? "الإحداثيات الجغرافية (GPS)" : language === "en" ? "GPS Coordinates" : "Coordonnées GPS"}: {modalAlert.lat}°N, {modalAlert.lon}°E
                 </p>
               </div>
               <button onClick={() => setModalAlert(null)} className="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800">
@@ -793,17 +794,17 @@ export default function AlertsPage() {
                   <div key={h.id || idx} className="p-3.5 rounded-xl border border-slate-800 bg-slate-950 space-y-1 text-xs">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 font-mono">
-                        <span className="text-ember-400 font-bold">{h.old_status}</span>
+                        <span className="text-ember-400 font-bold">{getLocalizedStatusName(h.old_status, language)}</span>
                         <span className="text-slate-500">→</span>
-                        <span className="text-emerald-400 font-bold">{h.new_status}</span>
+                        <span className="text-emerald-400 font-bold">{getLocalizedStatusName(h.new_status, language)}</span>
                       </div>
                       <span className="text-slate-500 font-mono text-[11px]">
                         {new Date(h.changed_at).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
                       </span>
                     </div>
-                    <div className="text-slate-300 font-medium">{t("intervenant_label")} <span className="text-white">{h.changed_by}</span></div>
+                    <div className="text-slate-300 font-medium">{t("intervenant_label")} <span className="text-white">{getLocalizedOperatorName(h.changed_by, language)}</span></div>
                     <div className="text-slate-400 text-[11px] bg-slate-900 p-2 rounded border border-slate-800 mt-1">
-                      {h.note}
+                      {getLocalizedAuditNote(h.note, language)}
                     </div>
                   </div>
                 ))

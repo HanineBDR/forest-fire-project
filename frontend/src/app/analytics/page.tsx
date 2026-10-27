@@ -420,24 +420,28 @@ export default function AnalyticsPage() {
                 <div className="flex items-center gap-2">
                   <HistoryIcon className="w-4 h-4 text-ember-400" />
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                    {activeKpiModal === "roc_auc" && "Historique de Discrimination ROC-AUC (20 derniers runs)"}
-                    {activeKpiModal === "accuracy" && "Télémétrie de Dérive & Précision du Modèle"}
-                    {activeKpiModal === "burn_points" && "Accroissement des Points d'Anomalie Thermique"}
-                    {activeKpiModal === "burned_area" && "Répartition des Surfaces Détectées par Période"}
+                    {activeKpiModal === "roc_auc" && (language === "ar" ? "سجل التمييز ROC-AUC (آخر 20 تشغيلاً)" : language === "en" ? "ROC-AUC Discrimination History (Last 20 runs)" : "Historique de Discrimination ROC-AUC (20 derniers runs)")}
+                    {activeKpiModal === "accuracy" && (language === "ar" ? "قياسات الانجراف ودقة النموذج" : language === "en" ? "Model Drift Telemetry & Precision" : "Télémétrie de Dérive & Précision du Modèle")}
+                    {activeKpiModal === "burn_points" && (language === "ar" ? "تطور نقاط الشذوذ الحراري" : language === "en" ? "Thermal Anomaly Hotspots Growth" : "Accroissement des Points d'Anomalie Thermique")}
+                    {activeKpiModal === "burned_area" && (language === "ar" ? "توزيع المساحات المرصودة حسب الفترة" : language === "en" ? "Distribution of Detected Burned Area by Period" : "Répartition des Surfaces Détectées par Période")}
                   </h3>
                 </div>
                 <button
                   onClick={() => setActiveKpiModal(null)}
                   className="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800"
                 >
-                  Fermer
+                  {language === "ar" ? "إغلاق" : language === "en" ? "Close" : "Fermer"}
                 </button>
               </div>
 
               {activeKpiModal === "roc_auc" && (
                 <div className="space-y-2">
                   <div className="text-xs text-slate-300">
-                    Progression continue de l'AUC de 0.912 (baseline v1.0) à 0.987 (v2.1-LIVE), confirmant une discrimination exceptionnelle des conditions à risque critique.
+                    {language === "ar" 
+                      ? "تقدم مستمر في دقة AUC من 0.912 إلى 0.987 (v2.1-LIVE)، مما يؤكد قدرة استثنائية على تمييز ظروف الخطر الحرج."
+                      : language === "en"
+                      ? "Continuous progression of AUC from 0.912 (baseline v1.0) to 0.987 (v2.1-LIVE), confirming exceptional discrimination of critical risk wildfire conditions."
+                      : "Progression continue de l'AUC de 0.912 (baseline v1.0) à 0.987 (v2.1-LIVE), confirmant une discrimination exceptionnelle des conditions à risque critique."}
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
                     {modelRuns.slice(-4).map((r) => (
@@ -455,13 +459,17 @@ export default function AnalyticsPage() {
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-slate-950 border border-slate-800">
                     <div>
-                      <div className="font-semibold text-white">Diagnostic de Dérive Statistique (Model Drift)</div>
+                      <div className="font-semibold text-white">{language === "ar" ? "تشخيص الانجراف الإحصائي (Model Drift)" : language === "en" ? "Statistical Drift Diagnosis (Model Drift)" : "Diagnostic de Dérive Statistique (Model Drift)"}</div>
                       <div className="text-slate-400 text-[11px] mt-0.5">
-                        Moyenne sur {modelDrift?.runs_analyzed || 7} runs: {(modelDrift?.average_accuracy ? modelDrift.average_accuracy * 100 : 93.8).toFixed(1)}% | Seuil critique: 85.0%
+                        {language === "ar" 
+                          ? `المتوسط على ${modelDrift?.runs_analyzed || 7} تشغيلات: ${(modelDrift?.average_accuracy ? modelDrift.average_accuracy * 100 : 93.8).toFixed(1)}% | العتبة الحرجة: 85.0%`
+                          : language === "en"
+                          ? `Average across ${modelDrift?.runs_analyzed || 7} runs: ${(modelDrift?.average_accuracy ? modelDrift.average_accuracy * 100 : 93.8).toFixed(1)}% | Critical threshold: 85.0%`
+                          : `Moyenne sur ${modelDrift?.runs_analyzed || 7} runs: ${(modelDrift?.average_accuracy ? modelDrift.average_accuracy * 100 : 93.8).toFixed(1)}% | Seuil critique: 85.0%`}
                       </div>
                     </div>
                     <span className="px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono font-bold text-xs">
-                      STABLE & OPÉRATIONNEL
+                      {language === "ar" ? "مستقر وعملياتي" : language === "en" ? "STABLE & OPERATIONAL" : "STABLE & OPÉRATIONNEL"}
                     </span>
                   </div>
                 </div>
@@ -487,11 +495,15 @@ export default function AnalyticsPage() {
               {activeKpiModal === "burned_area" && (
                 <div className="text-xs text-slate-300 space-y-2">
                   <p>
-                    Estimation calculée selon la résolution spatiale du capteur VIIRS (375m / pixel équivalant à ~14.06 ha par point d'anomalie thermique confirmée).
+                    {language === "ar"
+                      ? "تقدير محسوب وفقاً للدقة المكانية لمستشعر VIIRS (375 م / بكسل بما يعادل ~14.06 هكتار لكل نقطة شذوذ حراري مؤكدة)."
+                      : language === "en"
+                      ? "Estimate calculated using NASA VIIRS sensor spatial resolution (375m / pixel corresponding to ~14.06 ha per confirmed thermal anomaly hotspot)."
+                      : "Estimation calculée selon la résolution spatiale du capteur VIIRS (375m / pixel équivalant à ~14.06 ha par point d'anomalie thermique confirmée)."}
                   </p>
                   <div className="p-2.5 rounded bg-slate-950 border border-slate-800 font-mono text-[11px] text-slate-300 flex justify-between">
-                    <span>Total Algérie: <strong>{Math.round(totalAreaHa).toLocaleString()} ha</strong></span>
-                    <span className="text-rose-400">Grande Kabylie: <strong>~{Math.round(totalAreaHa * 0.59).toLocaleString()} ha</strong></span>
+                    <span>{language === "ar" ? "إجمالي الجزائر:" : language === "en" ? "Total Algeria:" : "Total Algérie:"} <strong>{Math.round(totalAreaHa).toLocaleString()} ha</strong></span>
+                    <span className="text-rose-400">{language === "ar" ? "منطقة القبائل الكبرى:" : language === "en" ? "Greater Kabylie:" : "Grande Kabylie:"} <strong>~{Math.round(totalAreaHa * 0.59).toLocaleString()} ha</strong></span>
                   </div>
                 </div>
               )}

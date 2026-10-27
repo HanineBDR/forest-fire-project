@@ -39,6 +39,8 @@ const TYPE_BADGES: Record<string, { label: string; colorClass: string }> = {
   DATA_SYNC: { label: "SYNCHRONISATION FIRMS", colorClass: "bg-blue-950/80 text-blue-300 border-blue-800" },
 };
 
+import { getLocalizedOperatorName, getLocalizedAuditNote, getLocalizedWilaya } from "@/lib/i18nAudit";
+
 const getLocalizedActionBadge = (type: string, lang: string) => {
   switch (type) {
     case "ALERT_CREATED":
@@ -57,85 +59,11 @@ const getLocalizedActionBadge = (type: string, lang: string) => {
 };
 
 const getLocalizedUserRole = (role: string, lang: string) => {
-  if (!role) return role;
-  if (lang === "fr") return role;
-  if (lang === "ar") {
-    if (role.includes("Officier CODIS")) return "ضابط مركز التنسيق الولائي (CODIS)";
-    if (role.includes("Super Admin") || role.includes("Administrateur")) return "مدير النظام (المديرية العامة - المشرف الرئيسي)";
-    if (role.includes("Commandant Protection Civile")) return "قائد الحماية المدنية";
-    if (role.includes("Garde") || role.includes("Forêts")) return "محافظة الغابات";
-    if (role.includes("Citoyen")) return "مواطن راصد";
-    if (role.includes("XGBoost") || role.includes("IA")) return "الذكاء الاصطناعي (XGBoost)";
-    return role;
-  }
-  // Default English (Latin representation MUST be in English, never French)
-  if (role.includes("Officier CODIS")) return "Central CODIS Officer";
-  if (role.includes("Super Admin") || role.includes("Administrateur")) return "System Administrator (General Directorate - Super Admin)";
-  if (role.includes("Commandant Protection Civile")) return "Civil Protection Commander";
-  if (role.includes("Garde") || role.includes("Forêts")) return "Forestry Ranger / Inspector";
-  if (role.includes("Citoyen")) return "Citizen Watch Sentinel";
-  if (role.includes("XGBoost") || role.includes("IA")) return "AI Autonomous Agent (XGBoost)";
-  return role;
+  return getLocalizedOperatorName(role, lang);
 };
 
 const getLocalizedDetails = (details: string, lang: string) => {
-  if (!details) return details;
-  let res = details;
-
-  // Massifs / Forests names translation in action details
-  res = res
-    .replace(/Forêt des Cèdres de Theniet El Had/gi, lang === "ar" ? "غابة أرز ثنية الحد" : lang === "en" ? "Theniet El Had Cedar Forest" : "Forêt des Cèdres de Theniet El Had")
-    .replace(/Parc National de Chréa/gi, lang === "ar" ? "الحظيرة الوطنية للشريعة" : lang === "en" ? "Chréa National Park" : "Parc National de Chréa")
-    .replace(/Parc National du Djurdjura \(Tikjda\)/gi, lang === "ar" ? "الحظيرة الوطنية لجرجرة (تيكجدة)" : lang === "en" ? "Djurdjura National Park (Tikjda)" : "Parc National du Djurdjura (Tikjda)")
-    .replace(/Parc National du Djurdjura/gi, lang === "ar" ? "الحظيرة الوطنية لجرجرة" : lang === "en" ? "Djurdjura National Park" : "Parc National du Djurdjura")
-    .replace(/Massif de Yakouren/gi, lang === "ar" ? "كتلة غابات يعكورن" : lang === "en" ? "Yakouren Forest Massif" : "Massif de Yakouren")
-    .replace(/Forêt d'Akfadou/gi, lang === "ar" ? "غابة أكفادو" : lang === "en" ? "Akfadou Forest" : "Forêt d'Akfadou");
-
-  // Operational statuses (ensure Latin tokens stay in ENGLISH, never French)
-  if (lang === "ar") {
-    res = res
-      .replace(/SMS_ENVOYE/gi, "تم إرسال الرسالة")
-      .replace(/MAITRISE/gi, "تمت السيطرة")
-      .replace(/ETEINT/gi, "تم الإخماد")
-      .replace(/UNITES_DEPLOYEES/gi, "تم نشر الوحدات")
-      .replace(/SOUS_SURVEILLANCE/gi, "تحت المراقبة")
-      .replace(/ACTIF/gi, "نشط")
-      .replace(/Diffusion SMS d'urgence à (\d+) personnes/gi, "بث رسالة نصية عاجلة إلى $1 مواطن")
-      .replace(/Changement de statut opérationnel vers/gi, "تغيير الحالة العملياتية نحو")
-      .replace(/Alerte automatique générée/gi, "إنذار تلقائي صادر عن خوارزمية الذكاء الاصطناعي")
-      .replace(/Nouveau signalement citoyen vérifié/gi, "بلاغ ميداني مؤكد من مواطن راصد");
-  } else if (lang === "en") {
-    res = res
-      .replace(/SMS_ENVOYE/gi, "SMS_SENT")
-      .replace(/MAITRISE/gi, "CONTAINED")
-      .replace(/ETEINT/gi, "EXTINGUISHED")
-      .replace(/UNITES_DEPLOYEES/gi, "UNITS_DEPLOYED")
-      .replace(/SOUS_SURVEILLANCE/gi, "UNDER_SURVEILLANCE")
-      .replace(/ACTIF/gi, "ACTIVE")
-      .replace(/Diffusion SMS d'urgence à (\d+) personnes/gi, "Emergency SMS broadcast dispatched to $1 residents")
-      .replace(/Changement de statut opérationnel vers/gi, "Operational status updated to")
-      .replace(/Alerte automatique générée/gi, "Automated wildfire alert generated")
-      .replace(/Nouveau signalement citoyen vérifié/gi, "Field citizen wildfire observation verified");
-  } else {
-    // French: keep French keywords
-    res = res
-      .replace(/SMS_SENT/gi, "SMS_ENVOYE")
-      .replace(/CONTAINED/gi, "MAITRISE")
-      .replace(/EXTINGUISHED/gi, "ETEINT")
-      .replace(/UNITS_DEPLOYED/gi, "UNITES_DEPLOYEES");
-  }
-
-  // Final fallback: if lang !== 'fr', ensure no French status words leak into Latin representation
-  if (lang !== "fr") {
-    res = res
-      .replace(/SMS_ENVOYE/gi, "SMS_SENT")
-      .replace(/MAITRISE/gi, "CONTAINED")
-      .replace(/ETEINT/gi, "EXTINGUISHED")
-      .replace(/UNITES_DEPLOYEES/gi, "UNITS_DEPLOYED")
-      .replace(/SOUS_SURVEILLANCE/gi, "UNDER_SURVEILLANCE");
-  }
-
-  return res;
+  return getLocalizedAuditNote(details, lang);
 };
 
 export default function HistoriqueAuditPage() {
@@ -350,11 +278,11 @@ export default function HistoriqueAuditPage() {
             className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"
           >
             <option value="Tous">{t("all_wilayas")}</option>
-            <option value="Tizi Ouzou">Tizi Ouzou</option>
-            <option value="Bejaia">Bejaia</option>
-            <option value="Bouira">Bouira</option>
-            <option value="Jijel">Jijel</option>
-            <option value="Nord">Nord Algérie</option>
+            <option value="Tizi Ouzou">{getLocalizedWilaya("Tizi Ouzou", language)}</option>
+            <option value="Bejaia">{getLocalizedWilaya("Bejaia", language)}</option>
+            <option value="Bouira">{getLocalizedWilaya("Bouira", language)}</option>
+            <option value="Jijel">{getLocalizedWilaya("Jijel", language)}</option>
+            <option value="Nord">{getLocalizedWilaya("Nord", language)}</option>
           </select>
         </div>
 
@@ -436,7 +364,7 @@ export default function HistoriqueAuditPage() {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-slate-200 font-semibold whitespace-nowrap">
-                        {ev.wilaya}
+                        {getLocalizedWilaya(ev.wilaya, language)}
                       </td>
                       <td className="py-3 px-4 text-slate-300 whitespace-nowrap">
                         <span className="font-medium">{localizedRole}</span>
