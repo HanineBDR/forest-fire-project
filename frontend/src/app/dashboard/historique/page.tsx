@@ -39,6 +39,105 @@ const TYPE_BADGES: Record<string, { label: string; colorClass: string }> = {
   DATA_SYNC: { label: "SYNCHRONISATION FIRMS", colorClass: "bg-blue-950/80 text-blue-300 border-blue-800" },
 };
 
+const getLocalizedActionBadge = (type: string, lang: string) => {
+  switch (type) {
+    case "ALERT_CREATED":
+      return lang === "ar" ? "تم إنشاء إنذار" : lang === "en" ? "ALERT CREATED" : "ALERTE CRÉÉE";
+    case "STATUS_CHANGED":
+      return lang === "ar" ? "تحديث الحالة" : lang === "en" ? "STATUS UPDATED" : "STATUT MIS À JOUR";
+    case "MODEL_REFRESHED":
+      return lang === "ar" ? "إعادة تدريب النموذج" : lang === "en" ? "MODEL RETRAINED" : "MODÈLE RÉENTRAÎNÉ";
+    case "COMMUNITY_REPORT":
+      return lang === "ar" ? "بلاغ مواطن" : lang === "en" ? "CITIZEN REPORT" : "SIGNALEMENT CITOYEN";
+    case "DATA_SYNC":
+      return lang === "ar" ? "مزامنة فيرمز" : lang === "en" ? "FIRMS DATA SYNC" : "SYNCHRONISATION FIRMS";
+    default:
+      return type;
+  }
+};
+
+const getLocalizedUserRole = (role: string, lang: string) => {
+  if (!role) return role;
+  if (lang === "fr") return role;
+  if (lang === "ar") {
+    if (role.includes("Officier CODIS")) return "ضابط مركز التنسيق الولائي (CODIS)";
+    if (role.includes("Super Admin") || role.includes("Administrateur")) return "مدير النظام (المديرية العامة - المشرف الرئيسي)";
+    if (role.includes("Commandant Protection Civile")) return "قائد الحماية المدنية";
+    if (role.includes("Garde") || role.includes("Forêts")) return "محافظة الغابات";
+    if (role.includes("Citoyen")) return "مواطن راصد";
+    if (role.includes("XGBoost") || role.includes("IA")) return "الذكاء الاصطناعي (XGBoost)";
+    return role;
+  }
+  // Default English (Latin representation MUST be in English, never French)
+  if (role.includes("Officier CODIS")) return "Central CODIS Officer";
+  if (role.includes("Super Admin") || role.includes("Administrateur")) return "System Administrator (General Directorate - Super Admin)";
+  if (role.includes("Commandant Protection Civile")) return "Civil Protection Commander";
+  if (role.includes("Garde") || role.includes("Forêts")) return "Forestry Ranger / Inspector";
+  if (role.includes("Citoyen")) return "Citizen Watch Sentinel";
+  if (role.includes("XGBoost") || role.includes("IA")) return "AI Autonomous Agent (XGBoost)";
+  return role;
+};
+
+const getLocalizedDetails = (details: string, lang: string) => {
+  if (!details) return details;
+  let res = details;
+
+  // Massifs / Forests names translation in action details
+  res = res
+    .replace(/Forêt des Cèdres de Theniet El Had/gi, lang === "ar" ? "غابة أرز ثنية الحد" : lang === "en" ? "Theniet El Had Cedar Forest" : "Forêt des Cèdres de Theniet El Had")
+    .replace(/Parc National de Chréa/gi, lang === "ar" ? "الحظيرة الوطنية للشريعة" : lang === "en" ? "Chréa National Park" : "Parc National de Chréa")
+    .replace(/Parc National du Djurdjura \(Tikjda\)/gi, lang === "ar" ? "الحظيرة الوطنية لجرجرة (تيكجدة)" : lang === "en" ? "Djurdjura National Park (Tikjda)" : "Parc National du Djurdjura (Tikjda)")
+    .replace(/Parc National du Djurdjura/gi, lang === "ar" ? "الحظيرة الوطنية لجرجرة" : lang === "en" ? "Djurdjura National Park" : "Parc National du Djurdjura")
+    .replace(/Massif de Yakouren/gi, lang === "ar" ? "كتلة غابات يعكورن" : lang === "en" ? "Yakouren Forest Massif" : "Massif de Yakouren")
+    .replace(/Forêt d'Akfadou/gi, lang === "ar" ? "غابة أكفادو" : lang === "en" ? "Akfadou Forest" : "Forêt d'Akfadou");
+
+  // Operational statuses (ensure Latin tokens stay in ENGLISH, never French)
+  if (lang === "ar") {
+    res = res
+      .replace(/SMS_ENVOYE/gi, "تم إرسال الرسالة")
+      .replace(/MAITRISE/gi, "تمت السيطرة")
+      .replace(/ETEINT/gi, "تم الإخماد")
+      .replace(/UNITES_DEPLOYEES/gi, "تم نشر الوحدات")
+      .replace(/SOUS_SURVEILLANCE/gi, "تحت المراقبة")
+      .replace(/ACTIF/gi, "نشط")
+      .replace(/Diffusion SMS d'urgence à (\d+) personnes/gi, "بث رسالة نصية عاجلة إلى $1 مواطن")
+      .replace(/Changement de statut opérationnel vers/gi, "تغيير الحالة العملياتية نحو")
+      .replace(/Alerte automatique générée/gi, "إنذار تلقائي صادر عن خوارزمية الذكاء الاصطناعي")
+      .replace(/Nouveau signalement citoyen vérifié/gi, "بلاغ ميداني مؤكد من مواطن راصد");
+  } else if (lang === "en") {
+    res = res
+      .replace(/SMS_ENVOYE/gi, "SMS_SENT")
+      .replace(/MAITRISE/gi, "CONTAINED")
+      .replace(/ETEINT/gi, "EXTINGUISHED")
+      .replace(/UNITES_DEPLOYEES/gi, "UNITS_DEPLOYED")
+      .replace(/SOUS_SURVEILLANCE/gi, "UNDER_SURVEILLANCE")
+      .replace(/ACTIF/gi, "ACTIVE")
+      .replace(/Diffusion SMS d'urgence à (\d+) personnes/gi, "Emergency SMS broadcast dispatched to $1 residents")
+      .replace(/Changement de statut opérationnel vers/gi, "Operational status updated to")
+      .replace(/Alerte automatique générée/gi, "Automated wildfire alert generated")
+      .replace(/Nouveau signalement citoyen vérifié/gi, "Field citizen wildfire observation verified");
+  } else {
+    // French: keep French keywords
+    res = res
+      .replace(/SMS_SENT/gi, "SMS_ENVOYE")
+      .replace(/CONTAINED/gi, "MAITRISE")
+      .replace(/EXTINGUISHED/gi, "ETEINT")
+      .replace(/UNITS_DEPLOYED/gi, "UNITES_DEPLOYEES");
+  }
+
+  // Final fallback: if lang !== 'fr', ensure no French status words leak into Latin representation
+  if (lang !== "fr") {
+    res = res
+      .replace(/SMS_ENVOYE/gi, "SMS_SENT")
+      .replace(/MAITRISE/gi, "CONTAINED")
+      .replace(/ETEINT/gi, "EXTINGUISHED")
+      .replace(/UNITES_DEPLOYEES/gi, "UNITS_DEPLOYED")
+      .replace(/SOUS_SURVEILLANCE/gi, "UNDER_SURVEILLANCE");
+  }
+
+  return res;
+};
+
 export default function HistoriqueAuditPage() {
   const { t, language, setLanguage } = useLanguage();
   const [showPdfModal, setShowPdfModal] = useState<boolean>(false);
@@ -298,13 +397,13 @@ export default function HistoriqueAuditPage() {
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-400 font-mono">
                     <div className="inline-block w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin mb-2" />
-                    <div>Chargement du journal d&apos;audit officiel...</div>
+                    <div>{t("audit_loading_label")}</div>
                   </td>
                 </tr>
               ) : events.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-400">
-                    Aucun événement correspondant aux critères de recherche.
+                    {t("audit_empty_label")}
                   </td>
                 </tr>
               ) : (
@@ -313,10 +412,14 @@ export default function HistoriqueAuditPage() {
                     label: ev.type,
                     colorClass: "bg-slate-800 text-slate-300 border-slate-700",
                   };
+                  const localizedLabel = getLocalizedActionBadge(ev.type, language);
+                  const localizedRole = getLocalizedUserRole(ev.user_role, language);
+                  const localizedDetails = getLocalizedDetails(ev.details, language);
+
                   return (
                     <tr key={ev.id} className="hover:bg-slate-800/40 transition">
                       <td className="py-3 px-4 font-mono text-slate-400 whitespace-nowrap">
-                        {new Date(ev.timestamp).toLocaleString("fr-FR", {
+                        {new Date(ev.timestamp).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
@@ -329,17 +432,17 @@ export default function HistoriqueAuditPage() {
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-bold border ${badge.colorClass}`}
                         >
-                          {badge.label}
+                          {localizedLabel}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-slate-200 font-semibold whitespace-nowrap">
                         {ev.wilaya}
                       </td>
                       <td className="py-3 px-4 text-slate-300 whitespace-nowrap">
-                        <span className="font-medium">{ev.user_role}</span>
+                        <span className="font-medium">{localizedRole}</span>
                       </td>
                       <td className="py-3 px-4 text-slate-300 max-w-md">
-                        <p className="line-clamp-2 leading-relaxed">{ev.details}</p>
+                        <p className="line-clamp-2 leading-relaxed">{localizedDetails}</p>
                       </td>
                     </tr>
                   );

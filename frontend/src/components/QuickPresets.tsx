@@ -17,14 +17,26 @@ interface QuickPresetsProps {
  * Keeps the recognizable massif/forest name rather than generic prefixes.
  */
 function getDisplayMassifName(fullName: string): string {
-  const cleaned = fullName
-    .replace(/^Forêt de\s+/i, "")
-    .replace(/^Massif de\s+/i, "")
+  let cleaned = fullName
+    .replace(/^Forêt\s+(des\s+Cèdres\s+du|Domaniale\s+des|de|des|du)\s+/i, "")
+    .replace(/^Massif\s+(des\s+Babors\s+-\s+|de|des|du)\s+/i, "")
+    .replace(/^Parc\s+National\s+(de|des|du)\s+/i, "")
     .replace(/^Mont\s+/i, "Mt. ")
     .replace(/\s+Forest$/i, "")
     .replace(/\s+Massif$/i, "")
     .replace(/\s+National Park$/i, "")
     .replace(/\s+Biosphere$/i, "");
+
+  if (cleaned.includes("Mont Zaccar") || cleaned.includes("Zaccar")) return "Mt. Zaccar";
+  if (cleaned.includes("Zarifet")) return "Zarifet";
+  if (cleaned.includes("Chélia")) return "Mt. Chélia";
+  if (cleaned.includes("Sidi Amar")) return "Sidi Amar";
+  if (cleaned.includes("Taza") || cleaned.includes("Guerrouche")) return "Guerrouche & Taza";
+  if (cleaned.includes("Beni Toufout")) return "Beni Toufout";
+  if (cleaned.includes("Akfadou")) return "Akfadou";
+  if (cleaned.includes("Yakouren")) return "Yakouren";
+  if (cleaned.includes("Djurdjura") || cleaned.includes("Tikjda")) return "Tikjda (Djurdjura)";
+
   return cleaned.trim() || fullName;
 }
 

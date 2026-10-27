@@ -469,11 +469,13 @@ export default function AnalyticsPage() {
 
               {activeKpiModal === "burn_points" && (
                 <div className="text-xs space-y-1.5 font-mono">
-                  <div className="text-slate-300">Snapshots historiques enregistrés dans in9ad_history.db:</div>
+                  <div className="text-slate-300">
+                    {language === "ar" ? "لقطات تاريخية مسجلة في قاعدة بيانات in9ad_history.db:" : language === "en" ? "Historical snapshots persisted in in9ad_history.db:" : "Snapshots historiques enregistrés dans in9ad_history.db:"}
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1">
                     {burnSnapshots.map((s) => (
                       <div key={s.id} className="p-2.5 rounded bg-slate-950 border border-slate-800">
-                        <div className="text-slate-400 text-[10px]">{new Date(s.timestamp).toLocaleDateString("fr-FR")}</div>
+                        <div className="text-slate-400 text-[10px]">{new Date(s.timestamp).toLocaleDateString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}</div>
                         <div className="text-white font-bold text-sm">{s.total_points.toLocaleString()} points</div>
                         <div className="text-rose-400 text-[10px]">{Math.round(s.total_ha).toLocaleString()} ha</div>
                       </div>
@@ -566,7 +568,7 @@ export default function AnalyticsPage() {
                 {modelDrift?.needs_retraining && (
                   <div className="px-2.5 py-1 rounded bg-red-950/80 border border-red-700 text-red-300 text-xs font-bold flex items-center gap-1.5 animate-pulse">
                     <AlertTriangle className="w-3.5 h-3.5" />
-                    <span>Modèle nécessite un réentraînement immédiat (&lt;85%)</span>
+                    <span>{t("model_needs_retraining_alert")}</span>
                   </div>
                 )}
               </div>
@@ -576,7 +578,7 @@ export default function AnalyticsPage() {
                 <svg className="w-full h-full" viewBox="0 0 600 120" preserveAspectRatio="none">
                   {/* Critical 85% threshold dashed line */}
                   <line x1="0" y1="90" x2="600" y2="90" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.7" />
-                  <text x="6" y="84" fill="#ef4444" fontSize="10" fontFamily="monospace">Seuil critique (85%)</text>
+                  <text x="6" y="84" fill="#ef4444" fontSize="10" fontFamily="monospace">{t("critical_threshold_label")}</text>
 
                   {/* Grid lines */}
                   <line x1="0" y1="30" x2="600" y2="30" stroke="#334155" strokeWidth="0.5" opacity="0.4" />
@@ -613,10 +615,10 @@ export default function AnalyticsPage() {
               <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 pt-1">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
-                  Précision globale du test holdout (Progression: +7.2% depuis baseline)
+                  {t("holdout_accuracy_label")}
                 </span>
                 <span className="font-mono text-slate-300">
-                  Dernier étalonnage: <strong>95.38%</strong> ({latestRun?.model_version || "v2.0-PROD"})
+                  {t("last_calibration_label")}: <strong>95.38%</strong> ({latestRun?.model_version || "v2.0-PROD"})
                 </span>
               </div>
             </div>
@@ -666,7 +668,7 @@ export default function AnalyticsPage() {
               <span>2. {t("section_historic_evolution")}</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Historique des itérations d'entraînement persistant dans <code className="text-ember-400 font-mono">/backend/in9ad_history.db</code>.
+              {t("analytics_sec2_subtitle")}
             </p>
           </div>
 
@@ -674,10 +676,9 @@ export default function AnalyticsPage() {
           <div className="p-3.5 rounded-lg border border-slate-800 bg-slate-900/60 flex items-start gap-3">
             <HistoryIcon className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" aria-hidden="true" />
             <div className="text-xs space-y-1">
-              <span className="font-semibold text-white">Traçabilité & Calibration Opérationnelle :</span>
+              <span className="font-semibold text-white">{t("analytics_traceability_title")}</span>
               <p className="text-slate-300 leading-relaxed">
-                Chaque réentraînement est automatiquement journalisé avec les métriques complètes de holdout, la taille du jeu de données et la note de version. 
-                Exemple clé : <strong className="text-ember-300">"Modèle v1.2 - Ajout de 200 nouveaux points FIRMS de Tizi Ouzou - Précision +2.0%"</strong>.
+                {t("analytics_traceability_desc")}
               </p>
             </div>
           </div>
@@ -688,13 +689,13 @@ export default function AnalyticsPage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-800/80 border-b border-slate-700/80 text-slate-300 font-medium">
                   <tr>
-                    <th className="py-2.5 px-3">Version</th>
-                    <th className="py-2.5 px-3">Date d'Exécution</th>
+                    <th className="py-2.5 px-3">{t("col_version")}</th>
+                    <th className="py-2.5 px-3">{t("col_execution_date")}</th>
                     <th className="py-2.5 px-3 text-right">Dataset</th>
                     <th className="py-2.5 px-3 text-right">Accuracy</th>
                     <th className="py-2.5 px-3 text-right">ROC-AUC</th>
                     <th className="py-2.5 px-3 text-right">F1-Score</th>
-                    <th className="py-2.5 px-3">Évolution & Modifications Apportées</th>
+                    <th className="py-2.5 px-3">{t("col_evolution_notes")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-mono">
@@ -719,9 +720,9 @@ export default function AnalyticsPage() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-slate-400 font-sans">
-                          {new Date(r.timestamp).toLocaleString("fr-FR", {
-                            day: "2-digit",
+                          {new Date(r.timestamp).toLocaleString(language === "fr" ? "fr-FR" : "en-US", {
                             month: "short",
+                            day: "2-digit",
                             hour: "2-digit",
                             minute: "2-digit"
                           })}
@@ -756,21 +757,21 @@ export default function AnalyticsPage() {
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Layers className="w-4 h-4 text-rose-400" />
-                <span>3. Historique de la Carte Thermique (NASA FIRMS)</span>
+                <span>3. {t("analytics_sec3_title")}</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Consultez l'historique des feux détectés par satellite selon différentes fenêtres temporelles.
+                {t("analytics_sec3_desc")}
               </p>
             </div>
 
             {/* Timeline Selector Buttons */}
             <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
-              <span className="text-[11px] text-slate-400 px-2 font-medium">Période :</span>
+              <span className="text-[11px] text-slate-400 px-2 font-medium">{t("period_label")}</span>
               {[
-                { id: "today", label: "Aujourd'hui" },
-                { id: "last_week", label: "Semaine Dernière" },
-                { id: "last_month", label: "Mois Dernier" },
-                { id: "2023_2024", label: "2023 - 2024 (Complet)" }
+                { id: "today", label: t("period_today") },
+                { id: "last_week", label: t("period_last_week") },
+                { id: "last_month", label: t("period_last_month") },
+                { id: "2023_2024", label: t("period_full") }
               ].map((btn) => (
                 <button
                   key={btn.id}
@@ -791,7 +792,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2 text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                <span>Visualisation : <strong>{burnTimeline.replace("_", " ").toUpperCase()}</strong></span>
+                <span>{t("visualization_mode")} <strong>{burnTimeline.replace("_", " ").toUpperCase()}</strong></span>
                 <span className="text-slate-400 font-mono">({activeBurnMapUrl})</span>
               </div>
               <div className="inline-flex rounded-lg border border-slate-800 bg-slate-950 p-0.5 text-xs">
@@ -801,7 +802,7 @@ export default function AnalyticsPage() {
                     activeMapTab === "interactive" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  Carte Interactive (Folium)
+                  {t("map_interactive_folium")}
                 </button>
                 <button
                   onClick={() => setActiveMapTab("static")}
@@ -809,7 +810,7 @@ export default function AnalyticsPage() {
                     activeMapTab === "static" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  Image PNG
+                  {t("map_image_png")}
                 </button>
               </div>
             </div>
@@ -846,12 +847,11 @@ export default function AnalyticsPage() {
                   {t("active_predictive_alerts")}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-red-950 text-red-300 border border-red-800 text-[11px] font-mono font-bold">
-                  5 ALERTES
+                  {language === "ar" ? "5 إنذارات" : language === "en" ? "5 ALERTS" : "5 ALERTES"}
                 </span>
               </div>
               <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                Ce modèle XGBoost alimente directement le module opérationnel de la Protection Civile et de la Conservation des Forêts. 
-                Aujourd'hui : <strong>1 alerte CRITIQUE (Forêt de Yakouren, Tizi Ouzou - 94.2%)</strong> et <strong>2 alertes TRÈS ÉLEVÉES</strong> nécessitant un pré-positionnement.
+                {t("alerts_banner_description")}
               </p>
             </div>
           </div>
@@ -873,11 +873,11 @@ export default function AnalyticsPage() {
                 4. {t("section_wilaya_impact")}
               </h2>
               <p className="text-xs text-slate-400">
-                Statistiques de feux recensés par satellite et superficies estimées pour les wilayas prioritaires.
+                {t("analytics_sec4_desc")}
               </p>
             </div>
             <span className="text-xs text-slate-400 font-mono">
-              Source: Registre SQLite in9ad_history.db
+              {t("source_sqlite_registry")}
             </span>
           </div>
 
@@ -888,11 +888,11 @@ export default function AnalyticsPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-800/80 border-b border-slate-700/80 text-slate-300 font-medium">
                     <tr>
-                      <th className="py-2.5 px-3">Wilaya</th>
-                      <th className="py-2.5 px-3">Région</th>
-                      <th className="py-2.5 px-3 text-right">Points Détectés</th>
-                      <th className="py-2.5 px-3 text-right">Superficie Estimée</th>
-                      <th className="py-2.5 px-3">Classification</th>
+                      <th className="py-2.5 px-3">{t("col_wilaya")}</th>
+                      <th className="py-2.5 px-3">{t("col_region")}</th>
+                      <th className="py-2.5 px-3 text-right">{t("col_points_detected")}</th>
+                      <th className="py-2.5 px-3 text-right">{t("col_estimated_area")}</th>
+                      <th className="py-2.5 px-3">{t("col_risk_class")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60 font-mono">
@@ -923,10 +923,10 @@ export default function AnalyticsPage() {
                             <span
                               className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium border ${
                                 w.risk_category.includes("Critical") || w.risk_category.includes("Critique")
-                                  ? "bg-red-950/70 text-red-300 border-red-800"
-                                  : w.risk_category.includes("High") || w.risk_category.includes("Élevée")
-                                  ? "bg-amber-950/70 text-amber-300 border-amber-800"
-                                  : "bg-emerald-950/70 text-emerald-300 border-emerald-800"
+                                    ? "bg-red-950/70 text-red-300 border-red-800"
+                                    : w.risk_category.includes("High") || w.risk_category.includes("Élevée")
+                                    ? "bg-amber-950/70 text-amber-300 border-amber-800"
+                                    : "bg-emerald-950/70 text-emerald-300 border-emerald-800"
                               }`}
                             >
                               {w.risk_category}
@@ -946,7 +946,7 @@ export default function AnalyticsPage() {
                 <>
                   <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                     <div>
-                      <div className="text-xs text-slate-400">Détails de la Wilaya Sélectionnée</div>
+                      <div className="text-xs text-slate-400">{t("selected_wilaya_details")}</div>
                       <h3 className="text-base font-bold text-white flex items-center gap-1.5 mt-0.5">
                         <MapPin className="w-4 h-4 text-ember-400" />
                         <span>{selectedWilaya.wilaya_name}</span>
@@ -960,24 +960,24 @@ export default function AnalyticsPage() {
 
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Anomalies thermiques :</span>
-                      <span className="font-mono font-bold text-rose-400">{selectedWilaya.total_burned_points} points</span>
+                      <span className="text-slate-400">{t("thermal_anomalies_count")}</span>
+                      <span className="font-mono font-bold text-rose-400">{selectedWilaya.total_burned_points} pts</span>
                     </div>
 
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Surface brûlée estimée :</span>
+                      <span className="text-slate-400">{t("estimated_burned_area")} :</span>
                       <span className="font-mono font-bold text-white">
-                        {Math.round(selectedWilaya.estimated_burned_area_ha).toLocaleString()} hectares
+                        {Math.round(selectedWilaya.estimated_burned_area_ha).toLocaleString()} ha
                       </span>
                     </div>
 
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Classification du risque :</span>
+                      <span className="text-slate-400">{t("col_risk_class")} :</span>
                       <span className="font-semibold text-rose-300">{selectedWilaya.risk_category}</span>
                     </div>
 
                     <div className="py-1">
-                      <span className="text-slate-400 block mb-1">Couvert forestier dominant :</span>
+                      <span className="text-slate-400 block mb-1">{t("dominant_forest_cover")}</span>
                       <span className="text-slate-200 font-medium block bg-slate-800/60 p-2 rounded border border-slate-800">
                         {selectedWilaya.top_vegetation_type}
                       </span>
@@ -990,13 +990,13 @@ export default function AnalyticsPage() {
                       className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-ember-600 hover:bg-ember-500 text-white font-medium text-xs transition-colors"
                     >
                       <Flame className="w-3.5 h-3.5" />
-                      <span>Simuler la propagation pour cette wilaya</span>
+                      <span>{t("simulate_wilaya_btn")}</span>
                     </Link>
                   </div>
                 </>
               ) : (
                 <div className="text-xs text-slate-400 py-6 text-center">
-                  Sélectionnez une wilaya dans la table pour inspecter son profil.
+                  {t("select_wilaya_hint")}
                 </div>
               )}
             </div>

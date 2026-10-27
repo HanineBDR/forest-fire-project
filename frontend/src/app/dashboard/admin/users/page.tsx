@@ -14,7 +14,8 @@ import {
   Lock,
   X
 } from "lucide-react";
-import { getStoredUser, getStoredToken, AuthUser, UserRole } from "@/lib/auth";
+import { getStoredUser, getStoredToken, getLocalizedUserName, AuthUser, UserRole } from "@/lib/auth";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ManagedUser {
   id: string;
@@ -57,6 +58,7 @@ const DEFAULT_USERS: ManagedUser[] = [
 ];
 
 export default function UsersManagementPage() {
+  const { language } = useLanguage();
   const [users, setUsers] = useState<ManagedUser[]>(DEFAULT_USERS);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -241,7 +243,7 @@ export default function UsersManagementPage() {
                 return (
                   <tr key={u.id} className="hover:bg-slate-800/40 transition">
                     <td className="py-3 px-4">
-                      <div className="font-semibold text-slate-200">{u.name}</div>
+                      <div className="font-semibold text-slate-200">{getLocalizedUserName(u.name, u.role, language)}</div>
                       <div className="text-[11px] text-slate-500 font-mono">ID: {u.id}</div>
                     </td>
 
@@ -259,9 +261,9 @@ export default function UsersManagementPage() {
                             : "bg-blue-950 text-blue-300 border border-blue-800"
                         }`}
                       >
-                        {u.role === "CIVIL_PROTECTION" && "الحماية المدنية"}
-                        {u.role === "FOREST_GUARD" && "محافظة الغابات"}
-                        {u.role === "ADMIN" && "الإدارة المركزية"}
+                        {u.role === "CIVIL_PROTECTION" && (language === "ar" ? "الحماية المدنية" : language === "en" ? "Civil Protection" : "Protection Civile")}
+                        {u.role === "FOREST_GUARD" && (language === "ar" ? "محافظة الغابات" : language === "en" ? "Forest Conservation" : "Conservation des Forêts")}
+                        {u.role === "ADMIN" && (language === "ar" ? "الإدارة المركزية" : language === "en" ? "Central Administration" : "Direction Générale")}
                       </span>
                     </td>
 
@@ -272,7 +274,7 @@ export default function UsersManagementPage() {
                     <td className="py-3 px-4 text-right">
                       {isPermanentDemo ? (
                         <span className="text-[10px] text-slate-500 font-mono bg-slate-950 px-2 py-1 rounded border border-slate-800">
-                          Compte Jury Protégé
+                          {language === "ar" ? "حساب محمي للجنة" : language === "en" ? "Protected Jury Account" : "Compte Jury Protégé"}
                         </span>
                       ) : (
                         <button

@@ -144,31 +144,46 @@ export async function logoutUser(): Promise<void> {
   }
 }
 
-export function getRoleBadgeInfo(role?: UserRole): { text: string; subtext: string; colorClass: string } {
+export function getRoleBadgeInfo(role?: UserRole, lang?: string): { text: string; subtext: string; colorClass: string } {
   switch (role) {
     case "CIVIL_PROTECTION":
       return {
-        text: "Protection Civile",
-        subtext: "Protection Civile Algérienne",
+        text: lang === "ar" ? "الحماية المدنية" : lang === "en" ? "Civil Protection" : "Protection Civile",
+        subtext: lang === "ar" ? "الحماية المدنية الجزائرية" : lang === "en" ? "Algerian Civil Protection" : "Protection Civile Algérienne",
         colorClass: "bg-red-950/80 text-red-300 border-red-800/80",
       };
     case "FOREST_GUARD":
       return {
-        text: "Conservation des Forêts",
-        subtext: "Conservation des Forêts (DGF)",
+        text: lang === "ar" ? "محافظة الغابات" : lang === "en" ? "Forest Conservation" : "Conservation des Forêts",
+        subtext: lang === "ar" ? "المديرية العامة للغابات (DGF)" : lang === "en" ? "General Directorate of Forests (DGF)" : "Conservation des Forêts (DGF)",
         colorClass: "bg-emerald-950/80 text-emerald-300 border-emerald-800/80",
       };
     case "ADMIN":
       return {
-        text: "Direction Générale",
-        subtext: "Administration Centrale",
+        text: lang === "ar" ? "المديرية العامة" : lang === "en" ? "General Directorate" : "Direction Générale",
+        subtext: lang === "ar" ? "الإدارة المركزية" : lang === "en" ? "Central Administration" : "Administration Centrale",
         colorClass: "bg-blue-950/80 text-blue-300 border-blue-800/80",
       };
     default:
       return {
-        text: "Personnel Autorisé",
-        subtext: "Ministère de l'Intérieur",
+        text: lang === "ar" ? "أفراد معتمدون" : lang === "en" ? "Authorized Personnel" : "Personnel Autorisé",
+        subtext: lang === "ar" ? "وزارة الداخلية" : lang === "en" ? "Ministry of Interior" : "Ministère de l'Intérieur",
         colorClass: "bg-slate-900 text-slate-300 border-slate-700",
       };
   }
 }
+
+export function getLocalizedUserName(name: string, role?: UserRole, lang?: string): string {
+  if (lang === "fr") return name;
+  if (role === "ADMIN") {
+    return lang === "ar" ? "المديرية العامة - المشرف الرئيسي" : "General Directorate - Super Admin";
+  }
+  if (role === "CIVIL_PROTECTION") {
+    return lang === "ar" ? "قائد الحماية المدنية" : "Civil Protection Commander";
+  }
+  if (role === "FOREST_GUARD") {
+    return lang === "ar" ? "المفتش الرئيسي للغابات" : "Chief Forest Inspector";
+  }
+  return name;
+}
+

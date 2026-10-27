@@ -242,15 +242,19 @@ export default function AlertsPage() {
     try {
       const res = await refreshAlerts();
       setToast({
-        title: "Veille Satellitaire Actualisée",
-        message: `${res.new_alerts_found || 0} nouvelles alertes détectées, ${res.alerts_updated || 0} mises à jour.`,
+        title: language === "ar" ? "تم تحديث الرصد الفضائي" : language === "en" ? "Satellite Monitoring Refreshed" : "Veille Satellitaire Actualisée",
+        message: language === "ar" 
+          ? `تم رصد ${res.new_alerts_found || 0} تنبيهات جديدة، وتحديث ${res.alerts_updated || 0}.`
+          : language === "en"
+          ? `${res.new_alerts_found || 0} new alerts detected, ${res.alerts_updated || 0} updated.`
+          : `${res.new_alerts_found || 0} nouvelles alertes détectées, ${res.alerts_updated || 0} mises à jour.`,
         type: "success"
       });
       await loadAlerts(true);
     } catch (err: any) {
       setToast({
-        title: "Échec du rafraîchissement",
-        message: err.message || "Erreur de contact avec le service d'alerte.",
+        title: language === "ar" ? "فشل التحديث" : language === "en" ? "Refresh Failed" : "Échec du rafraîchissement",
+        message: err.message || (language === "ar" ? "خطأ في الاتصال بخدمة الإنذار." : language === "en" ? "Error connecting to alert service." : "Erreur de contact avec le service d'alerte."),
         type: "critical"
       });
     } finally {
@@ -283,7 +287,11 @@ export default function AlertsPage() {
     setSmsResult(null);
     setSmsError(null);
     setSmsMessage(
-      `ALERTE INCENDIE FORÊT (Protection Civile Algérienne): Foyer critique détecté dans le secteur de ${alert.forest_name} (${alert.wilaya}). Risque ${alert.risk_score}%. Évacuation préventive conseillée pour habitations lisière. Contact: 14.`
+      language === "ar"
+        ? `إنذار حريق غابات عاجل (الحماية المدنية الجزائرية): تم رصد بؤرة حريق خطيرة في قطاع ${alert.forest_name} (${alert.wilaya}). نسبة الخطر ${alert.risk_score}%. يُنصح بإخلاء وقائي للمساكن المحاذية للغابة. رقم الطوارئ: 14.`
+        : language === "en"
+        ? `WILDFIRE EMERGENCY ALERT (Algerian Civil Protection): Critical fire hotspot detected in ${alert.forest_name} (${alert.wilaya}). AI Risk ${alert.risk_score}%. Precautionary evacuation advised for border dwellings. Emergency: 14.`
+        : `ALERTE INCENDIE FORÊT (Protection Civile Algérienne): Foyer critique détecté dans le secteur de ${alert.forest_name} (${alert.wilaya}). Risque ${alert.risk_score}%. Évacuation préventive conseillée pour habitations lisière. Contact: 14.`
     );
   };
 
@@ -303,13 +311,17 @@ export default function AlertsPage() {
       });
       setSmsResult(res);
       setToast({
-        title: "Diffusion SMS Réussie",
-        message: `${res.recipients_count || 12500} riverains alertés via Mobilis / Algérie Télécom.`,
+        title: language === "ar" ? "تم بث التنبيه بنجاح" : language === "en" ? "SMS Broadcast Successful" : "Diffusion SMS Réussie",
+        message: language === "ar"
+          ? `تم إشعار ${res.recipients_count || 12500} مواطناً عبر موبيليس / اتصالات الجزائر.`
+          : language === "en"
+          ? `${res.recipients_count || 12500} residents alerted via Mobilis / Algérie Télécom.`
+          : `${res.recipients_count || 12500} riverains alertés via Mobilis / Algérie Télécom.`,
         type: "success",
       });
     } catch (err) {
       console.error("SMS Broadcast Error:", err);
-      setSmsError("Échec lors de la transmission aux opérateurs télécoms.");
+      setSmsError(language === "ar" ? "فشل الإرسال إلى شبكات الاتصالات." : language === "en" ? "Failed to transmit message to telecom operators." : "Échec lors de la transmission aux opérateurs télécoms.");
     } finally {
       setIsSendingSMS(false);
     }
@@ -495,9 +507,11 @@ export default function AlertsPage() {
         {filteredAlerts.length === 0 ? (
           <div className="p-12 text-center rounded-lg border border-slate-800 bg-slate-900/40 space-y-3">
             <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto opacity-70" aria-hidden="true" />
-            <h3 className="text-sm font-bold text-white">Aucune alerte active ne correspond aux critères</h3>
+            <h3 className="text-sm font-bold text-white">
+              {language === "ar" ? "لا توجد تنبيهات نشطة مطابقة للمعايير المحددة" : language === "en" ? "No active alerts match current criteria" : "Aucune alerte active ne correspond aux critères"}
+            </h3>
             <p className="text-xs text-slate-400 font-mono">
-              Dernière vérification satellitaire & météo : {lastRefreshTime.toLocaleTimeString("fr-FR")}
+              {t("last_check_label")} {lastRefreshTime.toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
             </p>
           </div>
         ) : (
@@ -535,7 +549,7 @@ export default function AlertsPage() {
                         }`}
                       >
                         <Flame className="w-3.5 h-3.5" />
-                        <span>{alert.risk_level === "CRITIQUE" ? "RISQUE CRITIQUE" : alert.risk_level} · {alert.risk_score}%</span>
+                        <span>{alert.risk_level === "CRITIQUE" ? (language === "ar" ? "خطر حرج" : language === "en" ? "CRITICAL RISK" : "RISQUE CRITIQUE") : alert.risk_level} · {alert.risk_score}%</span>
                       </span>
 
                       {/* Alert ID */}
@@ -546,7 +560,7 @@ export default function AlertsPage() {
                       {/* Sirocco Tag */}
                       {alert.wind_dir.includes("Sud") && (
                         <span className="px-2 py-0.5 rounded bg-amber-950/70 text-amber-300 text-[11px] border border-amber-800 font-medium">
-                          Sirocco (الشهيلي)
+                          {t("sirocco_tag")}
                         </span>
                       )}
 
@@ -565,7 +579,7 @@ export default function AlertsPage() {
                         {isDropdownOpen && (
                           <div className="absolute left-0 mt-1.5 w-64 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl p-1.5 z-30 animate-in fade-in zoom-in-95">
                             <div className="px-2.5 py-1.5 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800 mb-1">
-                              Changer le Statut d'Intervention
+                              {t("change_intervention_status")}
                             </div>
                             {NEXT_STATUS_OPTIONS.map((stKey) => {
                               const meta = STATUS_LABELS[stKey];
@@ -580,14 +594,14 @@ export default function AlertsPage() {
                                       : "text-slate-300 hover:bg-slate-800/60"
                                   }`}
                                 >
-                                  <span className={meta.color}>{meta.label}</span>
+                                  <span className={meta.color}>{getLocalizedStatusLabel(stKey)}</span>
                                   {isCurrent && <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />}
                                 </button>
                               );
                             })}
                             {!canModifyStatus && (
                               <div className="px-2.5 py-1 text-[10px] text-amber-400/90 border-t border-slate-800 mt-1">
-                                Note : Rôle Protection Civile ou Administrateur requis en production.
+                                {t("role_requirement_note")}
                               </div>
                             )}
                           </div>
@@ -603,7 +617,7 @@ export default function AlertsPage() {
                         <span className="text-xs text-slate-400 font-normal">({alert.wilaya})</span>
                       </h2>
                       <p className="text-xs text-slate-400 font-mono mt-0.5">
-                        Coordonnées GPS: {alert.lat.toFixed(4)}°N, {alert.lon.toFixed(4)}°E · Détecté le {new Date(alert.created_at).toLocaleTimeString("fr-FR")}
+                        {language === "ar" ? "الإحداثيات الجغرافية" : language === "en" ? "GPS Coordinates" : "Coordonnées GPS"}: {alert.lat.toFixed(4)}°N, {alert.lon.toFixed(4)}°E · {language === "ar" ? "رُصد في" : language === "en" ? "Detected at" : "Détecté le"} {new Date(alert.created_at).toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
                       </p>
                     </div>
 
@@ -642,7 +656,7 @@ export default function AlertsPage() {
                         <div className="p-3 rounded-lg bg-slate-950 border border-slate-800/90 space-y-2 text-xs">
                           {historyList.length === 0 ? (
                             <div className="text-slate-400 font-mono text-[11px]">
-                              Chargement de la chronologie des interventions...
+                              {language === "ar" ? "جاري تحميل سجل التدخلات..." : language === "en" ? "Loading intervention log..." : "Chargement de la chronologie des interventions..."}
                             </div>
                           ) : (
                             historyList.map((h, i) => (
@@ -651,10 +665,10 @@ export default function AlertsPage() {
                                 <div className="space-y-0.5">
                                   <div className="flex items-center gap-2">
                                     <span className="font-mono text-slate-400">
-                                      {new Date(h.changed_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                                      {new Date(h.changed_at).toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
                                     </span>
                                     <span className="font-bold text-white">{h.new_status}</span>
-                                    <span className="text-slate-400">par {h.changed_by}</span>
+                                    <span className="text-slate-400">{language === "ar" ? "بواسطة " : language === "en" ? "by " : "par "}{h.changed_by}</span>
                                   </div>
                                   <p className="text-slate-300 font-sans leading-relaxed">{h.note}</p>
                                 </div>
@@ -760,7 +774,7 @@ export default function AlertsPage() {
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <HistoryIcon className="w-5 h-5 text-ember-400" />
-                  <span>Journal d'Audit & Historique — {modalAlert.alert_id}</span>
+                  <span>{t("audit_history_modal_title")} — {modalAlert.alert_id}</span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {modalAlert.forest_name} ({modalAlert.wilaya}) · Coordonnées GPS: {modalAlert.lat}°N, {modalAlert.lon}°E
@@ -773,7 +787,7 @@ export default function AlertsPage() {
 
             <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
               {modalHistory.length === 0 ? (
-                <div className="text-xs text-slate-400 text-center py-6">Aucun historique disponible</div>
+                <div className="text-xs text-slate-400 text-center py-6">{t("no_history_available")}</div>
               ) : (
                 modalHistory.map((h, idx) => (
                   <div key={h.id || idx} className="p-3.5 rounded-xl border border-slate-800 bg-slate-950 space-y-1 text-xs">
@@ -784,10 +798,10 @@ export default function AlertsPage() {
                         <span className="text-emerald-400 font-bold">{h.new_status}</span>
                       </div>
                       <span className="text-slate-500 font-mono text-[11px]">
-                        {new Date(h.changed_at).toLocaleString("fr-FR")}
+                        {new Date(h.changed_at).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
                       </span>
                     </div>
-                    <div className="text-slate-300 font-medium">Intervenant : <span className="text-white">{h.changed_by}</span></div>
+                    <div className="text-slate-300 font-medium">{t("intervenant_label")} <span className="text-white">{h.changed_by}</span></div>
                     <div className="text-slate-400 text-[11px] bg-slate-900 p-2 rounded border border-slate-800 mt-1">
                       {h.note}
                     </div>
@@ -801,7 +815,7 @@ export default function AlertsPage() {
                 onClick={() => setModalAlert(null)}
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition"
               >
-                Fermer
+                {t("close_modal")}
               </button>
             </div>
           </div>
@@ -817,10 +831,10 @@ export default function AlertsPage() {
                 <Smartphone className="w-5 h-5 text-red-500" />
                 <div>
                   <h3 className="text-base font-bold text-white">
-                    Passerelle SMS d&apos;Urgence — {smsModalAlert.alert_id}
+                    {t("sms_modal_title")} — {smsModalAlert.alert_id}
                   </h3>
                   <p className="text-xs text-slate-400 font-mono">
-                    {smsModalAlert.forest_name} ({smsModalAlert.wilaya}) · Cell-Broadcast Mobilis / Algérie Télécom
+                    {smsModalAlert.forest_name} ({smsModalAlert.wilaya}) · {t("cell_broadcast_networks")}
                   </p>
                 </div>
               </div>
@@ -839,18 +853,18 @@ export default function AlertsPage() {
             <form onSubmit={handleDispatchSMS} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3 font-mono">
                 <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
-                  <span className="text-[10px] text-slate-500 block font-sans">Secteur Cible</span>
+                  <span className="text-[10px] text-slate-500 block font-sans">{t("target_sector")}</span>
                   <span className="text-white font-bold">{smsModalAlert.forest_name} ({smsModalAlert.wilaya})</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
-                  <span className="text-[10px] text-slate-500 block font-sans">Indice de Risque IA</span>
+                  <span className="text-[10px] text-slate-500 block font-sans">{t("ai_risk_index")}</span>
                   <span className="text-red-400 font-bold">{smsModalAlert.risk_score}% ({smsModalAlert.risk_level})</span>
                 </div>
               </div>
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Rayon de Diffusion Cellulaire : {smsRadius} km
+                  {t("broadcast_radius")} {smsRadius} km
                 </label>
                 <input
                   type="range"
@@ -862,15 +876,15 @@ export default function AlertsPage() {
                   className="w-full accent-red-500"
                 />
                 <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
-                  <span>2 km (Proximité immédiate)</span>
+                  <span>{t("radius_immediate")}</span>
                   <span className="text-red-400 font-bold">{smsRadius} km</span>
-                  <span>20 km (Massif complet)</span>
+                  <span>{t("radius_full")}</span>
                 </div>
               </div>
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">
-                  Contenu du Message d&apos;Alerte SMS
+                  {t("sms_content_label")}
                 </label>
                 <textarea
                   value={smsMessage}
@@ -884,10 +898,10 @@ export default function AlertsPage() {
                 <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-600 text-emerald-200 text-xs space-y-1 animate-fadeIn">
                   <div className="flex items-center gap-2 font-bold text-emerald-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Alerte SMS Diffusée ({smsResult.broadcast_id})</span>
+                    <span>{t("sms_broadcast_success")} ({smsResult.broadcast_id})</span>
                   </div>
                   <div className="text-[11px] font-mono text-slate-300">
-                    Destinataires alertés : <span className="text-white font-bold">{smsResult.recipients_count}</span> riverains dans un rayon de {smsResult.radius_km} km.
+                    {t("sms_recipients_alerted")} <span className="text-white font-bold">{smsResult.recipients_count}</span> {t("sms_riverains_in_radius")} {smsResult.radius_km} km.
                   </div>
                 </div>
               )}
@@ -901,7 +915,7 @@ export default function AlertsPage() {
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-800">
                 <span className="text-[10px] text-slate-400 font-mono">
-                  Protocole DGF / Protection Civile Algérie
+                  {t("official_protocol_note")}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -913,7 +927,7 @@ export default function AlertsPage() {
                     }}
                     className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
                   >
-                    Fermer
+                    {t("close_modal")}
                   </button>
                   <button
                     type="submit"
@@ -925,7 +939,7 @@ export default function AlertsPage() {
                     ) : (
                       <Send className="w-3.5 h-3.5" />
                     )}
-                    <span>Diffuser Immédiatement</span>
+                    <span>{t("broadcast_now_btn")}</span>
                   </button>
                 </div>
               </div>

@@ -18,7 +18,7 @@ import {
   UserCheck,
   Settings
 } from "lucide-react";
-import { getStoredUser, getStoredToken, setSession, logoutUser, getRoleBadgeInfo, AuthUser } from "@/lib/auth";
+import { getStoredUser, getStoredToken, setSession, logoutUser, getRoleBadgeInfo, getLocalizedUserName, AuthUser } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -76,21 +76,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push("/login");
   };
 
+  const { t, isRTL, language } = useLanguage();
+
   if (!isReady || !user) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-          <span>Vérification des accréditations de sécurité...</span>
+          <span>{t("security_verification_loading")}</span>
         </div>
       </div>
     );
   }
 
-  const badgeInfo = getRoleBadgeInfo(user.role);
+  const badgeInfo = getRoleBadgeInfo(user.role, language);
   // Clean role text without duplicate emoji
   const cleanRoleText = badgeInfo.text.replace(/^[🔒\s]+Secure\s+access\s*-\s*/i, "").trim() || "Sécurité Accréditée";
-  const { t, isRTL } = useLanguage();
+  const cleanUserName = getLocalizedUserName(user.name, user.role, language);
   const isAdmin = user.role === "ADMIN";
 
   // PRIMARY OPERATIONAL ITEMS (visible in main top bar)
@@ -201,7 +203,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <UserCheck className="w-3.5 h-3.5 text-slate-300" aria-hidden="true" />
                 </div>
                 <div className="hidden lg:block text-left">
-                  <div className="font-semibold text-xs leading-none truncate max-w-[130px]">{user.name}</div>
+                  <div className="font-semibold text-xs leading-none truncate max-w-[130px]">{cleanUserName}</div>
                   <div className="text-[10px] text-slate-400 font-mono truncate max-w-[130px] mt-0.5">
                     {cleanRoleText}
                   </div>
@@ -218,7 +220,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 >
                   {/* Account Summary */}
                   <div className="px-3.5 py-2.5">
-                    <div className="font-semibold text-white truncate">{user.name}</div>
+                    <div className="font-semibold text-white truncate">{cleanUserName}</div>
                     <div className="text-[11px] text-slate-400 truncate mt-0.5">{user.email}</div>
                     <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold border bg-slate-800/80 border-slate-700 text-amber-300">
                       <Lock className="w-3 h-3 text-amber-400 shrink-0" aria-hidden="true" />

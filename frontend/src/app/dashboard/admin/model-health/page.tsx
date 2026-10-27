@@ -58,7 +58,7 @@ const DEFAULT_HEALTH: SystemHealth = {
       status: "healthy",
       latency_ms: 4.1,
       last_check: new Date().toISOString(),
-      details: "Opérationnel (Précision: 95.4%, ROC-AUC: 0.986, F1: 0.921)",
+      details: "Operational (Accuracy: 95.4%, ROC-AUC: 0.986, F1: 0.921)",
       accuracy: 0.954,
       threshold: 0.80
     },
@@ -67,21 +67,21 @@ const DEFAULT_HEALTH: SystemHealth = {
       status: "healthy",
       latency_ms: 120.4,
       last_check: new Date().toISOString(),
-      details: "Flux satellitaire actif (VIIRS 375m & MODIS - 6 anomalies détectées)"
+      details: "Active satellite telemetry feed (VIIRS 375m & MODIS - 6 anomalies detected)"
     },
     {
       service: "Weather API (Open-Meteo)",
       status: "healthy",
       latency_ms: 485.2,
       last_check: new Date().toISOString(),
-      details: "Synchronisation météo en temps réel (Température, Humidité, Vent, Pluie)"
+      details: "Real-time weather synchronization (Temperature, Humidity, Wind, Precipitation)"
     },
     {
       service: "Database & Audit Store",
       status: "healthy",
       latency_ms: 0.8,
       last_check: new Date().toISOString(),
-      details: "Stockage persistant JSON et registre d'audit en lecture/écriture totale"
+      details: "Persistent JSON storage & operational audit registry with full read/write integrity"
     }
   ]
 };
@@ -419,7 +419,7 @@ export default function ModelHealthPage() {
                 <span className="text-slate-400">Dernier rafraîchissement:</span>
                 <span className="text-emerald-400 font-bold">
                   {refreshData.logs.length > 0 
-                    ? new Date(refreshData.logs[0].timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) 
+                    ? new Date(refreshData.logs[0].timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) 
                     : "10 mins ago"}
                 </span>
               </div>
@@ -475,7 +475,7 @@ export default function ModelHealthPage() {
                   </div>
 
                   <span className="font-mono text-[10px] text-slate-400 shrink-0">
-                    {new Date(log.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(log.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
               ))}

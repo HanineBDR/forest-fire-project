@@ -281,7 +281,7 @@ function DashboardMapInner() {
         <div className="flex items-center gap-4 text-slate-400 font-mono text-[11px] tabular-nums">
           <span>NASA FIRMS: <strong className="text-slate-200">{firmsHotspots.length}</strong> {t("hotspots_count_label")}</span>
           <span>Open-Meteo: <strong className="text-emerald-400">{t("connected")}</strong></span>
-          <span>Modèle IA: <strong className="text-slate-200">95.4%</strong> {t("accuracy")}</span>
+          <span>{t("model_ai_label")}: <strong className="text-slate-200">95.4%</strong> {t("accuracy")}</span>
         </div>
       </div>
 

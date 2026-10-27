@@ -4,7 +4,6 @@
  */
 
 import { neon, Pool } from "@neondatabase/serverless";
-import { S3Client, ListObjectsV2Command, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
 // 1. Lakebase Postgres
 export function getNeonSql() {
@@ -28,8 +27,8 @@ export function getNeonPool() {
 }
 
 // 2. Neon Object Storage (S3-compatible)
-let cachedS3Client: S3Client | null = null;
-export function getNeonStorageClient(): S3Client {
+let cachedS3Client: any = null;
+export async function getNeonStorageClient(): Promise<any> {
   if (!cachedS3Client) {
     const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -40,15 +39,20 @@ export function getNeonStorageClient(): S3Client {
       throw new Error("Neon Object Storage credentials or endpoint are missing in environment");
     }
 
-    cachedS3Client = new S3Client({
-      region,
-      endpoint,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-      forcePathStyle: true,
-    });
+    try {
+      const { S3Client } = await import("@aws-sdk/client-s3");
+      cachedS3Client = new S3Client({
+        region,
+        endpoint,
+        credentials: {
+          accessKeyId,
+          secretAccessKey,
+        },
+        forcePathStyle: true,
+      });
+    } catch (e: any) {
+      throw new Error(`Neon Object Storage client init failed: ${e.message}`);
+    }
   }
   return cachedS3Client;
 }
@@ -59,7 +63,8 @@ export async function uploadToNeonStorage(
   contentType: string = "application/octet-stream",
   bucket: string = "assets"
 ) {
-  const client = getNeonStorageClient();
+  const client = await getNeonStorageClient();
+  const { PutObjectCommand } = await import("@aws-sdk/client-s3");
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
@@ -70,7 +75,8 @@ export async function uploadToNeonStorage(
 }
 
 export async function listNeonStorageFiles(bucket: string = "assets") {
-  const client = getNeonStorageClient();
+  const client = await getNeonStorageClient();
+  const { ListObjectsV2Command } = await import("@aws-sdk/client-s3");
   const command = new ListObjectsV2Command({
     Bucket: bucket,
     MaxKeys: 100,
