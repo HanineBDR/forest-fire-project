@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNeonSql } from "@/lib/neon";
+import { createAlertAndNotifications } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,18 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { wilaya, massif, risk_level, temperature, humidity, wind_speed, fwi } = body;
+    const {
+      wilaya,
+      massif,
+      risk_level,
+      temperature,
+      humidity,
+      wind_speed,
+      fwi,
+      risk_score,
+      lat,
+      lon,
+    } = body;
 
     if (!wilaya || !massif || !risk_level) {
       return NextResponse.json(
@@ -33,6 +45,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const tempNum = temperature !== undefined ? parseFloat(temperature) : 35.0;
+    const humNum = humidity !== undefined ? parseFloat(humidity) : 25.0;
+    const windNum = wind_speed !== undefined ? parseFloat(wind_speed) : 20.0;
+    const fwiNum = fwi !== undefined ? parseFloat(fwi) : 30.0;
+    const scoreNum = risk_score !== undefined ? parseFloat(risk_score) : fwiNum * 2.5;
+
     const sql = getNeonSql();
     const [inserted] = await sql`
       INSERT INTO predictions (wilaya, massif, risk_level, temperature, humidity, wind_speed, fwi)
@@ -40,15 +58,50 @@ export async function POST(req: NextRequest) {
         ${wilaya},
         ${massif},
         ${risk_level},
-        ${temperature !== undefined ? parseFloat(temperature) : 35.0},
-        ${humidity !== undefined ? parseFloat(humidity) : 25.0},
-        ${wind_speed !== undefined ? parseFloat(wind_speed) : 20.0},
-        ${fwi !== undefined ? parseFloat(fwi) : 30.0}
+        ${tempNum},
+        ${humNum},
+        ${windNum},
+        ${fwiNum}
       )
       RETURNING *
     `;
 
-    return NextResponse.json({ ok: true, data: inserted }, { status: 201 });
+    // National Early Warning: If risk is elevated, auto-notify all panels
+    let dispatchResult: any = null;
+    const isElevated =
+      ["High", "Very High", "Elevé", "Très Elevé", "Extreme"].some((lvl) =>
+        risk_level.toLowerCase().includes(lvl.toLowerCase())
+      ) ||
+      scoreNum > 60 ||
+      fwiNum >= 25;
+
+    if (isElevated) {
+      try {
+        dispatchResult = await createAlertAndNotifications({
+          wilaya,
+          massif,
+          risk_level,
+          risk_score: scoreNum,
+          temp: tempNum,
+          humidity: humNum,
+          wind: windNum,
+          lat: lat !== undefined ? parseFloat(lat) : 36.735,
+          lon: lon !== undefined ? parseFloat(lon) : 4.435,
+        });
+      } catch (e: any) {
+        console.warn("Auto notification dispatch error:", e?.message);
+      }
+    }
+
+    return NextResponse.json(
+      {
+        ok: true,
+        data: inserted,
+        auto_notified: !!dispatchResult,
+        dispatch: dispatchResult,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     return NextResponse.json(
       { ok: false, error: error?.message || "Failed to insert prediction" },
