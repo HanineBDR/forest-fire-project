@@ -286,17 +286,17 @@ function DashboardMapInner() {
       </div>
 
       {/* Strategic Hotspots Quick Selector */}
-      <QuickPresets
+      <div data-tour="massifs"><QuickPresets
         regions={regions}
         selectedRegionId={selectedRegionId}
         onSelectRegion={handleSelectRegion}
         isLoading={isLoading}
-      />
+      /></div>
 
       {/* Main Map + Risk Telemetry Split */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[640px]">
         {/* Tactical Map (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col gap-3 min-h-[500px]">
+        <div data-tour="map" className="lg:col-span-7 flex flex-col gap-3 min-h-[500px]">
           <div className="flex-1 relative min-h-[460px] rounded-lg border border-slate-800 overflow-hidden">
             <DynamicMap
               prediction={prediction}
@@ -314,15 +314,17 @@ function DashboardMapInner() {
             />
           </div>
 
-          <SimulationControls
-            simulation={prediction?.simulation || null}
-            activeHorizonIndex={activeHorizonIndex}
-            onSelectHorizon={setActiveHorizonIndex}
-          />
+          <div data-tour="simulation">
+            <SimulationControls
+              simulation={prediction?.simulation || null}
+              activeHorizonIndex={activeHorizonIndex}
+              onSelectHorizon={setActiveHorizonIndex}
+            />
+          </div>
         </div>
 
         {/* Telemetry Sidebar (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col">
+        <div data-tour="risk-panel" className="lg:col-span-5 flex flex-col">
           <RiskPanel
             prediction={prediction}
             weather={weather}

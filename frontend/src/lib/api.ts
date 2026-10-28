@@ -580,6 +580,25 @@ export async function predictFireRisk(payload: {
 
   const simulation = simulateOfflineFirePropagation(lat, lon, wind, wind_direction, score);
 
+  if (typeof window !== "undefined" && score >= 60) {
+    fetch("/api/predictions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        wilaya: "Tizi Ouzou",
+        massif: "Massif de Yakouren",
+        risk_level: frenchLevel,
+        temperature: temp,
+        humidity,
+        wind_speed: wind,
+        fwi: score,
+        risk_score: score,
+        lat,
+        lon,
+      }),
+    }).catch(() => {});
+  }
+
   return {
     input: { lat, lon, temp, wind, humidity, rain, wind_direction },
     risk_score: score,
