@@ -134,6 +134,11 @@ try:
 except Exception as e:
     logger.warning(f"Could not load reports_router: {e}")
 
+from app.routers.predictions import router as predictions_router
+app.include_router(predictions_router)
+from app.routers.notifications import router as notifications_router
+app.include_router(notifications_router)
+
 
 class PredictRequest(BaseModel):
     lat: float = Field(..., description="Latitude in decimal degrees")
@@ -146,6 +151,8 @@ class PredictRequest(BaseModel):
     wind_direction: Optional[float] = Field(180.0, description="Wind direction degrees (0-360)")
     vegetation_index: Optional[float] = Field(None, description="NDVI vegetation index (0.0 - 1.0)")
     month: Optional[int] = Field(None, description="Seasonal month (1 - 12)")
+    wilaya: Optional[str] = Field("Tizi Ouzou", description="Wilaya name")
+    massif: Optional[str] = Field("Massif de Yakouren", description="Forest massif name")
 
 
 STRATEGIC_REGIONS = [
@@ -368,6 +375,24 @@ def predict_risk_post(req: PredictRequest, current_user: dict = Depends(get_curr
         latency_ms=latency_ms
     )
 
+    # 5. National Early Warning: Auto-dispatch alerts & notifications if risk is elevated
+    notification_dispatch = None
+    try:
+        from app.routers.predictions import check_and_notify_risk
+        notif_payload = {
+            **prediction,
+            "lat": req.lat,
+            "lon": req.lon,
+            "temp": req.temp,
+            "humidity": req.humidity,
+            "wind": req.wind,
+            "wilaya": getattr(req, "wilaya", None) or "Tizi Ouzou",
+            "massif": getattr(req, "massif", None) or "Massif de Yakouren"
+        }
+        notification_dispatch = check_and_notify_risk(notif_payload)
+    except Exception as e:
+        logger.warning(f"Auto-notification dispatch error: {e}")
+
     # Calculate FWI proxy metrics for backward compatibility with frontend
     fwi_metrics = {
         "ffmc": round(min(99.0, max(20.0, 50.0 + (req.temp * 0.7) + (req.wind * 0.3) - (req.humidity * 0.4))), 1),
@@ -397,6 +422,7 @@ def predict_risk_post(req: PredictRequest, current_user: dict = Depends(get_curr
         "fwi_metrics": fwi_metrics,
         "is_sirocco": is_sirocco,
         "contributing_factors": prediction.get("factors", []),
+        "notification_dispatch": notification_dispatch,
         "civil_protection_advisory": (
             "Alerte Rouge: Mobiliser les unités d'intervention de la Protection Civile."
             if prediction["risk_score"] >= 75
@@ -1705,3 +1731,26 @@ def api_get_drone_patrols():
 
 
 
+
+
+@app.on_event("startup")
+async def start_periodic_wildfire_scanner():
+    """
+    Background worker that runs every 5 minutes:
+    Re-evaluates high-risk forest massifs using Open-Meteo weather + NASA FIRMS + FWI
+    and triggers automated multi-panel notifications when critical thresholds are crossed.
+    """
+    import asyncio
+    async def periodic_worker():
+        await asyncio.sleep(30)
+        while True:
+            try:
+                from ml.history_manager import auto_detect_new_alerts
+                res = auto_detect_new_alerts()
+                if res and (res.get("new_alerts", 0) > 0 or res.get("updated_alerts", 0) > 0):
+                    logger.info(f"Automated risk scan: {res}")
+            except Exception as ex:
+                logger.warning(f"Error during periodic automated scan: {ex}")
+            await asyncio.sleep(300)
+
+    asyncio.create_task(periodic_worker())

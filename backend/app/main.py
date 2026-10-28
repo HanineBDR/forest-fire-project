@@ -18,3 +18,10 @@ import main
 
 # Export FastAPI app instance for uvicorn app.main:app
 app = main.app
+
+# Mount new AI Early Warning and Multi-Panel Notification Routers
+from app.routers.predictions import router as predictions_router
+from app.routers.notifications import router as notifications_router
+
+app.include_router(predictions_router)
+app.include_router(notifications_router)
