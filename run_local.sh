@@ -42,7 +42,7 @@ fi
 
 echo "==================================================="
 echo "[1/2] Starting Backend Server on port 8000..."
-(cd backend && source venv/bin/activate && uvicorn app.main:app --reload --host 127.0.0.1 --port 8000) &
+(cd backend && source venv/bin/activate && uvicorn app.main:app --reload --reload-dir app --reload-exclude "*.db" --reload-exclude "*.db-*" --reload-exclude "ml/outputs/*" --host 127.0.0.1 --port 8000) &
 BACKEND_PID=$!
 
 sleep 3

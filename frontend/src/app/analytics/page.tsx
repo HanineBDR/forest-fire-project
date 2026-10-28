@@ -47,6 +47,14 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
+
+function formatNumber(n: number | null | undefined): string {
+  if (n === null || n === undefined || isNaN(n)) return "0";
+  const parts = Math.round(n).toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return parts.join(".");
+}
+
 export default function AnalyticsPage() {
   const { t, language } = useLanguage();
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
@@ -144,7 +152,7 @@ export default function AnalyticsPage() {
       const res: RefreshAllResponse = await refreshAllData(false, false);
       setToast({
         title: "Synchronisation réussie",
-        message: `+${res.diff_from_last.new_points} nouveaux foyers détectés par NASA FIRMS. Total: ${res.new_stats.total_points.toLocaleString()} points.`,
+        message: `+${res.diff_from_last.new_points} nouveaux foyers détectés par NASA FIRMS. Total: ${formatNumber(res.new_stats.total_points)} points.`,
         type: "success"
       });
       await loadAllData(true);
@@ -322,7 +330,7 @@ export default function AnalyticsPage() {
               onClick={() => setActiveKpiModal(activeKpiModal === "roc_auc" ? null : "roc_auc")}
               className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden ${
                 activeKpiModal === "roc_auc"
-                  ? "bg-slate-900 border-ember-500 ring-1 ring-ember-500/50 shadow-lg"
+                  ? "bg-slate-900 border-ember-500 ring-1 ring-ember-500/50 "
                   : "bg-slate-900/80 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
               }`}
             >
@@ -346,7 +354,7 @@ export default function AnalyticsPage() {
               onClick={() => setActiveKpiModal(activeKpiModal === "accuracy" ? null : "accuracy")}
               className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden ${
                 activeKpiModal === "accuracy"
-                  ? "bg-slate-900 border-amber-500 ring-1 ring-amber-500/50 shadow-lg"
+                  ? "bg-slate-900 border-amber-500 ring-1 ring-amber-500/50 "
                   : "bg-slate-900/80 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
               }`}
             >
@@ -373,7 +381,7 @@ export default function AnalyticsPage() {
               onClick={() => setActiveKpiModal(activeKpiModal === "burn_points" ? null : "burn_points")}
               className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden ${
                 activeKpiModal === "burn_points"
-                  ? "bg-slate-900 border-rose-500 ring-1 ring-rose-500/50 shadow-lg"
+                  ? "bg-slate-900 border-rose-500 ring-1 ring-rose-500/50 "
                   : "bg-slate-900/80 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
               }`}
             >
@@ -381,7 +389,7 @@ export default function AnalyticsPage() {
                 <span className="text-xs text-slate-400 font-medium">{t("satellite_hotspots")}</span>
                 <Flame className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="mt-1 text-2xl font-bold text-white font-mono">{totalPoints.toLocaleString()}</div>
+              <div suppressHydrationWarning className="mt-1 text-2xl font-bold text-white font-mono">{formatNumber(totalPoints)}</div>
               <div className="mt-1 text-xs text-rose-400 font-medium">{t("nasa_firms_viirs_modis")}</div>
               <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
                 <span>{t("click_for_evolution")}</span>
@@ -394,7 +402,7 @@ export default function AnalyticsPage() {
               onClick={() => setActiveKpiModal(activeKpiModal === "burned_area" ? null : "burned_area")}
               className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden ${
                 activeKpiModal === "burned_area"
-                  ? "bg-slate-900 border-orange-500 ring-1 ring-orange-500/50 shadow-lg"
+                  ? "bg-slate-900 border-orange-500 ring-1 ring-orange-500/50 "
                   : "bg-slate-900/80 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
               }`}
             >
@@ -403,7 +411,7 @@ export default function AnalyticsPage() {
                 <Layers className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
               </div>
               <div className="mt-1 text-2xl font-bold text-white font-mono">
-                {Math.round(totalAreaHa).toLocaleString()} ha
+                {formatNumber(totalAreaHa)} ha
               </div>
               <div className="mt-1 text-xs text-orange-400 font-medium">{t("arc_tellien_kabylie")}</div>
               <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
@@ -484,8 +492,8 @@ export default function AnalyticsPage() {
                     {burnSnapshots.map((s) => (
                       <div key={s.id} className="p-2.5 rounded bg-slate-950 border border-slate-800">
                         <div className="text-slate-400 text-[10px]">{new Date(s.timestamp).toLocaleDateString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}</div>
-                        <div className="text-white font-bold text-sm">{s.total_points.toLocaleString()} points</div>
-                        <div className="text-rose-400 text-[10px]">{Math.round(s.total_ha).toLocaleString()} ha</div>
+                        <div suppressHydrationWarning className="text-white font-bold text-sm">{formatNumber(s.total_points)} points</div>
+                        <div suppressHydrationWarning className="text-rose-400 text-[10px]">{formatNumber(s.total_ha)} ha</div>
                       </div>
                     ))}
                   </div>
@@ -502,8 +510,8 @@ export default function AnalyticsPage() {
                       : "Estimation calculée selon la résolution spatiale du capteur VIIRS (375m / pixel équivalant à ~14.06 ha par point d'anomalie thermique confirmée)."}
                   </p>
                   <div className="p-2.5 rounded bg-slate-950 border border-slate-800 font-mono text-[11px] text-slate-300 flex justify-between">
-                    <span>{language === "ar" ? "إجمالي الجزائر:" : language === "en" ? "Total Algeria:" : "Total Algérie:"} <strong>{Math.round(totalAreaHa).toLocaleString()} ha</strong></span>
-                    <span className="text-rose-400">{language === "ar" ? "منطقة القبائل الكبرى:" : language === "en" ? "Greater Kabylie:" : "Grande Kabylie:"} <strong>~{Math.round(totalAreaHa * 0.59).toLocaleString()} ha</strong></span>
+                    <span suppressHydrationWarning>{language === "ar" ? "إجمالي الجزائر:" : language === "en" ? "Total Algeria:" : "Total Algérie:"} <strong>{formatNumber(totalAreaHa)} ha</strong></span>
+                    <span suppressHydrationWarning className="text-rose-400">{language === "ar" ? "منطقة القبائل الكبرى:" : language === "en" ? "Greater Kabylie:" : "Grande Kabylie:"} <strong>~{formatNumber(totalAreaHa * 0.59)} ha</strong></span>
                   </div>
                 </div>
               )}
@@ -696,7 +704,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Model Runs Table */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden shadow-lg">
+          <div className="rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden ">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-800/80 border-b border-slate-700/80 text-slate-300 font-medium">
@@ -740,7 +748,7 @@ export default function AnalyticsPage() {
                           })}
                         </td>
                         <td className="py-2.5 px-3 text-right text-slate-200">
-                          {r.dataset_size.toLocaleString()} pts
+                          {formatNumber(r.dataset_size)} pts
                         </td>
                         <td className="py-2.5 px-3 text-right text-emerald-400 font-bold">
                           {(r.accuracy * 100).toFixed(2)}%
@@ -870,7 +878,7 @@ export default function AnalyticsPage() {
 
           <Link
             href="/dashboard/alerts"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition-all shadow-lg active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition-all  active:scale-95 shrink-0"
           >
             <span>{t("access_live_alerts_center")}</span>
             <ChevronRight className="w-4 h-4" />
@@ -895,7 +903,7 @@ export default function AnalyticsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Table Column (2 cols) */}
-            <div className="lg:col-span-2 rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden shadow-lg">
+            <div className="lg:col-span-2 rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden ">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-800/80 border-b border-slate-700/80 text-slate-300 font-medium">
@@ -929,7 +937,7 @@ export default function AnalyticsPage() {
                             {w.total_burned_points}
                           </td>
                           <td className="py-2.5 px-3 text-right text-slate-200">
-                            {Math.round(w.estimated_burned_area_ha).toLocaleString()} ha
+                            {formatNumber(w.estimated_burned_area_ha)} ha
                           </td>
                           <td className="py-2.5 px-3 font-sans">
                             <span
@@ -953,7 +961,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Selected Wilaya Detail Card (1 col) */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 space-y-3 shadow-lg">
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 space-y-3 ">
               {selectedWilaya ? (
                 <>
                   <div className="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -979,7 +987,7 @@ export default function AnalyticsPage() {
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
                       <span className="text-slate-400">{t("estimated_burned_area")} :</span>
                       <span className="font-mono font-bold text-white">
-                        {Math.round(selectedWilaya.estimated_burned_area_ha).toLocaleString()} ha
+                        <span suppressHydrationWarning>{formatNumber(selectedWilaya.estimated_burned_area_ha)} ha</span>
                       </span>
                     </div>
 

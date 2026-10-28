@@ -42,7 +42,7 @@ if not exist "frontend\node_modules" (
 echo.
 echo ===================================================
 echo [1/2] Launching Backend Server on port 8000...
-start "IN9AD Backend (FastAPI)" cmd /k "cd backend && call venv\Scripts\activate && uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
+start "IN9AD Backend (FastAPI)" cmd /k "cd backend && call venv\Scripts\activate && uvicorn app.main:app --reload --reload-dir app --reload-exclude \"*.db\" --reload-exclude \"*.db-*\" --reload-exclude \"ml/outputs/*\" --host 127.0.0.1 --port 8000"
 
 timeout /t 3 /nobreak >nul
 

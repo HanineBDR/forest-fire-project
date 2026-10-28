@@ -40,6 +40,7 @@ import { useLanguage, Language } from "@/context/LanguageContext";
 import { AlertRecord, AlertStatusHistory } from "@/types";
 import { PdfLanguageModal } from "@/components/PdfLanguageModal";
 import { getLocalizedStatusName, getLocalizedOperatorName, getLocalizedAuditNote } from "@/lib/i18nAudit";
+import { PanelIntercomModal } from "@/components/PanelIntercomModal";
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string; border: string }> = {
   DETECTED: {
@@ -443,6 +444,7 @@ export default function AlertsPage() {
             <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true" />
             <span>{isRefreshing ? t("loading") : t("refresh_alerts")}</span>
           </button>
+          <PanelIntercomModal buttonLabel="Alerter autre panel" />
         </div>
       </div>
 
@@ -559,7 +561,7 @@ export default function AlertsPage() {
                       </span>
 
                       {/* Sirocco Tag */}
-                      {alert.wind_dir.includes("Sud") && (
+                      {Boolean(alert.wind_dir && typeof alert.wind_dir === "string" && alert.wind_dir.includes("Sud")) && (
                         <span className="px-2 py-0.5 rounded bg-amber-950/70 text-amber-300 text-[11px] border border-amber-800 font-medium">
                           {t("sirocco_tag")}
                         </span>
@@ -638,7 +640,7 @@ export default function AlertsPage() {
                       </div>
                       <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
                         <div className="text-[10px] text-slate-500 font-sans uppercase">{t("wind_direction")}</div>
-                        <div className="font-bold text-slate-200 mt-0.5 text-sm">{formatWindDir(alert.wind_dir)}</div>
+                        <div className="font-bold text-slate-200 mt-0.5 text-sm">{formatWindDir(alert.wind_dir || "Sud (Sirocco)")}</div>
                       </div>
                     </div>
 
@@ -698,7 +700,7 @@ export default function AlertsPage() {
                       title="Télécharger le Procès-Verbal officiel d'alerte incendie (PDF)"
                     >
                       <FileText className="w-3.5 h-3.5 text-red-400" />
-                      <span>📄 {t("export_pv")}</span>
+                      <span>{t("export_pv")}</span>
                     </button>
 
                     <button
@@ -775,7 +777,7 @@ export default function AlertsPage() {
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <HistoryIcon className="w-5 h-5 text-ember-400" />
-                  <span>{t("audit_history_modal_title")} — {modalAlert.alert_id}</span>
+                  <span>{t("audit_history_modal_title")} : {modalAlert.alert_id}</span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {getLocalizedAuditNote(modalAlert.forest_name, language)} ({modalAlert.wilaya}) · {language === "ar" ? "الإحداثيات الجغرافية (GPS)" : language === "en" ? "GPS Coordinates" : "Coordonnées GPS"}: {modalAlert.lat}°N, {modalAlert.lon}°E
@@ -832,7 +834,7 @@ export default function AlertsPage() {
                 <Smartphone className="w-5 h-5 text-red-500" />
                 <div>
                   <h3 className="text-base font-bold text-white">
-                    {t("sms_modal_title")} — {smsModalAlert.alert_id}
+                    {t("sms_modal_title")} : {smsModalAlert.alert_id}
                   </h3>
                   <p className="text-xs text-slate-400 font-mono">
                     {smsModalAlert.forest_name} ({smsModalAlert.wilaya}) · {t("cell_broadcast_networks")}
