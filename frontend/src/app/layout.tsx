@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     "NASA FIRMS",
     "Open-Meteo",
     "IN9AD",
-    "Protection Civile"
+    "Protection Civile",
   ],
   authors: [{ name: "IN9AD PFE Research Team" }],
   icons: {
@@ -34,7 +34,9 @@ export const metadata: Metadata = {
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { OnboardingGuide } from "@/components/OnboardingGuide";
 
 export default function RootLayout({
   children,
@@ -62,10 +64,12 @@ export default function RootLayout({
       <body className="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-red-600 selection:text-white">
         <ServiceWorkerRegister />
         <LanguageProvider>
-          {children}
+          <NotificationProvider>
+            {children}
+            <OnboardingGuide />
+          </NotificationProvider>
         </LanguageProvider>
       </body>
     </html>
   );
 }
-

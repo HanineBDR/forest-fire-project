@@ -169,12 +169,12 @@ export default function Home() {
 
       <div className="flex-1 flex flex-col p-3 sm:p-5 max-w-[1680px] w-full mx-auto gap-4">
         {/* Strategic Regions Fast Jump Bar */}
-        <QuickPresets
+        <div data-tour="massifs"><QuickPresets
           regions={regions}
           selectedRegionId={selectedRegionId}
           onSelectRegion={handleSelectRegion}
           isLoading={isLoading}
-        />
+        /></div>
 
         {/* Main Work Area: Map + Telemetry Dashboard */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[600px]">
@@ -184,7 +184,7 @@ export default function Home() {
               isSidebarOpen ? "hidden lg:flex" : "flex"
             }`}
           >
-            <div className="flex-1 relative min-h-[440px]">
+            <div data-tour="map" className="flex-1 relative min-h-[440px]">
               <DynamicMap
                 prediction={prediction}
                 activeHorizonIndex={activeHorizonIndex}
@@ -197,15 +197,18 @@ export default function Home() {
             </div>
 
             {/* Fire Spread Timeline Scrubber */}
-            <SimulationControls
-              simulation={prediction?.simulation || null}
-              activeHorizonIndex={activeHorizonIndex}
-              onSelectHorizon={setActiveHorizonIndex}
-            />
+            <div data-tour="simulation">
+              <SimulationControls
+                simulation={prediction?.simulation || null}
+                activeHorizonIndex={activeHorizonIndex}
+                onSelectHorizon={setActiveHorizonIndex}
+              />
+            </div>
           </div>
 
           {/* Telemetry Sidebar Column (5 Cols on desktop) */}
           <div
+            data-tour="risk-panel"
             className={`lg:col-span-5 flex flex-col ${
               isSidebarOpen ? "flex" : "hidden lg:flex"
             }`}
