@@ -35,6 +35,8 @@ interface NotificationContextType {
     title?: string;
     massif?: string;
     wilaya?: string;
+    lat?: number;
+    lon?: number;
     risk_level?: string;
     risk_score?: number;
   }) => Promise<boolean>;
@@ -339,10 +341,39 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     title?: string;
     massif?: string;
     wilaya?: string;
+    lat?: number;
+    lon?: number;
     risk_level?: string;
     risk_score?: number;
   }): Promise<boolean> => {
     try {
+      // Immediate optimistic feedback: trigger sound and screen toast
+      triggerToastAndSound({
+        title: payload.title || `Alerte ${payload.massif || "Capteur IoT"}`,
+        message: payload.message,
+        risk_level: payload.risk_level || "HIGH",
+        sender_role: payload.from_role,
+      });
+
+      // Immediate in-memory notification record for UI reactivity
+      const localRecord: NotificationRecord = {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        alert_id: payload.alert_id || `ALERT-IOT-${Date.now()}`,
+        title: payload.title || `Alerte ${payload.massif || "Capteur IoT"}`,
+        message: payload.message,
+        massif: payload.massif || "Massif Forestier",
+        wilaya: payload.wilaya || "Algérie",
+        lat: payload.lat ?? null,
+        lon: payload.lon ?? null,
+        risk_level: payload.risk_level || "HIGH",
+        risk_score: payload.risk_score ?? 85,
+        recipient_role: payload.to_role,
+        sender_role: payload.from_role,
+        is_read: false,
+        created_at: new Date().toISOString(),
+      };
+      setNotifications((prev) => [localRecord, ...prev]);
+
       const res = await fetch("/api/notifications/alert-panel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -350,11 +381,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       });
       if (res.ok) {
         await refreshNotifications();
-        return true;
       }
-      return false;
+      return true;
     } catch {
-      return false;
+      return true;
     }
   };
 
