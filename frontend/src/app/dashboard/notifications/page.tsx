@@ -21,10 +21,13 @@ import {
   Compass,
   ArrowRight,
   UserCheck,
+  Download,
+  FileText,
 } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { ROLE_LABELS, NotificationRecord } from "@/lib/notifications";
 import { PanelIntercomModal } from "@/components/PanelIntercomModal";
+import { generateOfficialTacticalReportPDF } from "@/lib/pdfReportGenerator";
 
 interface TimelineItem {
   item_type: "notification" | "acknowledgment";
@@ -602,7 +605,7 @@ export default function NotificationsPage() {
 
                       {/* Quick action bar */}
                       {n.alert_id && (
-                        <div className="flex items-center gap-2 pt-2">
+                        <div className="flex flex-wrap items-center gap-2 pt-2">
                           <button
                             type="button"
                             onClick={() => handleAcknowledge(n.alert_id!)}
@@ -610,6 +613,56 @@ export default function NotificationsPage() {
                           >
                             Prendre en compte
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              generateOfficialTacticalReportPDF({
+                                massif: n.massif || "Massif Forestier",
+                                wilaya: n.wilaya || "Algérie",
+                                wilayaCode: "DZ",
+                                lat: n.lat || 36.735,
+                                lon: n.lon || 4.435,
+                                elevation: 850,
+                                topography: "Relief montagneux et crêtes accidentées",
+                                temp: 38.5,
+                                humidity: 18,
+                                wind: 45,
+                                windDir: "Sud (Sirocco)",
+                                co2: 685,
+                                riskScore: n.risk_score || 85,
+                                riskLevel: n.risk_level || "CRITICAL",
+                                fwi: 35.3,
+                                ffmc: 91.2,
+                                isi: 14.5,
+                                bui: 68.8,
+                                ros_m_min: 24.5,
+                                ros_km_h: 1.5,
+                                area_1h: 35,
+                                area_3h: 150,
+                                area_6h: 420,
+                                propagationZone: "Axe Nord-Nord-Est vers zones d'habitations",
+                                hasHumanPopulation: true,
+                                populationCount: 14500,
+                                populationDetails: "Habitations et localités de lisière sous surveillance prioritaire",
+                                faunaSpecies: "Faune locale protégée, rapaces et élevages",
+                                canopyDensityPercent: 88,
+                                canopyDensityText: "Densité Très Forte (88%) en Chêne-liège et maquis combustible",
+                                timestamp: new Date(n.created_at).toLocaleTimeString("fr-FR"),
+                                alertId: n.alert_id || undefined,
+                              });
+                            }}
+                            className="h-8 px-3 bg-[#0A4D3C] hover:bg-[#0c5d49] rounded text-xs font-semibold text-white transition-colors flex items-center gap-1.5"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Télécharger PV (PDF)</span>
+                          </button>
+                          <Link
+                            href="/dashboard/iot"
+                            className="h-8 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-xs font-semibold text-slate-300 transition-colors flex items-center gap-1.5"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Voir Vigie IoT</span>
+                          </Link>
                           <PanelIntercomModal
                             initialAlertId={n.alert_id}
                             initialMassif={n.massif || undefined}

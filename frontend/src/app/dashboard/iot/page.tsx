@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Cpu,
@@ -29,9 +29,10 @@ import {
   ShieldAlert,
   X,
   Eye,
+  RefreshCw,
 } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { downloadZoneReportPDF } from "@/lib/api";
+import { generateOfficialTacticalReportPDF, TacticalReportData } from "@/lib/pdfReportGenerator";
 
 interface SensorNode {
   id: string;
@@ -48,16 +49,12 @@ interface SensorNode {
   windDir: string;
   co2: number;
   battery: number;
-  // Population and human presence
   hasHumanPopulation: boolean;
   populationCount: number;
   populationDetails: string;
-  // Wildlife and protected fauna
   faunaSpecies: string;
-  // Forest canopy and fuel density
   canopyDensityPercent: number;
   canopyDensityText: string;
-  // Topography and spread vector
   topography: string;
   spreadAxis: string;
 }
@@ -80,10 +77,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 92,
     hasHumanPopulation: true,
     populationCount: 14500,
-    populationDetails: "14 500 habitants: Villages Ait Bouhini, Tablabalt et habitations le long du CW 150",
+    populationDetails: "14 500 habitants : Villages Ait Bouhini, Tablabalt et habitations le long du CW 150",
     faunaSpecies: "Macaque de Barbarie (Macaca sylvanus), Cerf de Barbarie, rapaces nicheurs, cheptels caprins",
     canopyDensityPercent: 88,
-    canopyDensityText: "Densité Très Forte (88%): Chêne-liège séculaire, chêne zéen et sous-bois dense à forte charge combustible",
+    canopyDensityText: "Densité Très Forte (88%) : Chêne-liège séculaire, chêne zéen et sous-bois dense à forte charge combustible",
     topography: "Relief montagneux accidenté, crêtes rocheuses et vallons encaissés créant un effet venturi",
     spreadAxis: "Axe Nord-Nord-Est vers cuvette de Yakouren Centre et lisière de la forêt domaniale d'Akfadou",
   },
@@ -104,10 +101,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 88,
     hasHumanPopulation: true,
     populationCount: 8200,
-    populationDetails: "8 200 habitants: Communes d'Adekar, Taourirt Ighil et hameaux forestiers isolés",
+    populationDetails: "8 200 habitants : Communes d'Adekar, Taourirt Ighil et hameaux forestiers isolés",
     faunaSpecies: "Singe magot, Sanglier d'Afrique du Nord, Aigle botté, Chacal doré",
     canopyDensityPercent: 92,
-    canopyDensityText: "Densité Maximale (92%): Forêt humide mixte à haute densité de biomasse et litière épaisse",
+    canopyDensityText: "Densité Maximale (92%) : Forêt humide mixte à haute densité de biomasse et litière épaisse",
     topography: "Hauts plateaux et ravins profonds, zone humide d'altitude du Lac Noir",
     spreadAxis: "Axe Est-Nord-Est vers les versants surplombant la vallée de la Soummam",
   },
@@ -128,10 +125,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 95,
     hasHumanPopulation: true,
     populationCount: 1800,
-    populationDetails: "1 800 personnes: Chalets du Centre National de Sports, bergers saisonniers et personnel hôtelier",
+    populationDetails: "1 800 personnes : Chalets du Centre National de Sports, bergers saisonniers et personnel hôtelier",
     faunaSpecies: "Gypaète barbu, Vautour percnoptère, Macaque de Barbarie, genette d'Europe",
     canopyDensityPercent: 65,
-    canopyDensityText: "Densité Moyenne (65%): Cédraie d'altitude clairsemée sur pelouses calcaires combustibles",
+    canopyDensityText: "Densité Moyenne (65%) : Cédraie d'altitude clairsemée sur pelouses calcaires combustibles",
     topography: "Falaises abruptes et crêtes calcaires au-dessus de 1 500m",
     spreadAxis: "Axe Sud-Ouest vers le col de Tizi N'Koulal et la lisière inférieure",
   },
@@ -152,10 +149,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 84,
     hasHumanPopulation: true,
     populationCount: 22000,
-    populationDetails: "22 000 habitants: Quartiers périurbains hauts de Bejaia, route touristique du Cap Carbon",
+    populationDetails: "22 000 habitants : Quartiers périurbains hauts de Bejaia, route touristique du Cap Carbon",
     faunaSpecies: "Macaque de Barbarie (colonie majeure protégée), Faucon pèlerin, Goéland d'Audouin",
     canopyDensityPercent: 75,
-    canopyDensityText: "Densité Forte (75%): Pin d'Alep résineux et garrigue méditerranéenne très inflammable",
+    canopyDensityText: "Densité Forte (75%) : Pin d'Alep résineux et garrigue méditerranéenne très inflammable",
     topography: "Corniche maritime rocheuse à forte pente plongeant directement dans la mer",
     spreadAxis: "Axe Sud-Sud-Est vers les habitations surplombant le port de Bejaia",
   },
@@ -176,10 +173,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 90,
     hasHumanPopulation: true,
     populationCount: 9600,
-    populationDetails: "9 600 habitants: Villages Mizrana, lisière ouest de Tigzirt, exploitations agricoles familiales",
+    populationDetails: "9 600 habitants : Villages Mizrana, lisière ouest de Tigzirt, exploitations agricoles familiales",
     faunaSpecies: "Renard roux, Lièvre d'Afrique, rapaces nocturnes, élevages bovins et ovins",
     canopyDensityPercent: 82,
-    canopyDensityText: "Densité Forte (82%): Chêne-liège avec sous-bois buissonnant ininterrompu",
+    canopyDensityText: "Densité Forte (82%) : Chêne-liège avec sous-bois buissonnant ininterrompu",
     topography: "Collines ondulées côtières traversées par des pistes pastorales étroites",
     spreadAxis: "Axe Nord vers les zones d'habitations de la corniche de Tigzirt",
   },
@@ -200,10 +197,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 79,
     hasHumanPopulation: false,
     populationCount: 0,
-    populationDetails: "Zone sanctuarisée inhabitée: Aucun village permanent dans le périmètre direct de la réserve",
-    faunaSpecies: "Sittelle kabyle (Sitta ledanti, espèce endémique mondiale rarissime), Léopard de Barbarie historique",
+    populationDetails: "Zone sanctuarisée inhabitée : Aucun village permanent dans le périmètre direct de la réserve",
+    faunaSpecies: "Sittelle kabyle (Sitta ledanti, espèce endémique mondiale), Léopard de Barbarie historique",
     canopyDensityPercent: 94,
-    canopyDensityText: "Densité Exceptionnelle (94%): Forêt relique de Sapin de Numidie et Chêne afares",
+    canopyDensityText: "Densité Exceptionnelle (94%) : Forêt relique de Sapin de Numidie et Chêne afares",
     topography: "Sommet pyramidal isolé entouré d'abrupts rocheux et de vallons humides",
     spreadAxis: "Axe Nord-Est vers les forêts profondes de Jijel sans menace d'agglomération directe",
   },
@@ -224,10 +221,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 86,
     hasHumanPopulation: true,
     populationCount: 12000,
-    populationDetails: "12 000 habitants: Agglomération de Chréa, habitations des Gorges de la Chiffa et chalets",
+    populationDetails: "12 000 habitants : Agglomération de Chréa, habitations des Gorges de la Chiffa et chalets",
     faunaSpecies: "Macaque de Barbarie, Aigle royal, Martre des pins, faune sylvestre de l'Atlas",
     canopyDensityPercent: 85,
-    canopyDensityText: "Densité Forte (85%): Cédraie majestueuse de l'Atlas et pinède dense à fort indice de danger",
+    canopyDensityText: "Densité Forte (85%) : Cédraie majestueuse de l'Atlas et pinède dense à fort indice de danger",
     topography: "Versants montagneux escarpés dominant la plaine agricole de la Mitidja",
     spreadAxis: "Axe Nord vers les lisières habitées de Blida et les gorges de la Chiffa",
   },
@@ -248,10 +245,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 91,
     hasHumanPopulation: true,
     populationCount: 16500,
-    populationDetails: "16 500 habitants: Agglomération d'El Kala, riverains des Lacs Tonga et Oubeira, postes frontières",
+    populationDetails: "16 500 habitants : Agglomération d'El Kala, riverains des Lacs Tonga et Oubeira, postes frontières",
     faunaSpecies: "Cerf de Barbarie (dernière population indigène en liberté), Loutre d'Europe, rapaces aquatiques",
     canopyDensityPercent: 90,
-    canopyDensityText: "Densité Très Forte (90%): Chênaie-liège côtière avec sous-bois dense de bruyère arborescente",
+    canopyDensityText: "Densité Très Forte (90%) : Chênaie-liège côtière avec sous-bois dense de bruyère arborescente",
     topography: "Zones humides marécageuses ceinturées de collines boisées sableuses",
     spreadAxis: "Axe Est vers la zone frontière algéro-tunisienne et les campements d'éleveurs",
   },
@@ -272,10 +269,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 83,
     hasHumanPopulation: true,
     populationCount: 5100,
-    populationDetails: "5 100 habitants: Hameaux de Bouhmama, Yabous et vergers arboricoles en contrebas",
+    populationDetails: "5 100 habitants : Hameaux de Bouhmama, Yabous et vergers arboricoles en contrebas",
     faunaSpecies: "Mouflon à manchettes, Gazelle de Cuvier, sangliers des Aurès, rapaces des steppes",
     canopyDensityPercent: 70,
-    canopyDensityText: "Densité Moyenne (70%): Cèdre de l'Atlas et Pin d'Alep en climat semi-aride à sécheresse extrême",
+    canopyDensityText: "Densité Moyenne (70%) : Cèdre de l'Atlas et Pin d'Alep en climat semi-aride à sécheresse extrême",
     topography: "Massif culminant de l'est algérien (2 328m), pentes rocheuses abruptes et ventées",
     spreadAxis: "Axe Sud-Est vers la dépression agricole de Bouhmama et les vergers de pommiers",
   },
@@ -296,10 +293,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 89,
     hasHumanPopulation: true,
     populationCount: 4800,
-    populationDetails: "4 800 habitants: Villages d'Erraguene, ouvriers du barrage hydroélectrique et exploitants de liège",
+    populationDetails: "4 800 habitants : Villages d'Erraguene, ouvriers du barrage hydroélectrique et exploitants de liège",
     faunaSpecies: "Macaque de Barbarie, Chacal doré, Genette, amphibiens rares des torrents de montagne",
     canopyDensityPercent: 91,
-    canopyDensityText: "Densité Très Forte (91%): Chêne-liège vierge et ripisylve fluviale luxuriante",
+    canopyDensityText: "Densité Très Forte (91%) : Chêne-liège vierge et ripisylve fluviale luxuriante",
     topography: "Gorges encaissées et vallées profondes à forte humidité ambiante",
     spreadAxis: "Axe Nord vers les gorges de la Soummam et les installations hydrauliques d'Erraguene",
   },
@@ -320,10 +317,10 @@ const INITIAL_NODES: SensorNode[] = [
     battery: 94,
     hasHumanPopulation: true,
     populationCount: 18300,
-    populationDetails: "18 300 habitants: Chenoua Plage, villages de montagne, campus universitaire et résidences de Sidi Amar",
+    populationDetails: "18 300 habitants : Chenoua Plage, villages de montagne, campus universitaire et résidences de Sidi Amar",
     faunaSpecies: "Tortue mauresque, Caméléon commun, rongeurs sauvages, oiseaux marins littoraux",
     canopyDensityPercent: 78,
-    canopyDensityText: "Densité Forte (78%): Pin d'Alep résineux, maquis de lentisque et calicotome hautement combustible",
+    canopyDensityText: "Densité Forte (78%) : Pin d'Alep résineux, maquis de lentisque et calicotome hautement combustible",
     topography: "Promontoire maritime culminant à pic au-dessus de la baie de Tipaza",
     spreadAxis: "Axe Est vers le tissu urbain de Tipaza ville et le complexe archéologique protégé",
   },
@@ -359,6 +356,9 @@ export default function IoTPage() {
   const [ingestionCount, setIngestionCount] = useState<number>(1);
   const [lastIngestedAt, setLastIngestedAt] = useState<string>("À l'instant");
 
+  // Persistent Tactical Report State (saved in localStorage)
+  const [persistedReport, setPersistedReport] = useState<TacticalReportData | null>(null);
+
   // Ingestion and dispatch status
   const [dispatchStatus, setDispatchStatus] = useState<{
     type: "idle" | "nominal" | "normal" | "urgent";
@@ -372,6 +372,19 @@ export default function IoTPage() {
   // Tactical Alert Report Modal State
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
+
+  // Load persisted report on initial mount
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("in9ad_saved_tactical_report");
+        if (saved) {
+          const parsed: TacticalReportData = JSON.parse(saved);
+          setPersistedReport(parsed);
+        }
+      }
+    } catch {}
+  }, []);
 
   // Switch active node and sync custom inputs
   const handleSelectNode = (node: SensorNode) => {
@@ -430,7 +443,7 @@ export default function IoTPage() {
       badgeColor = "bg-amber-950 border-amber-800 text-amber-300";
     }
 
-    // Rate of Spread (ROS - سرعة انتشار النار) in m/min & km/h
+    // Rate of Spread (ROS - vitesse d'avancée du feu) in m/min & km/h
     const fuelCoeff = activeNode.canopyDensityPercent / 80;
     const ros_m_min = Math.max(
       0.3,
@@ -451,7 +464,7 @@ export default function IoTPage() {
     // Dynamic fire propagation zone based on wind direction
     let propagationZone = activeNode.spreadAxis;
     if (customWindDir.includes("Sud") || customWindDir.includes("Sirocco")) {
-      propagationZone = `Axe Nord-Nord-Est sous effet Sirocco violent: Propagation directe vers ${activeNode.populationDetails.split(":")[1]?.trim() || activeNode.name}`;
+      propagationZone = `Axe Nord-Nord-Est sous effet Sirocco violent : Propagation directe vers ${activeNode.populationDetails.split(":")[1]?.trim() || activeNode.name}`;
     } else if (customWindDir.includes("Nord")) {
       propagationZone = `Axe Sud-Sud-Est vers l'intérieur du massif et les vallées amont`;
     } else if (customWindDir.includes("Est")) {
@@ -477,6 +490,49 @@ export default function IoTPage() {
     };
   }, [customTemp, customHumidity, customWind, customWindDir, customCO2, activeNode]);
 
+  // Current report data object
+  const currentReportData: TacticalReportData = useMemo(() => {
+    return {
+      massif: activeNode.name,
+      wilaya: activeNode.wilaya,
+      wilayaCode: activeNode.wilayaCode,
+      lat: activeNode.lat,
+      lon: activeNode.lon,
+      elevation: activeNode.elevation,
+      topography: activeNode.topography,
+      temp: customTemp,
+      humidity: customHumidity,
+      wind: customWind,
+      windDir: customWindDir,
+      co2: customCO2,
+      riskScore: mlInference.riskScore,
+      riskLevel: mlInference.riskLevel,
+      fwi: mlInference.fwi,
+      ffmc: mlInference.ffmc,
+      isi: mlInference.isi,
+      bui: mlInference.bui,
+      ros_m_min: mlInference.ros_m_min,
+      ros_km_h: mlInference.ros_km_h,
+      area_1h: mlInference.area_1h,
+      area_3h: mlInference.area_3h,
+      area_6h: mlInference.area_6h,
+      propagationZone: mlInference.propagationZone,
+      hasHumanPopulation: activeNode.hasHumanPopulation,
+      populationCount: activeNode.populationCount,
+      populationDetails: activeNode.populationDetails,
+      faunaSpecies: activeNode.faunaSpecies,
+      canopyDensityPercent: activeNode.canopyDensityPercent,
+      canopyDensityText: activeNode.canopyDensityText,
+      timestamp: lastIngestedAt !== "À l'instant" ? lastIngestedAt : new Date().toLocaleTimeString("fr-FR"),
+      alertId: `ALT-IOT-${activeNode.wilayaCode.replace(/[\s.]+/g, "")}-${Date.now().toString().slice(-5)}`,
+    };
+  }, [activeNode, customTemp, customHumidity, customWind, customWindDir, customCO2, mlInference, lastIngestedAt]);
+
+  // Active report displayed in modal: either current or restored persisted report
+  const modalReport = useMemo(() => {
+    return persistedReport || currentReportData;
+  }, [persistedReport, currentReportData]);
+
   // Transmit telemetry and execute AI evaluation + multi-panel alert dispatch
   const handleTriggerAnalysisAndDispatch = async () => {
     setIngestionCount((c) => c + 1);
@@ -492,11 +548,21 @@ export default function IoTPage() {
     const isModerateRisk =
       !isFireCharacteristics && (mlInference.riskScore >= 30 || customTemp >= 35);
 
+    // Save report in localStorage so it persists even if user leaves or refreshes
+    const reportToSave: TacticalReportData = {
+      ...currentReportData,
+      timestamp: timeStr,
+    };
+    try {
+      localStorage.setItem("in9ad_saved_tactical_report", JSON.stringify(reportToSave));
+      setPersistedReport(reportToSave);
+    } catch {}
+
     // CASE 1: No risk detected / Nominal conditions
     if (!isFireCharacteristics && !isModerateRisk) {
       setDispatchStatus({
         type: "nominal",
-        message: `Analyse IA terminée: Conditions nominales (Risque Faible ${mlInference.riskScore}%). Aucun foyer ou anomalie thermique détectée. Aucune alerte transmise aux postes de commandement.`,
+        message: `Analyse IA terminée : Conditions nominales (Risque Faible ${mlInference.riskScore}%). Aucun foyer ou anomalie thermique détectée. Aucune alerte transmise aux postes de commandement.`,
         timestamp: timeStr,
       });
       return;
@@ -507,9 +573,9 @@ export default function IoTPage() {
       const normalAlertPayload = {
         from_role: "iot_vigie_network",
         to_role: "all",
-        alert_id: `ALERT-MOD-${activeNode.id}-${Date.now()}`,
+        alert_id: `ALT-${activeNode.wilayaCode.replace(/[\s.]+/g, "")}-${Date.now().toString().slice(-6)}`,
         title: `Vigilance Modérée : ${activeNode.name} (${activeNode.wilayaCode})`,
-        message: `Conditions de sécheresse détectées par capteur IoT: Temp ${customTemp.toFixed(
+        message: `Conditions de sécheresse détectées par capteur IoT : Temp ${customTemp.toFixed(
           1
         )}°C, Humidité ${customHumidity}%, Vent ${customWind} km/h (${customWindDir}). Risque IA estimé à ${
           mlInference.riskScore
@@ -526,34 +592,34 @@ export default function IoTPage() {
 
       setDispatchStatus({
         type: "normal",
-        message: `Alerte de vigilance standard transmise aux panels Protection Civile et Conservation des Forêts. Indice de risque: ${mlInference.riskScore}%.`,
+        message: `Alerte de vigilance standard transmise aux panels Protection Civile et Conservation des Forêts. Indice de risque : ${mlInference.riskScore}%.`,
         timestamp: timeStr,
       });
       return;
     }
 
-    // CASE 3: Active Fire Characteristics -> URGENT ALERT to ALL PANELS + DOUBLE ALERT FOR CENTRAL ADMIN IF HUMANS THREATENED
+    // CASE 3: Active Fire Characteristics -> URGENT ALERT + DOUBLE ALERT FOR CENTRAL ADMIN
     if (isFireCharacteristics) {
-      const alertId = `ALERT-URG-${activeNode.id}-${Date.now()}`;
+      const baseAlertId = `ALT-${activeNode.wilayaCode.replace(/[\s.]+/g, "")}-${Date.now().toString().slice(-6)}`;
 
-      // 1. Operational Wildfire Alert dispatched to all panels
-      const urgentMessage = `ALERTE URGENTE INCENDIE: Détection foyer actif à ${activeNode.name} (${activeNode.wilayaCode}). Coordonnées GPS: ${activeNode.lat.toFixed(
+      // 1. ALERT 1 (RAPPORT INCENDIE): Operational Wildfire Alert dispatched to all commands (including Central Admin)
+      const fireReportMessage = `ALERTE INCENDIE ACTIVE : Foyer détecté à ${activeNode.name} (${activeNode.wilayaCode}). GPS : ${activeNode.lat.toFixed(
         4
-      )}, ${activeNode.lon.toFixed(4)} (Alt ${activeNode.elevation}m). Télémétrie: Temp ${customTemp.toFixed(
+      )} N, ${activeNode.lon.toFixed(4)} E (Alt ${activeNode.elevation}m). Télémétrie : Temp ${customTemp.toFixed(
         1
-      )}°C, Humidité ${customHumidity}%, Vent ${customWind} km/h (${customWindDir}), CO2 ${customCO2} ppm. Vitesse de propagation estimée: ${
+      )}°C, Humidité ${customHumidity}%, Vent ${customWind} km/h (${customWindDir}), CO2 ${customCO2} ppm. Vitesse de propagation estimée : ${
         mlInference.ros_m_min
-      } m/min (${mlInference.ros_km_h} km/h). Zone de menace: ${mlInference.propagationZone}. Densité forêt: ${
+      } m/min (${mlInference.ros_km_h} km/h). Surfaces projetées : +1h: ${mlInference.area_1h} ha, +3h: ${mlInference.area_3h} ha. Couvert végétal : ${
         activeNode.canopyDensityText
-      }. Faune menacée: ${activeNode.faunaSpecies}.`;
+      }. Procès-verbal officiel disponible au téléchargement.`;
 
-      // Broadcast to Protection Civile, Conservation des Forêts and Central Admin
+      // Broadcast to all panels
       await alertPanel({
         from_role: "iot_vigie_network",
         to_role: "all",
-        alert_id: alertId,
-        title: `[URGENT] Alerte Incendie Active : ${activeNode.name}`,
-        message: urgentMessage,
+        alert_id: baseAlertId,
+        title: `[RAPPORT INCENDIE] Détection Foyer Actif : ${activeNode.name} (${activeNode.wilayaCode})`,
+        message: fireReportMessage,
         massif: activeNode.name,
         wilaya: activeNode.wilaya,
         lat: activeNode.lat,
@@ -562,21 +628,21 @@ export default function IoTPage() {
         risk_score: mlInference.riskScore,
       });
 
-      // 2. Double Urgent Alert for Central Administration if human lives are threatened
+      // 2. ALERT 2 (URGENCE ÉVACUATION): Dedicated Civilian Safety Alert for Central Administration
       if (activeNode.hasHumanPopulation && activeNode.populationCount > 0) {
-        const civilianEvacMessage = `URGENCE ÉVACUATION POPULATION CIVILE: Menace vitale imminente pour ${activeNode.populationCount.toLocaleString(
+        const civilianEvacMessage = `ORDRE MINISTÈRE / WILAYA : ${activeNode.populationCount.toLocaleString(
           "fr-FR"
-        )} résidents dans la zone d'impact de ${activeNode.name}. Périmètre menacé: ${activeNode.populationDetails}. Vitesse du front: ${
-          mlInference.ros_m_min
-        } m/min vers les habitations. Déclenchement recommandé du Plan ORSEC Wilaya et transmission des ordres d'évacuation préventive par l'Administration Centrale.`;
+        )} résidents menacés dans la zone d'impact (${activeNode.populationDetails}). Axe de propagation prévisionnel : ${
+          mlInference.propagationZone
+        }. Vitesse d'avancée : ${mlInference.ros_m_min} m/min vers les habitations. Déclenchement impératif du Plan ORSEC Wilaya et transmission immédiate des consignes d'évacuation préventive aux autorités locales et aux populations.`;
 
         await alertPanel({
           from_role: "iot_vigie_network",
           to_role: "admin_centrale",
-          alert_id: `${alertId}-EVAC`,
-          title: `[URGENT ÉVACUATION] Population Civile Menacée : ${activeNode.name} (${activeNode.populationCount.toLocaleString(
+          alert_id: `${baseAlertId}-EVAC`,
+          title: `[URGENT ÉVACUATION] Population Civile Menacée : ${activeNode.populationCount.toLocaleString(
             "fr-FR"
-          )} habitants)`,
+          )} Habitants (${activeNode.name})`,
           message: civilianEvacMessage,
           massif: activeNode.name,
           wilaya: activeNode.wilaya,
@@ -589,103 +655,24 @@ export default function IoTPage() {
 
       setDispatchStatus({
         type: "urgent",
-        message: `ALERTE URGENTE DISPATCHÉE AUX 3 COMMANDEMENTS. Risque critique (${mlInference.riskScore}%). Double alerte spéciale d'évacuation transmise à l'Administration Centrale pour les ${activeNode.populationCount.toLocaleString(
+        message: `ALERTE URGENTE DISPATCHÉE AUX COMMANDEMENTS. Risque critique (${mlInference.riskScore}%). Double alerte spéciale d'évacuation transmise à l'Administration Centrale pour les ${activeNode.populationCount.toLocaleString(
           "fr-FR"
-        )} habitants menacés.`,
+        )} habitants menacés. Rapport tactique persistant généré.`,
         timestamp: timeStr,
       });
 
-      // Open the tactical crisis report modal automatically
+      // Automatically open the tactical crisis report modal
       setShowReportModal(true);
     }
   };
 
-  // Official PDF Download Handler
+  // Official PDF Download Handler using client-side jsPDF
   const handleDownloadReport = async () => {
     setIsDownloadingPdf(true);
     try {
-      await downloadZoneReportPDF(
-        {
-          wilaya: activeNode.wilaya,
-          forest_name: activeNode.name,
-          risk_score: mlInference.riskScore,
-          temp: customTemp,
-          humidity: customHumidity,
-          wind: customWind,
-          wind_dir: customWindDir,
-          co2: customCO2,
-          lat: activeNode.lat,
-          lon: activeNode.lon,
-          elevation: activeNode.elevation,
-          ros: mlInference.ros_m_min,
-          population: activeNode.populationCount,
-          population_details: activeNode.populationDetails,
-          fauna: activeNode.faunaSpecies,
-          density: activeNode.canopyDensityText,
-          spread_zone: mlInference.propagationZone,
-        },
-        "fr"
-      );
-    } catch {
-      // Direct client download fallback
-      const reportText = `================================================================================
-RÉPUBLIQUE ALGÉRIENNE DÉMOCRATIQUE ET POPULAIRE
-SYSTÈME NATIONAL DE VEILLE PRÉDICTIVE DES FEUX DE FORÊT - IN9AD
-RAPPORT OFFICIEL DE CRISE ET PROCÈS-VERBAL D'ALERTE IOT
-================================================================================
-Date & Heure d'émission : ${new Date().toLocaleString("fr-FR")}
-Statut de l'alerte      : ALERTE URGENTE - RISQUE CRITIQUE (${mlInference.riskScore}%)
-Identifiant Capteur     : ${activeNode.id} (${activeNode.type})
-
-1. LOCALISATION ET COORDONNÉES OPÉRATIONNELLES
-- Massif Forestier      : ${activeNode.name}
-- Wilaya de Rattachement : ${activeNode.wilaya} (${activeNode.wilayaCode})
-- Coordonnées GPS       : Latitude ${activeNode.lat.toFixed(4)} N, Longitude ${activeNode.lon.toFixed(4)} E
-- Altitude              : ${activeNode.elevation} mètres
-- Relief & Topographie  : ${activeNode.topography}
-
-2. PARAMÈTRES MICRO-CLIMATIQUES INGÉRÉS
-- Température Ambiante  : ${customTemp.toFixed(1)} °C
-- Humidité Relative     : ${customHumidity} %
-- Vitesse du Vent       : ${customWind} km/h (${customWindDir})
-- Gaz de Combustion CO2 : ${customCO2} ppm
-- Indice FWI Canadien   : ${mlInference.fwi} (FFMC: ${mlInference.ffmc}, ISI: ${mlInference.isi}, BUI: ${mlInference.bui})
-- Probabilité XGBoost   : ${mlInference.riskScore} %
-
-3. DYNAMIQUE ET VITESSE DE PROPAGATION DU FRONT
-- Vitesse d'avancée (ROS) : ${mlInference.ros_m_min} m/min (${mlInference.ros_km_h} km/h)
-- Surface menacée estimée : +1h: ${mlInference.area_1h} ha | +3h: ${mlInference.area_3h} ha | +6h: ${mlInference.area_6h} ha
-- Axe de propagation      : ${mlInference.propagationZone}
-
-4. ENJEUX HUMAINS ET POPULATION CIVILE
-- Présence humaine       : ${activeNode.hasHumanPopulation ? "OUI - ZONE HABITÉE" : "NON - ZONE INHABITÉE"}
-- Population estimée     : ${activeNode.populationCount.toLocaleString("fr-FR")} habitants
-- Localités menacées     : ${activeNode.populationDetails}
-- Mesure d'urgence       : Déclenchement immédiat du Plan ORSEC et évacuation préventive
-
-5. FAUNE PROTÉGÉE ET BIODIVERSITÉ
-- Espèces menacées       : ${activeNode.faunaSpecies}
-
-6. COUVERT VÉGÉTAL ET COMBUSTIBLE
-- Densité du couvert     : ${activeNode.canopyDensityPercent} %
-- Type de combustible    : ${activeNode.canopyDensityText}
-
-================================================================================
-Postes de commandement destinataires :
-[X] Protection Civile (CODIS)
-[X] Mohafadat El Ghabat (Conservation des Forêts)
-[X] Ministère de l'Intérieur / Administration Centrale
-================================================================================`;
-
-      const blob = new Blob([reportText], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `RAPPORT_CRISE_${activeNode.wilayaCode.replace(/\s+/g, "")}_${Date.now()}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      await generateOfficialTacticalReportPDF(modalReport);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
     } finally {
       setIsDownloadingPdf(false);
     }
@@ -703,7 +690,7 @@ Postes de commandement destinataires :
             </h1>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Surveillance micro-climatique continue, détection de caractéristiques d&apos;incendie et routage d&apos;alertes multi-commandements
+            Surveillance micro-climatique continue, détection de caractéristiques d&apos;incendie et double alerte d&apos;urgence pour l&apos;Administration Centrale
           </p>
         </div>
 
@@ -716,12 +703,50 @@ Postes de commandement destinataires :
             <FileText className="w-3.5 h-3.5 text-emerald-400" />
             <span>Consulter le rapport officiel</span>
           </button>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-emerald-300 font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-            Ingestion Frontend Active
-          </span>
+          <button
+            type="button"
+            onClick={handleDownloadReport}
+            disabled={isDownloadingPdf}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#0A4D3C] hover:bg-[#0c5d49] text-white transition-colors disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>{isDownloadingPdf ? "Génération..." : "Télécharger PDF"}</span>
+          </button>
         </div>
       </div>
+
+      {/* Persistent Saved Report Banner */}
+      {persistedReport && (
+        <div className="rounded-lg border border-emerald-800/80 bg-emerald-950/40 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-emerald-200">
+          <div className="flex items-center gap-2.5">
+            <FileText className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="text-xs">
+              Dernier rapport tactique enregistré : <strong>{persistedReport.massif} ({persistedReport.wilayaCode})</strong> · Risque {persistedReport.riskScore}% · Vitesse {persistedReport.ros_m_min} m/min ({persistedReport.ros_km_h} km/h) · Émis à {persistedReport.timestamp || "récemment"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                const matching = nodes.find((n) => n.name === persistedReport.massif);
+                if (matching) setSelectedNodeId(matching.id);
+                setShowReportModal(true);
+              }}
+              className="px-3 py-1.5 rounded bg-emerald-900 hover:bg-emerald-800 text-emerald-100 text-xs font-semibold transition-colors"
+            >
+              Ouvrir le rapport
+            </button>
+            <button
+              type="button"
+              onClick={() => generateOfficialTacticalReportPDF(persistedReport)}
+              className="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
+            >
+              <Download className="w-3 h-3 text-emerald-400" />
+              <span>Télécharger le PDF</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Hardware Status Banner */}
       <div className="rounded-lg border border-amber-800/80 bg-amber-950/40 p-4 flex items-start gap-3 text-amber-200">
@@ -731,7 +756,7 @@ Postes de commandement destinataires :
             Fenêtre inactive : Réseau terrain LoRaWAN en cours de déploiement
           </div>
           <p className="text-xs text-amber-200/90 leading-relaxed">
-            Réseau LoRaWAN et capteurs environnementaux (température, humidité, vent, micro-particules de fumée / CO2) en attente d&apos;installation physique sur les 11 massifs. Vous pouvez injecter des données personnalisées ci-dessous (ex: 60°C ou plus) pour tester l&apos;analyse IA et le déclenchement des alertes d&apos;urgence.
+            Réseau LoRaWAN et capteurs environnementaux (température, humidité, vent, micro-particules de fumée / CO2) en attente d&apos;installation physique sur les 11 massifs. Vous pouvez injecter des données personnalisées ci-dessous (ex : 60°C ou plus) pour tester l&apos;analyse IA et le déclenchement des alertes d&apos;urgence.
           </p>
         </div>
       </div>
@@ -785,7 +810,7 @@ Postes de commandement destinataires :
             />
             <div className="flex justify-between text-[10px] text-slate-500 font-mono">
               <span>-10°C</span>
-              <span>Canicule: &gt;35°C</span>
+              <span>Canicule : &gt;35°C</span>
               <span>100°C</span>
             </div>
           </div>
@@ -821,7 +846,7 @@ Postes de commandement destinataires :
             />
             <div className="flex justify-between text-[10px] text-slate-500 font-mono">
               <span>0% (Critique)</span>
-              <span>Sécheresse: &lt;20%</span>
+              <span>Sécheresse : &lt;20%</span>
               <span>100%</span>
             </div>
           </div>
@@ -856,7 +881,7 @@ Postes de commandement destinataires :
               className="w-full accent-emerald-500 bg-slate-800 h-1.5 rounded cursor-pointer"
             />
             <div className="flex items-center justify-between gap-1 pt-0.5">
-              <span className="text-[10px] text-slate-500 font-mono">Orientation:</span>
+              <span className="text-[10px] text-slate-500 font-mono">Orientation :</span>
               <select
                 value={customWindDir}
                 onChange={(e) => setCustomWindDir(e.target.value)}
@@ -902,7 +927,7 @@ Postes de commandement destinataires :
             />
             <div className="flex justify-between text-[10px] text-slate-500 font-mono">
               <span>350 ppm</span>
-              <span>Anomalie: &gt;750 ppm</span>
+              <span>Anomalie : &gt;750 ppm</span>
               <span>2000 ppm</span>
             </div>
           </div>
@@ -1181,8 +1206,8 @@ Postes de commandement destinataires :
                 <h3 className="text-base sm:text-lg font-bold text-white tracking-tight mt-0.5">
                   Procès-Verbal d&apos;Alerte & Rapport Tactique d&apos;Incendie
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Système National IN9AD : Ingestion Capteur {activeNode.id} ({activeNode.name})
+                <p className="text-xs text-slate-400 mt-0.5 font-mono">
+                  Système National IN9AD : Ingestion Capteur ({modalReport.massif} - {modalReport.wilayaCode}) · Émis : {modalReport.timestamp}
                 </p>
               </div>
               <button
@@ -1205,23 +1230,23 @@ Postes de commandement destinataires :
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-300 font-mono">
                   <div>
                     <span className="text-slate-500 block text-[10px]">Massif</span>
-                    <strong>{activeNode.name}</strong>
+                    <strong>{modalReport.massif}</strong>
                   </div>
                   <div>
                     <span className="text-slate-500 block text-[10px]">Wilaya</span>
-                    <strong>{activeNode.wilaya} ({activeNode.wilayaCode})</strong>
+                    <strong>{modalReport.wilaya} ({modalReport.wilayaCode})</strong>
                   </div>
                   <div>
                     <span className="text-slate-500 block text-[10px]">Coordonnées GPS</span>
-                    <strong>{activeNode.lat.toFixed(4)} N, {activeNode.lon.toFixed(4)} E</strong>
+                    <strong>{modalReport.lat.toFixed(4)}° N, {modalReport.lon.toFixed(4)}° E</strong>
                   </div>
                   <div>
                     <span className="text-slate-500 block text-[10px]">Altitude</span>
-                    <strong>{activeNode.elevation} m</strong>
+                    <strong>{modalReport.elevation} m</strong>
                   </div>
                 </div>
                 <div className="text-[11px] text-slate-400 border-t border-slate-800/60 pt-1.5 font-sans">
-                  <strong>Relief :</strong> {activeNode.topography}
+                  <strong>Relief :</strong> {modalReport.topography}
                 </div>
               </div>
 
@@ -1234,23 +1259,23 @@ Postes de commandement destinataires :
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-slate-300 font-mono">
                   <div>
                     <span className="text-slate-500 block text-[10px]">Température</span>
-                    <strong className="text-rose-400">{customTemp.toFixed(1)} °C</strong>
+                    <strong className="text-rose-400">{modalReport.temp.toFixed(1)} °C</strong>
                   </div>
                   <div>
                     <span className="text-slate-500 block text-[10px]">Humidité</span>
-                    <strong className="text-sky-400">{customHumidity} %</strong>
+                    <strong className="text-sky-400">{modalReport.humidity} %</strong>
                   </div>
                   <div>
                     <span className="text-slate-500 block text-[10px]">Vent</span>
-                    <strong className="text-teal-400">{customWind} km/h ({customWindDir})</strong>
+                    <strong className="text-teal-400">{modalReport.wind} km/h ({modalReport.windDir})</strong>
                   </div>
                   <div>
                     <span className="text-slate-500 block text-[10px]">CO2 / Fumée</span>
-                    <strong className="text-amber-400">{customCO2} ppm</strong>
+                    <strong className="text-amber-400">{modalReport.co2} ppm</strong>
                   </div>
                   <div>
                     <span className="text-slate-500 block text-[10px]">Indice IA</span>
-                    <strong className="text-white">{mlInference.riskScore} % ({mlInference.riskLevel})</strong>
+                    <strong className="text-white">{modalReport.riskScore} % ({modalReport.riskLevel})</strong>
                   </div>
                 </div>
               </div>
@@ -1264,47 +1289,47 @@ Postes de commandement destinataires :
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-slate-300">
                   <div className="p-2 rounded bg-slate-900 border border-slate-800/80">
                     <span className="text-slate-500 text-[10px] block">Vitesse du Front (ROS)</span>
-                    <strong className="text-slate-100 text-sm">{mlInference.ros_m_min} m/min</strong>
-                    <span className="text-slate-400 text-[10px] block">({mlInference.ros_km_h} km/h)</span>
+                    <strong className="text-slate-100 text-sm">{modalReport.ros_m_min} m/min</strong>
+                    <span className="text-slate-400 text-[10px] block">({modalReport.ros_km_h} km/h)</span>
                   </div>
                   <div className="p-2 rounded bg-slate-900 border border-slate-800/80">
                     <span className="text-slate-500 text-[10px] block">Surfaces Projetées</span>
-                    <strong className="text-slate-100 text-xs block">+1h: {mlInference.area_1h} ha | +3h: {mlInference.area_3h} ha</strong>
-                    <span className="text-slate-400 text-[10px] block">+6h: {mlInference.area_6h} ha</span>
+                    <strong className="text-slate-100 text-xs block">+1h: {modalReport.area_1h} ha | +3h: {modalReport.area_3h} ha</strong>
+                    <span className="text-slate-400 text-[10px] block">+6h: {modalReport.area_6h} ha</span>
                   </div>
                   <div className="p-2 rounded bg-slate-900 border border-slate-800/80">
                     <span className="text-slate-500 text-[10px] block">Indice FWI Canadien</span>
-                    <strong className="text-slate-100 text-sm">{mlInference.fwi}</strong>
-                    <span className="text-slate-400 text-[10px] block">FFMC: {mlInference.ffmc} | ISI: {mlInference.isi}</span>
+                    <strong className="text-slate-100 text-sm">{modalReport.fwi}</strong>
+                    <span className="text-slate-400 text-[10px] block">FFMC : {modalReport.ffmc} | ISI : {modalReport.isi}</span>
                   </div>
                 </div>
                 <div className="text-[11px] text-slate-300 border-t border-slate-800/60 pt-2 font-sans">
-                  <strong>Axe de propagation prévisionnel :</strong> {mlInference.propagationZone}
+                  <strong>Axe de propagation prévisionnel :</strong> {modalReport.propagationZone}
                 </div>
               </div>
 
               {/* Section 4: Human Lives & Threatened Villages */}
-              <div className={`p-3.5 rounded-lg border space-y-2 ${activeNode.hasHumanPopulation ? "bg-rose-950/30 border-rose-800/80" : "bg-slate-950 border-slate-800"}`}>
+              <div className={`p-3.5 rounded-lg border space-y-2 ${modalReport.hasHumanPopulation ? "bg-rose-950/30 border-rose-800/80" : "bg-slate-950 border-slate-800"}`}>
                 <div className="font-semibold text-slate-200 uppercase tracking-wider text-[11px] flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-rose-400" />
                     <span>4. Menace Humaine & Populations Civiles</span>
                   </span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${activeNode.hasHumanPopulation ? "bg-rose-950 text-rose-300 border border-rose-800" : "bg-emerald-950 text-emerald-300 border border-emerald-800"}`}>
-                    {activeNode.hasHumanPopulation ? "POPULATION MENACÉE" : "ZONE INHABITÉE"}
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${modalReport.hasHumanPopulation ? "bg-rose-950 text-rose-300 border border-rose-800" : "bg-emerald-950 text-emerald-300 border border-emerald-800"}`}>
+                    {modalReport.hasHumanPopulation ? "POPULATION MENACÉE" : "ZONE INHABITÉE"}
                   </span>
                 </div>
                 <p className="text-slate-300 text-xs leading-relaxed">
-                  {activeNode.populationDetails}
+                  {modalReport.populationDetails}
                 </p>
-                {activeNode.hasHumanPopulation && (
+                {modalReport.hasHumanPopulation && (
                   <div className="p-2 rounded bg-rose-950/60 border border-rose-900 text-rose-200 text-[11px] space-y-1">
                     <div className="font-bold flex items-center gap-1.5">
                       <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
                       <span>Recommandation Opérationnelle Administration Centrale :</span>
                     </div>
                     <p>
-                      Déclenchement immédiat du Plan ORSEC Wilaya de {activeNode.wilaya}. Établissement d&apos;un périmètre de sécurité et évacuation préventive des {activeNode.populationCount.toLocaleString("fr-FR")} habitants le long des axes de repli vers les centres de regroupement.
+                      Déclenchement immédiat du Plan ORSEC Wilaya de {modalReport.wilaya}. Établissement d&apos;un périmètre de sécurité et évacuation préventive des {modalReport.populationCount.toLocaleString("fr-FR")} habitants le long des axes de repli vers les centres de regroupement.
                     </p>
                   </div>
                 )}
@@ -1318,7 +1343,7 @@ Postes de commandement destinataires :
                     <span>5. Végétation & Combustible</span>
                   </div>
                   <p className="text-slate-300 text-xs leading-relaxed">
-                    {activeNode.canopyDensityText}
+                    {modalReport.canopyDensityText}
                   </p>
                 </div>
 
@@ -1328,7 +1353,7 @@ Postes de commandement destinataires :
                     <span>6. Faune & Biodiversité Protégée</span>
                   </div>
                   <p className="text-slate-300 text-xs leading-relaxed">
-                    {activeNode.faunaSpecies}
+                    {modalReport.faunaSpecies}
                   </p>
                 </div>
               </div>
@@ -1347,7 +1372,7 @@ Postes de commandement destinataires :
                   className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#0A4D3C] hover:bg-[#0c5d49] text-white text-xs font-semibold transition-colors disabled:opacity-50"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>{isDownloadingPdf ? "Génération..." : "Télécharger le PV d'Alerte (PDF)"}</span>
+                  <span>{isDownloadingPdf ? "Génération PDF..." : "Télécharger le PV d'Alerte (PDF)"}</span>
                 </button>
                 <Link
                   href="/dashboard/alerts"
