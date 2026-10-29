@@ -18,6 +18,8 @@ import {
   UserCheck,
   Settings,
   Radio,
+  Plane,
+  Cpu,
 } from "lucide-react";
 import { getStoredUser, getStoredToken, setSession, logoutUser, getRoleBadgeInfo, getLocalizedUserName, AuthUser, DEMO_ACCOUNTS, UserRole } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
@@ -126,6 +128,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: "/dashboard", label: t("nav_tactical_map") || "Carte Tactique", icon: Map },
     { href: "/dashboard/alerts", label: t("nav_alerts") || "Alertes Actives", icon: AlertTriangle },
     { href: "/dashboard/notifications", label: "Intercom & Alertes", icon: Radio },
+    { href: "/dashboard/drones", label: "Drones FLIR", icon: Plane, dataTour: "drones" },
+    { href: "/dashboard/iot", label: "Capteurs IoT", icon: Cpu, dataTour: "iot" },
     { href: "/analytics", label: t("nav_analytics") || "Analytics ML", icon: BarChart3 },
     { href: "/dashboard/historique", label: t("nav_history") || "Historique", icon: History },
   ];
@@ -244,6 +248,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Link
                   key={item.href}
                   href={item.href}
+                  data-tour={item.dataTour}
                   aria-current={active ? "page" : undefined}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                     active
