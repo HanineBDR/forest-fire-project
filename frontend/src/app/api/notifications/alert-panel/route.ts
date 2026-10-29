@@ -35,10 +35,10 @@ export async function POST(req: NextRequest) {
       title,
       massif,
       wilaya,
-      lat: lat ? parseFloat(lat) : null,
-      lon: lon ? parseFloat(lon) : null,
+      lat: typeof lat === "number" ? lat : (lat ? parseFloat(lat) : null),
+      lon: typeof lon === "number" ? lon : (lon ? parseFloat(lon) : null),
       risk_level,
-      risk_score: risk_score ? parseFloat(risk_score) : null,
+      risk_score: typeof risk_score === "number" ? risk_score : (risk_score ? parseFloat(risk_score) : null),
     });
 
     return NextResponse.json({ ok: true, data: result }, { status: 201 });

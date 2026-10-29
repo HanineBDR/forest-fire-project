@@ -241,43 +241,109 @@ export async function createPanelIntercomAlert(params: {
       ? `Signalement Terrain (${params.massif}) - ${senderLabel}`
       : `Message Opérationnel de ${senderLabel}`);
 
-  // 1. Insert notification for target panel
-  const [notif] = await sql`
-    INSERT INTO notifications (
-      alert_id, sender_role, recipient_role, title, message,
-      risk_level, risk_score, massif, wilaya, lat, lon, is_read, created_at
-    ) VALUES (
-      ${params.alert_id || null},
-      ${params.from_role},
-      ${params.to_role},
-      ${title},
-      ${params.message},
-      ${params.risk_level || "Elevé"},
-      ${params.risk_score || 75.0},
-      ${params.massif || null},
-      ${params.wilaya || null},
-      ${params.lat || null},
-      ${params.lon || null},
-      FALSE,
-      NOW()
-    )
-    RETURNING *
-  `;
+  // 0. Ensure alert exists in alerts table to satisfy foreign key constraint and show on alerts map
+  if (params.alert_id) {
+    try {
+      await sql`
+        INSERT INTO alerts (
+          alert_id, lat, lon, wilaya, forest_name, risk_score, risk_level, status, created_at, updated_at
+        ) VALUES (
+          ${params.alert_id},
+          ${params.lat || null},
+          ${params.lon || null},
+          ${params.wilaya || null},
+          ${params.massif || null},
+          ${params.risk_score || 85.0},
+          ${params.risk_level || "CRITICAL"},
+          'DETECTED',
+          NOW(),
+          NOW()
+        )
+        ON CONFLICT (alert_id) DO UPDATE SET
+          risk_score = EXCLUDED.risk_score,
+          risk_level = EXCLUDED.risk_level,
+          updated_at = NOW()
+      `;
+    } catch (alertErr) {
+      console.warn("Could not insert/upsert alert in alerts table:", alertErr);
+    }
+  }
 
-  // 2. Insert record in alert_acknowledgments
-  const [ack] = await sql`
-    INSERT INTO alert_acknowledgments (
-      alert_id, user_role, action, comment, target_role, created_at
-    ) VALUES (
-      ${params.alert_id || "GENERAL-DISPATCH"},
-      ${params.from_role},
-      'alerted_other',
-      ${params.message},
-      ${params.to_role},
-      NOW()
-    )
-    RETURNING *
-  `;
+  // 1. Insert notification for target panel (with resilient FK fallback)
+  let notif: any = null;
+  try {
+    const [inserted] = await sql`
+      INSERT INTO notifications (
+        alert_id, sender_role, recipient_role, title, message,
+        risk_level, risk_score, massif, wilaya, lat, lon, is_read, created_at
+      ) VALUES (
+        ${params.alert_id || null},
+        ${params.from_role},
+        ${params.to_role},
+        ${title},
+        ${params.message},
+        ${params.risk_level || "Elevé"},
+        ${params.risk_score || 75.0},
+        ${params.massif || null},
+        ${params.wilaya || null},
+        ${params.lat || null},
+        ${params.lon || null},
+        FALSE,
+        NOW()
+      )
+      RETURNING *
+    `;
+    notif = inserted;
+  } catch (notifErr: any) {
+    // If foreign key constraint failed, retry with alert_id = NULL
+    if (notifErr?.code === "23503") {
+      const [insertedFallback] = await sql`
+        INSERT INTO notifications (
+          alert_id, sender_role, recipient_role, title, message,
+          risk_level, risk_score, massif, wilaya, lat, lon, is_read, created_at
+        ) VALUES (
+          NULL,
+          ${params.from_role},
+          ${params.to_role},
+          ${title},
+          ${params.message},
+          ${params.risk_level || "Elevé"},
+          ${params.risk_score || 75.0},
+          ${params.massif || null},
+          ${params.wilaya || null},
+          ${params.lat || null},
+          ${params.lon || null},
+          FALSE,
+          NOW()
+        )
+        RETURNING *
+      `;
+      notif = insertedFallback;
+    } else {
+      throw notifErr;
+    }
+  }
+
+  // 2. Insert record in alert_acknowledgments (safe non-blocking)
+  let ack: any = null;
+  try {
+    const [insertedAck] = await sql`
+      INSERT INTO alert_acknowledgments (
+        alert_id, user_role, action, comment, target_role, created_at
+      ) VALUES (
+        ${params.alert_id || "GENERAL-DISPATCH"},
+        ${params.from_role},
+        'alerted_other',
+        ${params.message},
+        ${params.to_role},
+        NOW()
+      )
+      RETURNING *
+    `;
+    ack = insertedAck;
+  } catch (ackErr) {
+    console.warn("Could not insert alert_acknowledgment:", ackErr);
+  }
 
   return { notification: notif, acknowledgment: ack };
 }
