@@ -283,3 +283,4 @@ export async function generateOfficialTacticalReportPDF(data: TacticalReportData
   const cleanWilaya = data.wilayaCode.replace(/[\s.]+/g, "");
   doc.save(`PV_ALERTE_INCENDIE_${cleanWilaya}_${cleanMassif}_${Date.now()}.pdf`);
 }
+

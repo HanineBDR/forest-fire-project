@@ -111,19 +111,31 @@ forest-fire-project/
 │   └── Procfile                 # Production web server process definition
 ├── frontend/
 │   ├── public/
+│   │   └── icon.png             # Official IN9AD high-res favicon asset
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── globals.css      # Dark command-center theme + radar pulse animations
 │   │   │   ├── layout.tsx       # Root layout, Google Fonts & Leaflet styling
-│   │   │   └── page.tsx         # Main app dashboard
+│   │   │   ├── page.tsx         # Main tactical dashboard
+│   │   │   └── dashboard/
+│   │   │       ├── alerts/      # Multi-role alert room & operational transitions
+│   │   │       ├── drones/      # FLIR aerial surveillance unit & telemetry
+│   │   │       ├── iot/         # LoRaWAN sensor network, ML ingestion & PV generator
+│   │   │       ├── notifications/ # Intercom dispatch, timeline & double alert routing
+│   │   │       └── admin/       # Model health monitoring, roadmap & users
 │   │   ├── components/
 │   │   │   ├── Header.tsx       # Brand, live badges & Protection Civile hotline
 │   │   │   ├── Map.tsx          # Leaflet map with satellite, dark & OSM base layers
+│   │   │   ├── OnboardingGuide.tsx # 8-step contextual spotlight guided tour
 │   │   │   ├── QuickPresets.tsx # Instant jump to Yakouren, Akfadou, Tikjda, Gouraya
 │   │   │   ├── RiskPanel.tsx    # Risk score gauge, FWI metrics, What-If weather lab
 │   │   │   └── SimulationControls.tsx # 1h-12h fire propagation timeline scrubber
+│   │   ├── contexts/
+│   │   │   └── NotificationContext.tsx # Real-time alerts, sound chimes & intercom
 │   │   ├── lib/
-│   │   │   └── api.ts           # Backend connectors + offline fallback resilience
+│   │   │   ├── api.ts           # Backend connectors + offline fallback resilience
+│   │   │   ├── notifications.ts # Neon Lakebase Postgres query layer & FK safety
+│   │   │   └── pdfReportGenerator.ts # Client-side official PDF PV generator (jsPDF)
 │   │   └── types/
 │   │       └── index.ts         # TypeScript interfaces
 │   ├── package.json
@@ -202,6 +214,58 @@ La plateforme est sécurisée par tokens JWT avec contrôle d'accès strict par 
 
 #### 10. Feuille de Route 2026 (Feature 10)
 - Accessible via `/dashboard/admin/roadmap` : Frise stratégique en 4 phases (Mois 1-2, Mois 3, Mois 6, Long Terme) détaillant le déploiement national avec la DGF et la Protection Civile.
+
+#### 11. Réseau Capteurs IoT & Ingestion Micro-Climatique ML (Feature 11)
+- Accessible via `/dashboard/iot`.
+- **Surveillance des 11 massifs stratégiques :** Yakouren, Akfadou, Tikjda, Gouraya, Mizrana, Babors, Chréa, El Kala, Aurès, Guerrouche, Chenoua.
+- **Télémétrie étendue avec saisie directe :**
+  - Température de `-10 °C` à `100 °C` (curseur + champ numérique direct pour injecter des valeurs extrêmes comme `60 °C` ou `85 °C`).
+  - Humidité relative de `0 %` à `100 %` (détection de seuil de dessiccation critique sous 20 %).
+  - Vitesse du vent de `0` à `120 km/h` couplée à un sélecteur d'orientation à 8 directions (`Sud (Sirocco)`, `Nord-Est`, etc.).
+  - Gaz de combustion CO2 de `350` à `2 000 ppm` (seuil d'anomalie de combustion active dès 750 ppm).
+- **Moteur d'inférence IA en temps réel :** Calcul automatique du score XGBoost et des composantes du Canadian FWI (FFMC, ISI, BUI, FWI).
+- **Dynamique du front de feu :** Calcul de la vitesse de propagation (Rate of Spread - ROS en m/min et km/h), projection de surface brûlée (+1h, +3h, +6h) et axe prévisionnel d'avancée selon la rose des vents.
+- **Enjeux de terrain par massif :** Dénombrement exact des populations résidentes, villages et hameaux menacés, espèces animales protégées (Macaque de Barbarie, Cerf de Barbarie, rapaces) et densité du couvert forestier (كثافة الغابة).
+
+#### 12. Double Alerte Institutionnelle & Directive d'Évacuation Civile (Feature 12)
+- En cas de détection d'un foyer actif menaçant des zones habitées, le système déclenche automatiquement **deux notifications distinctes et prioritaires** à destination de l'Administration Centrale :
+  1. **Alerte 1 (`[RAPPORT INCENDIE]`) :** Bilan opérationnel du feu, coordonnées GPS, vitesse de propagation ROS, surfaces projetées, combustible dominant et procès-verbal officiel.
+  2. **Alerte 2 (`[URGENT ÉVACUATION]`) :** Directive de sécurité civile prioritaire précisant le nombre exact de résidents menacés (ex : 14 500 habitants à Yakouren), la liste des villages en lisière et la recommandation d'activation immédiate du Plan ORSEC Wilaya.
+- Routage multi-commandements avec avertisseur sonore Web Audio deux-tons et actualisation instantanée du badge d'alertes non lues.
+
+#### 13. Générateur Autonome de Procès-Verbal d'Alerte (PDF Officiel sans serveur) (Feature 13)
+- Module dédié basé sur `jspdf` et `jspdf-autotable` ([`pdfReportGenerator.ts`](file:///c:/Users/hadji/Downloads/Thirduni-Project/forest-fire-project/frontend/src/lib/pdfReportGenerator.ts)).
+- Génération instantanée côté client dans le navigateur, sans appel réseau ni dépendance externe.
+- Document au format officiel de la **République Algérienne Démocratique et Populaire** incluant 6 tableaux réglementaires :
+  - Identification administrative, wilaya, coordonnées GPS précises et relief.
+  - Télémétrie capteurs et indices FWI / XGBoost.
+  - Dynamique du front et vitesse d'expansion en m/min et km/h.
+  - Enjeux humains, dénombrement et plan d'évacuation préconisé.
+  - Végétation, combustible et biodiversité protégée.
+  - Destinataires officiels (DGPC, DGF, Ministère de l'Intérieur) et cachet électronique IN9AD.
+
+#### 14. Système de Persistance des Rapports de Crise (Feature 14)
+- Résolution du caractère éphémère des rapports : chaque analyse ou alerte est automatiquement enregistrée dans `localStorage` (`in9ad_saved_tactical_report`).
+- À chaque visite sur `/dashboard/iot`, une bannière persistante signale le dernier rapport disponible avec boutons d'ouverture et de téléchargement immédiat.
+- Sur la salle des notifications (`/dashboard/notifications`), chaque carte d'alerte IoT intègre un bouton **[Télécharger PV (PDF)]** et un accès direct **[Voir Vigie IoT]**.
+
+#### 15. Unité Drones FLIR - Surveillance Aérienne Thermique (Feature 15)
+- Accessible via `/dashboard/drones`.
+- Interface dédiée au vecteur aéroporté thermique (DJI Matrice 300 RTK + nacelle FLIR).
+- Tracé cartographique de trajectoire de vol planifiée (couloir Yakouren -> Akfadou), télémétrie en direct (altitude, autonomie batterie, capteur thermique FLIR, liaison radio), flux vidéo infrarouge simulé et statut de préparation opérationnelle Phase 2.
+
+#### 16. Guide Interactif d'Onboarding Visuel (Spotlight 8 Étapes) (Feature 16)
+- Visite guidée contextuelle automatique dès la première visite sur la plateforme (persistée via `in9ad_onboarding_seen`).
+- Masque semi-transparent sombre avec projecteur visuel entourant tour à tour :
+  1. En-tête officiel et identité IN9AD.
+  2. Grille des 11 massifs stratégiques surveillés.
+  3. Carte tactique Leaflet et couches cartographiques.
+  4. Calculateur d'indice de risque IA (XGBoost + FWI).
+  5. Centre d'alertes en temps réel et avertisseur sonore.
+  6. Sélecteur de rôles de commandement (Protection Civile, DGF, Admin).
+  7. Unité Drones FLIR de surveillance aérienne.
+  8. Réseau Capteurs IoT et vigies forestières.
+- Navigation fluide au clavier (Échap pour quitter, flèches gauche/droite) et boutons Précédent / Suivant / Passer.
 
 ---
 
