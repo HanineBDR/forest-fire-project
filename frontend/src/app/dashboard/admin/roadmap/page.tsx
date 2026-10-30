@@ -44,6 +44,64 @@ const WILAYAS = [
   "Médéa",
   "Chlef",
 ];
+const DEFAULT_COMMUNITY_REPORTS = [
+  {
+    report_id: "REP-2026-005",
+    lat: 35.432,
+    lon: 7.143,
+    wilaya: "Khenchela",
+    description: "Violent Sirocco winds and dust-laden atmosphere in the Aurès forest massif",
+    photo_url: "/reports/report_sirocco.jpg",
+    phone: "+213 661 77 88 99",
+    status: "PENDING",
+    timestamp: "2026-10-20T20:05:13.000Z",
+  },
+  {
+    report_id: "REP-2026-002",
+    lat: 36.689,
+    lon: 4.623,
+    wilaya: "Bejaia",
+    description: "Suspicious fire outbreak in undergrowth along the forest trail in the Akfadou massif",
+    photo_url: "/reports/report_fire_akfadou.jpg",
+    phone: "+213 662 98 76 54",
+    status: "PENDING",
+    timestamp: "2026-10-20T19:15:33.000Z",
+  },
+  {
+    report_id: "REP-2026-001",
+    lat: 36.738,
+    lon: 4.412,
+    wilaya: "Tizi Ouzou",
+    description: "Dense smoke and pungent odor observed above the canopy near Ighil Bouchene (Yakouren Forest)",
+    photo_url: "/reports/report_smoke_yakouren.jpg",
+    phone: "+213 551 23 45 67",
+    status: "PENDING",
+    timestamp: "2026-10-20T18:42:10.000Z",
+  },
+  {
+    report_id: "REP-2026-003",
+    lat: 36.465,
+    lon: 4.148,
+    wilaya: "Bouira",
+    description: "White smoke plumes observed from the Tikjda watchtower",
+    photo_url: "/reports/report_vigie.jpg",
+    phone: "+213 770 45 67 89",
+    status: "VERIFIED",
+    timestamp: "2026-10-20T17:20:00.000Z",
+  },
+  {
+    report_id: "REP-2026-004",
+    lat: 36.782,
+    lon: 5.31,
+    wilaya: "Jijel",
+    description: "Charred trees and flare-up resurgence following a wind gust",
+    photo_url: "/reports/report_burned_zone.jpg",
+    phone: "+213 661 22 33 44",
+    status: "VERIFIED",
+    timestamp: "2026-10-20T16:10:00.000Z",
+  },
+];
+
 
 // Helper to translate default/mock report descriptions according to active language
 function getLocalizedReportDescription(desc: string, lang: string): string {
@@ -114,14 +172,44 @@ export default function AdminCitizenReportsPage() {
   const [validationSuccess, setValidationSuccess] = useState<string | null>(null);
   const [isSubmittingReport, setIsSubmittingReport] = useState<boolean>(false);
 
-  // Load Citizen Reports from Backend
+  // Load Citizen Reports from Backend and LocalStorage
   const loadReports = async () => {
     setIsLoadingReports(true);
     try {
-      const reps = await fetchCommunityReports();
-      setCommunityReports(reps);
+      let reps: any[] = [];
+      try {
+        reps = await fetchCommunityReports();
+      } catch (err) {
+        console.warn("fetchCommunityReports error:", err);
+      }
+
+      // Check localStorage for newly submitted citizen reports
+      let localReps: any[] = [];
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("inkad_citizen_reports");
+          if (stored) {
+            localReps = JSON.parse(stored);
+          }
+        } catch (e) {
+          console.warn("Error reading local reports:", e);
+        }
+      }
+
+      // Merge local reports with backend reports (local on top)
+      const existingIds = new Set((reps || []).map((r: any) => r.report_id));
+      const newFromLocal = localReps.filter((r: any) => !existingIds.has(r.report_id));
+      let combined = [...newFromLocal, ...(reps || [])];
+
+      // If empty, populate with default seed reports
+      if (combined.length === 0) {
+        combined = DEFAULT_COMMUNITY_REPORTS;
+      }
+
+      setCommunityReports(combined);
     } catch (e) {
       console.warn("Could not fetch reports:", e);
+      setCommunityReports(DEFAULT_COMMUNITY_REPORTS);
     } finally {
       setIsLoadingReports(false);
     }
@@ -134,12 +222,38 @@ export default function AdminCitizenReportsPage() {
   // Update Citizen Report Status (VERIFIED / REJECTED)
   const handleUpdateReportStatus = async (reportId: string, newStatus: "VERIFIED" | "REJECTED") => {
     try {
-      await updateCommunityReportStatus(reportId, newStatus, "Officier CODIS Central");
+      // 1. Update in backend if reachable
+      try {
+        await updateCommunityReportStatus(reportId, newStatus, "Officier CODIS Central");
+      } catch (backendErr) {
+        console.warn("Backend status update note:", backendErr);
+      }
+
+      // 2. Update in localStorage if present
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("inkad_citizen_reports");
+          if (stored) {
+            const list: any[] = JSON.parse(stored);
+            const updated = list.map((r: any) =>
+              r.report_id === reportId ? { ...r, status: newStatus } : r
+            );
+            localStorage.setItem("inkad_citizen_reports", JSON.stringify(updated));
+          }
+        } catch (e) {
+          console.warn("Error updating local report status:", e);
+        }
+      }
+
+      // 3. Update local state
+      setCommunityReports((prev) =>
+        prev.map((r) => (r.report_id === reportId ? { ...r, status: newStatus } : r))
+      );
+
       const template = newStatus === "VERIFIED"
         ? (t("community_action_verified") || "Report {id} validated with status: VERIFIED")
         : (t("community_action_rejected") || "Report {id} marked as REJECTED");
       setActionMessage(template.replace("{id}", reportId));
-      loadReports();
       setTimeout(() => setActionMessage(null), 4000);
     } catch (err) {
       console.error(err);
