@@ -24,6 +24,7 @@ import {
   Menu,
   X,
   Camera,
+  MoreHorizontal,
 } from "lucide-react";
 import { 
   getStoredUser, 
@@ -52,6 +53,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [unauthToast, setUnauthToast] = useState<{ title: string; desc: string } | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -110,6 +113,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (roleDropdownRef.current && !roleDropdownRef.current.contains(target)) {
         setIsRoleSwitcherOpen(false);
       }
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(target)) {
+        setIsMoreOpen(false);
+      }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
         if (!target.closest('[data-mobile-menu-toggle="true"]')) {
           setIsMobileMenuOpen(false);
@@ -120,6 +126,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (e.key === "Escape") {
         setIsProfileOpen(false);
         setIsRoleSwitcherOpen(false);
+        setIsMoreOpen(false);
         setIsMobileMenuOpen(false);
       }
     }
@@ -135,6 +142,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     setIsProfileOpen(false);
     setIsRoleSwitcherOpen(false);
+    setIsMoreOpen(false);
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
@@ -153,6 +161,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setActiveRole(mapped);
     setIsProfileOpen(false);
     setIsRoleSwitcherOpen(false);
+    setIsMoreOpen(false);
     setIsMobileMenuOpen(false);
 
     if (pathname === "/analytics" && acc.role !== "ADMIN") {
@@ -191,19 +200,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isAdmin = user.role === "ADMIN";
   const permissions = user ? ROLE_PERMISSIONS[user.role] : null;
 
-  // ALL OPERATIONAL & ACCREDITED FUNCTIONS (directly visible on the navigation bar)
-  const navItems = [
+  interface HeaderNavItem {
+    href: string;
+    label: string;
+    icon: any;
+    show: boolean;
+    dataTour?: string;
+  }
+
+  // PRIMARY OPERATIONAL FUNCTIONS (directly visible on the navigation bar)
+  const primaryNavItems: HeaderNavItem[] = [
     { href: "/dashboard", label: t("nav_tactical_map") || "Tactical Map", icon: Map, show: true },
     { href: "/dashboard/alerts", label: t("nav_alerts") || "Active Alerts", icon: AlertTriangle, show: true },
     { href: "/analytics", label: t("nav_analytics") || "ML Analytics", icon: BarChart3, show: permissions?.canViewAnalytics ?? false },
-    { href: "/dashboard/drones", label: t("nav_drones_flir") || "Drones FLIR", icon: Plane, dataTour: "drones", show: permissions?.canAccessDrones ?? false },
-    { href: "/dashboard/iot", label: t("nav_iot_sensors") || "IoT Vigies", icon: Cpu, dataTour: "iot", show: permissions?.canAccessIoT ?? false },
     { href: "/dashboard/notifications", label: t("nav_intercom_alerts") || "Intercom", icon: Radio, show: true },
-    { href: "/dashboard/historique", label: t("nav_history") || "History", icon: History, show: permissions?.canAccessHistory ?? true },
+  ].filter((item) => item.show);
+
+  // SECONDARY / EXTENDED OPERATIONAL FUNCTIONS (accessible via the "More" dropdown menu)
+  const moreNavItems: HeaderNavItem[] = [
+    { href: "/dashboard/drones", label: t("nav_drones_flir") || "FLIR Drones", icon: Plane, dataTour: "drones", show: permissions?.canAccessDrones ?? false },
+    { href: "/dashboard/iot", label: t("nav_iot_sensors") || "IoT Vigies", icon: Cpu, dataTour: "iot", show: permissions?.canAccessIoT ?? false },
+    { href: "/dashboard/historique", label: t("nav_history") || "History & Audit", icon: History, show: permissions?.canAccessHistory ?? true },
     { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera, show: permissions?.canVerifyCitizenReports ?? false },
-    { href: "/dashboard/admin/users", label: t("nav_users") || "Users", icon: Users, show: permissions?.canManageUsers ?? false },
+    { href: "/dashboard/admin/users", label: t("nav_users") || "User Management", icon: Users, show: permissions?.canManageUsers ?? false },
     { href: "/dashboard/admin/model-health", label: t("nav_model_health") || "Model Health", icon: Activity, show: permissions?.canViewModelHealth ?? false },
   ].filter((item) => item.show);
+
+  const isMoreActive = moreNavItems.some(
+    (item) => pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history")
+  );
 
   return (
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${isRTL ? "font-arabic" : ""}`}>
@@ -304,15 +329,15 @@ alt="INKAD Logo"
             </div>
           </div>
 
-          {/* Center: ALL Operational Functions Rendered Directly on Navigation Bar */}
+          {/* Center: Primary Navigation + "More" Dropdown Menu */}
           <nav 
             aria-label={t("nav_main_heading")} 
             data-tour="nav" 
-            className="hidden lg:flex items-center gap-1 xl:gap-1.5 flex-nowrap overflow-x-auto no-scrollbar py-1"
+            className="hidden lg:flex items-center gap-1 xl:gap-1.5 flex-nowrap py-1 shrink-0"
           >
-            {navItems.map((item) => {
+            {primaryNavItems.map((item) => {
               const Icon = item.icon;
-              const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
+              const active = pathname === item.href;
               return (
                 <Link
                   key={item.href}
@@ -330,6 +355,68 @@ alt="INKAD Logo"
                 </Link>
               );
             })}
+
+            {/* "More" (Plus / المزيد) Dropdown Menu */}
+            {moreNavItems.length > 0 && (
+              <div ref={moreDropdownRef} className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsMoreOpen(!isMoreOpen)}
+                  aria-haspopup="menu"
+                  aria-expanded={isMoreOpen}
+                  aria-label={t("nav_operational_tools")}
+                  className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
+                    isMoreOpen || isMoreActive
+                      ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
+                  }`}
+                  title={t("nav_more") || "More"}
+                >
+                  <MoreHorizontal className={`w-3.5 h-3.5 shrink-0 ${isMoreActive ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                  <span>{t("nav_more") || "More"}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isMoreOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+                </button>
+
+                {isMoreOpen && (
+                  <div 
+                    role="menu"
+                    aria-orientation="vertical"
+                    className="absolute start-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none animate-in fade-in slide-in-from-top-2 duration-150"
+                  >
+                    <div className="px-3 py-1.5 border-b border-slate-800 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                      <span>{t("nav_more")} & {t("nav_operational_tools")}</span>
+                      <span className="text-[10px] text-slate-500 font-mono">{moreNavItems.length}</span>
+                    </div>
+                    <div className="p-1 space-y-0.5">
+                      {moreNavItems.map((item) => {
+                        const Icon = item.icon;
+                        const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            data-tour={item.dataTour}
+                            role="menuitem"
+                            onClick={() => setIsMoreOpen(false)}
+                            className={`flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors ${
+                              active
+                                ? "bg-slate-800 text-white font-semibold border border-slate-700"
+                                : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                              <span>{item.label}</span>
+                            </div>
+                            {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </nav>
 
           {/* Right: Notification Bell + Language Selector + User Profile + Mobile Hamburger */}
@@ -521,15 +608,15 @@ alt="INKAD Logo"
               </Link>
             </div>
 
-            {/* All functions in mobile drawer */}
+            {/* Primary functions in mobile drawer */}
             <div>
               <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
                 {t("nav_main_heading")}
               </div>
               <div className="space-y-1">
-                {navItems.map((item) => {
+                {primaryNavItems.map((item) => {
                   const Icon = item.icon;
-                  const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
+                  const active = pathname === item.href;
                   return (
                     <Link
                       key={item.href}
@@ -551,6 +638,39 @@ alt="INKAD Logo"
                 })}
               </div>
             </div>
+
+            {/* Extended / Tools in mobile drawer */}
+            {moreNavItems.length > 0 && (
+              <div className="border-t border-slate-800/80 pt-2.5">
+                <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
+                  {t("nav_more")} & {t("nav_operational_tools")}
+                </div>
+                <div className="space-y-1">
+                  {moreNavItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                          active
+                            ? "bg-slate-800 text-white border border-slate-700"
+                            : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} />
+                          <span>{item.label}</span>
+                        </div>
+                        {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="border-t border-slate-800/80 pt-2.5">
               <button
