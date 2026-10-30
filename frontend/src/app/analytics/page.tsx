@@ -204,9 +204,9 @@ export default function AnalyticsPage() {
 
   // URL for Folium Burn Map based on timeline
   const activeBurnMapUrl = useMemo(() => {
-    if (burnTimeline === "2023_2024") return `${apiBase}/burn-map`;
-    return `${apiBase}/burn-map/history/${burnTimeline}`;
-  }, [apiBase, burnTimeline]);
+    if (burnTimeline === "2023_2024") return `/api/burn-map`;
+    return `/api/burn-map/history/${burnTimeline}`;
+  }, [burnTimeline]);
 
   return (
     <RoleGate allowedRoles={["ADMIN"]} redirectTo="/dashboard" showToast={true}>
@@ -851,6 +851,10 @@ export default function AnalyticsPage() {
                   src={`${apiBase}/outputs/algeria_burn_map.png?t=${lastUpdated.getTime()}`}
                   alt="NASA FIRMS Burned Areas Map"
                   className="w-full h-auto rounded border border-slate-800 object-contain max-h-[600px] mx-auto"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/outputs/algeria_burn_map.png";
+                  }}
                 />
               </div>
             )}
