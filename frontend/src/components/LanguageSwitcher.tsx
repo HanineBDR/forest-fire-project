@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLanguage, Language } from "@/context/LanguageContext";
 import { Globe, Check, ChevronDown } from "lucide-react";
+import { Tooltip } from "@/components/Tooltip";
 
 interface LanguageOption {
   code: Language;
@@ -18,7 +19,7 @@ const OPTIONS: LanguageOption[] = [
 ];
 
 export const LanguageSwitcher: React.FC = () => {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -45,19 +46,21 @@ export const LanguageSwitcher: React.FC = () => {
 
   return (
     <div ref={containerRef} data-tour="lang-switcher" className="relative inline-block text-left">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-label={`Changer de langue, langue actuelle : ${activeOption.fullLabel}`}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-      >
-        <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
-        <span aria-hidden="true">{activeOption.flag}</span>
-        <span className="font-semibold">{activeOption.shortLabel}</span>
-        <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-150 ${isOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-      </button>
+      <Tooltip content={t("tooltip_language_switcher")} position="bottom">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+          aria-label={`Changer de langue, langue actuelle : ${activeOption.fullLabel}`}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+        >
+          <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
+          <span aria-hidden="true">{activeOption.flag}</span>
+          <span className="font-semibold">{activeOption.shortLabel}</span>
+          <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-150 ${isOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+        </button>
+      </Tooltip>
 
       {isOpen && (
         <div

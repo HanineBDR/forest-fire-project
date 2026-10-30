@@ -13,6 +13,7 @@ import {
   DronePatrol,
 } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
+import { Tooltip } from "@/components/Tooltip";
 import {
   Flame,
   Globe2,
@@ -727,29 +728,33 @@ export const Map: React.FC<MapProps> = ({
       >
         {/* View Scope Switcher */}
         <div className="flex items-center gap-1 p-0.5 bg-slate-950 rounded-md border border-slate-800 text-xs">
-          <button
-            type="button"
-            onClick={() => setViewScope("northern")}
-            aria-pressed={viewScope === "northern"}
-            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-              viewScope === "northern" ? "bg-red-600 text-white" : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Flame className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>{t("scope_northern_algeria")}</span>
-          </button>
+          <Tooltip content={t("tooltip_scope_northern")} position="bottom">
+            <button
+              type="button"
+              onClick={() => setViewScope("northern")}
+              aria-pressed={viewScope === "northern"}
+              className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                viewScope === "northern" ? "bg-red-600 text-white" : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>{t("scope_northern_algeria")}</span>
+            </button>
+          </Tooltip>
 
-          <button
-            type="button"
-            onClick={() => setViewScope("all_algeria")}
-            aria-pressed={viewScope === "all_algeria"}
-            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-              viewScope === "all_algeria" ? "bg-red-600 text-white" : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Globe2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>{t("scope_national_view")}</span>
-          </button>
+          <Tooltip content={t("tooltip_scope_national")} position="bottom">
+            <button
+              type="button"
+              onClick={() => setViewScope("all_algeria")}
+              aria-pressed={viewScope === "all_algeria"}
+              className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                viewScope === "all_algeria" ? "bg-red-600 text-white" : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Globe2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>{t("scope_national_view")}</span>
+            </button>
+          </Tooltip>
         </div>
 
         {/* 3 Map Base Layer Types: Satellite, Dark, Street (OSM) */}
@@ -758,68 +763,71 @@ export const Map: React.FC<MapProps> = ({
           aria-label={t("map_base_layer_label")}
           className="flex items-center gap-0.5 p-0.5 bg-slate-950 rounded-md border border-slate-800 text-xs"
         >
-          <button
-            type="button"
-            role="radio"
-            aria-checked={activeTileLayer === "satellite"}
-            onClick={() => setActiveTileLayer("satellite")}
-            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-              activeTileLayer === "satellite" 
-                ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-            title={t("map_satellite_title")}
-          >
-            <Satellite className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
-            <span>{t("map_satellite")}</span>
-          </button>
+          <Tooltip content={t("tooltip_map_satellite")} position="bottom">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={activeTileLayer === "satellite"}
+              onClick={() => setActiveTileLayer("satellite")}
+              className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                activeTileLayer === "satellite" 
+                  ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Satellite className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
+              <span>{t("map_satellite")}</span>
+            </button>
+          </Tooltip>
 
-          <button
-            type="button"
-            role="radio"
-            aria-checked={activeTileLayer === "dark"}
-            onClick={() => setActiveTileLayer("dark")}
-            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-              activeTileLayer === "dark" 
-                ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-            title={t("map_dark_title")}
-          >
-            <Layers className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
-            <span>{t("map_dark")}</span>
-          </button>
+          <Tooltip content={t("tooltip_map_dark")} position="bottom">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={activeTileLayer === "dark"}
+              onClick={() => setActiveTileLayer("dark")}
+              className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                activeTileLayer === "dark" 
+                  ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
+              <span>{t("map_dark")}</span>
+            </button>
+          </Tooltip>
 
-          <button
-            type="button"
-            role="radio"
-            aria-checked={activeTileLayer === "osm"}
-            onClick={() => setActiveTileLayer("osm")}
-            className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-              activeTileLayer === "osm" 
-                ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-            title={t("map_osm_title")}
-          >
-            <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
-            <span>{t("map_streets")}</span>
-          </button>
+          <Tooltip content={t("tooltip_map_streets")} position="bottom">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={activeTileLayer === "osm"}
+              onClick={() => setActiveTileLayer("osm")}
+              className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                activeTileLayer === "osm" 
+                  ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
+              <span>{t("map_streets")}</span>
+            </button>
+          </Tooltip>
         </div>
 
         {/* FEATURE 5: Animated Wind Particle Toggle Switch */}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={showWindAnimation}
-          onClick={() => setShowWindAnimation(!showWindAnimation)}
-          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-            showWindAnimation
-              ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-          }`}
-          title={t("toggle_wind_title")}
-        >
+        <Tooltip content={t("tooltip_layer_wind")} position="bottom">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showWindAnimation}
+            onClick={() => setShowWindAnimation(!showWindAnimation)}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              showWindAnimation
+                ? "bg-slate-800 border-slate-600 text-white shadow-sm"
+                : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+            }`}
+          >
           <Wind className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
           <span>{t("layer_wind")}</span>
           <span
@@ -834,21 +842,22 @@ export const Map: React.FC<MapProps> = ({
               } mt-0.5`}
             />
           </span>
-        </button>
+          </button>
+        </Tooltip>
 
         {/* ROADMAP IDEA 1: DGF Watchtowers Layer Toggle Switch */}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={showDgfVigies}
-          onClick={() => setShowDgfVigies(!showDgfVigies)}
-          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-            showDgfVigies
-              ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-          }`}
-          title={t("toggle_vigies_title")}
-        >
+        <Tooltip content={t("tooltip_layer_vigies")} position="bottom">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showDgfVigies}
+            onClick={() => setShowDgfVigies(!showDgfVigies)}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              showDgfVigies
+                ? "bg-slate-800 border-slate-600 text-white shadow-sm"
+                : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+            }`}
+          >
           <Radio className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
           <span>{t("layer_vigies")}</span>
           <span
@@ -863,21 +872,22 @@ export const Map: React.FC<MapProps> = ({
               } mt-0.5`}
             />
           </span>
-        </button>
+          </button>
+        </Tooltip>
 
         {/* ROADMAP IDEA 3: Sirocco Mountain Pass Corridors Toggle Switch */}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={showSiroccoCorridors}
-          onClick={() => setShowSiroccoCorridors(!showSiroccoCorridors)}
-          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-            showSiroccoCorridors
-              ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-          }`}
-          title={t("toggle_sirocco_title")}
-        >
+        <Tooltip content={t("tooltip_layer_sirocco")} position="bottom">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showSiroccoCorridors}
+            onClick={() => setShowSiroccoCorridors(!showSiroccoCorridors)}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              showSiroccoCorridors
+                ? "bg-slate-800 border-slate-600 text-white shadow-sm"
+                : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+            }`}
+          >
           <Wind className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
           <span>{t("layer_sirocco")}</span>
           <span
@@ -892,21 +902,22 @@ export const Map: React.FC<MapProps> = ({
               } mt-0.5`}
             />
           </span>
-        </button>
+          </button>
+        </Tooltip>
 
         {/* ROADMAP IDEA 4: FLIR Thermal Drone Patrols Toggle Switch */}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={showDronePatrols}
-          onClick={() => setShowDronePatrols(!showDronePatrols)}
-          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-            showDronePatrols
-              ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-              : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-          }`}
-          title={t("toggle_drones_title")}
-        >
+        <Tooltip content={t("tooltip_layer_drones")} position="bottom">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showDronePatrols}
+            onClick={() => setShowDronePatrols(!showDronePatrols)}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              showDronePatrols
+                ? "bg-slate-800 border-slate-600 text-white shadow-sm"
+                : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+            }`}
+          >
           <Plane className="w-3.5 h-3.5 text-violet-400 shrink-0" aria-hidden="true" />
           <span>{t("layer_drones")}</span>
           <span
@@ -921,19 +932,22 @@ export const Map: React.FC<MapProps> = ({
               } mt-0.5`}
             />
           </span>
-        </button>
+          </button>
+        </Tooltip>
 
         {/* FEATURE 8: Offline Map Download Button & Dropdown */}
         <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowOfflineMenu(!showOfflineMenu)}
-            aria-expanded={showOfflineMenu}
-            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-          >
-            <Download className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
-            <span>{t("offline_map_btn")}</span>
-          </button>
+          <Tooltip content={t("tooltip_offline_map")} position="bottom">
+            <button
+              type="button"
+              onClick={() => setShowOfflineMenu(!showOfflineMenu)}
+              aria-expanded={showOfflineMenu}
+              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
+              <span>{t("offline_map_btn")}</span>
+            </button>
+          </Tooltip>
 
           {showOfflineMenu && (
             <div className="absolute left-0 mt-1.5 w-72 bg-slate-900 border border-slate-700 rounded-lg p-2 z-50 space-y-1.5 text-xs shadow-lg">

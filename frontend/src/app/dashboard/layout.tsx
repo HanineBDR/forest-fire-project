@@ -45,6 +45,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { OnboardingGuide } from "@/components/OnboardingGuide";
+import { Tooltip } from "@/components/Tooltip";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -208,6 +209,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   interface HeaderNavItem {
     href: string;
     label: string;
+    tooltipKey?: string;
     icon: any;
     show: boolean;
     dataTour?: string;
@@ -215,10 +217,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // PRIMARY OPERATIONAL FUNCTIONS (directly visible on the navigation bar)
   const primaryNavItems: HeaderNavItem[] = [
-    { href: "/dashboard", label: t("nav_tactical_map") || "Tactical Map", icon: Map, dataTour: "nav-map", show: true },
-    { href: "/dashboard/alerts", label: t("nav_alerts") || "Active Alerts", icon: AlertTriangle, dataTour: "nav-alerts", show: true },
-    { href: "/analytics", label: t("nav_analytics") || "ML Analytics", icon: BarChart3, dataTour: "nav-analytics", show: permissions?.canViewAnalytics ?? false },
-    { href: "/dashboard/notifications", label: t("nav_intercom_alerts") || "Intercom", icon: Radio, dataTour: "nav-intercom", show: true },
+    { href: "/dashboard", label: t("nav_tactical_map") || "Tactical Map", tooltipKey: "tooltip_nav_tactical_map", icon: Map, dataTour: "nav-map", show: true },
+    { href: "/dashboard/alerts", label: t("nav_alerts") || "Active Alerts", tooltipKey: "tooltip_nav_alerts", icon: AlertTriangle, dataTour: "nav-alerts", show: true },
+    { href: "/analytics", label: t("nav_analytics") || "ML Analytics", tooltipKey: "tooltip_nav_analytics", icon: BarChart3, dataTour: "nav-analytics", show: permissions?.canViewAnalytics ?? false },
+    { href: "/dashboard/notifications", label: t("nav_intercom_alerts") || "Intercom", tooltipKey: "tooltip_nav_intercom", icon: Radio, dataTour: "nav-intercom", show: true },
   ].filter((item) => item.show);
 
   // SECONDARY / EXTENDED OPERATIONAL FUNCTIONS (accessible via the "More" dropdown menu)
@@ -276,18 +278,19 @@ alt="INKAD Logo"
 
             {/* Interactive Command Panel Switcher */}
             <div ref={roleDropdownRef} data-tour="roles" className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsRoleSwitcherOpen(!isRoleSwitcherOpen)}
-                aria-haspopup="menu"
-                aria-expanded={isRoleSwitcherOpen}
-                className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${badgeInfo.colorClass} hover:brightness-110`}
-                title={t("switch_command_title")}
-              >
+              <Tooltip content={t("tooltip_role_switcher")} position="bottom">
+                <button
+                  type="button"
+                  onClick={() => setIsRoleSwitcherOpen(!isRoleSwitcherOpen)}
+                  aria-haspopup="menu"
+                  aria-expanded={isRoleSwitcherOpen}
+                  className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${badgeInfo.colorClass} hover:brightness-110`}
+                >
                 <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
                 <span className="max-w-[90px] sm:max-w-[130px] xl:max-w-[160px] truncate">{cleanRoleText}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isRoleSwitcherOpen ? "rotate-180" : ""}`} />
-              </button>
+                </button>
+              </Tooltip>
 
               {isRoleSwitcherOpen && (
                 <div 
@@ -344,43 +347,45 @@ alt="INKAD Logo"
               const Icon = item.icon;
               const active = pathname === item.href;
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  data-tour={item.dataTour}
-                  aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
-                    active
-                      ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
-                      : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
-                  <span>{item.label}</span>
-                </Link>
+                <Tooltip key={item.href} content={item.tooltipKey ? t(item.tooltipKey) : item.label} position="bottom">
+                  <Link
+                    href={item.href}
+                    data-tour={item.dataTour}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
+                      active
+                        ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                    <span>{item.label}</span>
+                  </Link>
+                </Tooltip>
               );
             })}
 
             {/* "More" (Plus / المزيد) Dropdown Menu */}
             {moreNavItems.length > 0 && (
               <div ref={moreDropdownRef} className="relative shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIsMoreOpen(!isMoreOpen)}
-                  aria-haspopup="menu"
-                  aria-expanded={isMoreOpen}
-                  data-tour="nav-more" aria-label={t("nav_operational_tools")}
-                  className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
-                    isMoreOpen || isMoreActive
-                      ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
-                      : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
-                  }`}
-                  title={t("nav_more") || "More"}
-                >
-                  <MoreHorizontal className={`w-3.5 h-3.5 shrink-0 ${isMoreActive ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
-                  <span>{t("nav_more") || "More"}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isMoreOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-                </button>
+                <Tooltip content={t("tooltip_nav_more")} position="bottom">
+                  <button
+                    type="button"
+                    onClick={() => setIsMoreOpen(!isMoreOpen)}
+                    aria-haspopup="menu"
+                    aria-expanded={isMoreOpen}
+                    data-tour="nav-more" aria-label={t("nav_operational_tools")}
+                    className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
+                      isMoreOpen || isMoreActive
+                        ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
+                    }`}
+                  >
+                    <MoreHorizontal className={`w-3.5 h-3.5 shrink-0 ${isMoreActive ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                    <span>{t("nav_more") || "More"}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isMoreOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+                  </button>
+                </Tooltip>
 
                 {isMoreOpen && (
                   <div 
@@ -427,16 +432,17 @@ alt="INKAD Logo"
           {/* Right: Help Button + Notification Bell + Language Selector + User Profile + Mobile Hamburger */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Interactive Guide / Help Button */}
-            <button
-              type="button"
-              data-tour="help-btn"
-              onClick={handleStartTour}
-              aria-label={t("tour_open_guide_tooltip") || "Start Interactive Guide"}
-              title={t("tour_open_guide_tooltip") || "Start Interactive Guide"}
-              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-slate-800 bg-slate-900/90 text-slate-400 hover:text-emerald-400 hover:border-emerald-700/60 hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 shrink-0"
-            >
-              <HelpCircle className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-            </button>
+            <Tooltip content={t("tooltip_help_button")} position="bottom">
+              <button
+                type="button"
+                data-tour="help-btn"
+                onClick={handleStartTour}
+                aria-label={t("tour_open_guide_tooltip") || "Start Interactive Guide"}
+                className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-slate-800 bg-slate-900/90 text-slate-400 hover:text-emerald-400 hover:border-emerald-700/60 hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 shrink-0"
+              >
+                <HelpCircle className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+              </button>
+            </Tooltip>
 
             {/* Real-time Notification Bell */}
             <div data-tour="bell" className="shrink-0"><NotificationBell /></div>
@@ -446,18 +452,19 @@ alt="INKAD Logo"
 
             {/* Profile & Secondary Settings Dropdown */}
             <div ref={profileDropdownRef} data-tour="profile" className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                aria-haspopup="menu"
-                aria-expanded={isProfileOpen}
-                aria-label={t("nav_system_supervision")}
-                className={`flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-                  isProfileOpen || pathname === "/dashboard/profile"
-                    ? "bg-slate-800 border-slate-700 text-white"
-                    : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/70"
-                }`}
-              >
+              <Tooltip content={t("tooltip_profile")} position="bottom">
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  aria-haspopup="menu"
+                  aria-expanded={isProfileOpen}
+                  aria-label={t("nav_system_supervision")}
+                  className={`flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                    isProfileOpen || pathname === "/dashboard/profile"
+                      ? "bg-slate-800 border-slate-700 text-white"
+                      : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/70"
+                  }`}
+                >
                 <div className="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
                   {user.avatar ? (
                     <img src={user.avatar} alt={cleanUserName} className="w-full h-full object-cover" />
@@ -472,7 +479,8 @@ alt="INKAD Logo"
                   </div>
                 </div>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isProfileOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-              </button>
+                </button>
+              </Tooltip>
 
               {/* Dropdown Menu */}
               {isProfileOpen && (

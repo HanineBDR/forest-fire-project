@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { SimulationResult, SimulationStep } from "@/types";
 import { Play, Pause, Clock } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { Tooltip } from "@/components/Tooltip";
 
 interface SimulationControlsProps {
   simulation: SimulationResult | null;
@@ -51,16 +52,17 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsPlaying(!isPlaying)}
-          aria-label={isPlaying ? "Pause simulation playback" : "Start simulation playback"}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
-            isPlaying
-              ? "bg-amber-600 hover:bg-amber-500 text-white"
-              : "bg-ember-600 hover:bg-ember-500 text-white"
-          }`}
-        >
+        <Tooltip content={t("tooltip_sim_play_pause")} position="top">
+          <button
+            type="button"
+            onClick={() => setIsPlaying(!isPlaying)}
+            aria-label={isPlaying ? "Pause simulation playback" : "Start simulation playback"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
+              isPlaying
+                ? "bg-amber-600 hover:bg-amber-500 text-white"
+                : "bg-ember-600 hover:bg-ember-500 text-white"
+            }`}
+          >
           {isPlaying ? (
             <>
               <Pause className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
@@ -72,7 +74,8 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               <span>{t("sim_play")}</span>
             </>
           )}
-        </button>
+          </button>
+        </Tooltip>
       </div>
 
       {/* Horizon Selection Buttons */}

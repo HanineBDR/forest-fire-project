@@ -28,6 +28,7 @@ import {
   translateNotificationMessage,
 } from "@/lib/notificationTypes";
 import { useLanguage } from "@/context/LanguageContext";
+import { Tooltip } from "@/components/Tooltip";
 
 // Helper to extract telemetry chips from raw notification messages to prevent RTL text corruption
 interface TelemetryTags {
@@ -126,26 +127,28 @@ export function NotificationBell() {
 
   return (
     <div ref={dropdownRef} className="relative">
-      <button
-        type="button"
-        id="notification-bell-btn"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-        aria-label={`${t("notif_center_title")} (${unreadCount})`}
-        className={`relative flex items-center justify-center w-9 h-9 rounded-xl border text-xs transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-          isOpen
-            ? "bg-slate-800 border-slate-600 text-white shadow-md"
-            : "bg-slate-900/90 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80"
-        }`}
-      >
-        <Bell className="w-4 h-4 text-slate-300" aria-hidden="true" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-600 rounded-full border-2 border-slate-950 shadow-sm animate-pulse">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-      </button>
+      <Tooltip content={t("tooltip_notification_bell")} position="bottom">
+        <button
+          type="button"
+          id="notification-bell-btn"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          aria-haspopup="true"
+          aria-label={`${t("notif_center_title")} (${unreadCount})`}
+          className={`relative flex items-center justify-center w-9 h-9 rounded-xl border text-xs transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+            isOpen
+              ? "bg-slate-800 border-slate-600 text-white shadow-md"
+              : "bg-slate-900/90 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80"
+          }`}
+        >
+          <Bell className="w-4 h-4 text-slate-300" aria-hidden="true" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-600 rounded-full border-2 border-slate-950 shadow-sm animate-pulse">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </button>
+      </Tooltip>
 
       {isOpen && (
         <div

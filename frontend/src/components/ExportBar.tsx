@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { FileSpreadsheet, FileText, FileJson, Table, Loader2 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { Tooltip } from "@/components/Tooltip";
 import {
   exportToCSV,
   exportToJSON,
@@ -79,64 +80,72 @@ export const ExportBar: React.FC<ExportBarProps> = ({
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {/* CSV */}
-        <button
-          type="button"
-          disabled={loadingType !== null}
-          onClick={() => handleExport("csv")}
-          className="bg-[#0A4D3C] text-[#F5F1E8] rounded-[16px] p-[14px] text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-opacity duration-150 flex items-center justify-center gap-2 disabled:opacity-60 font-sans cursor-pointer"
-        >
-          {loadingType === "csv" ? (
-            <Loader2 className="w-4 h-4 animate-spin text-[#F5F1E8]" />
-          ) : (
-            <Table className="w-4 h-4 text-[#F5F1E8]" />
-          )}
-          <span>{t("export_csv")}</span>
-        </button>
+        <Tooltip content={t("tooltip_export_csv")} position="top">
+          <button
+            type="button"
+            disabled={loadingType !== null}
+            onClick={() => handleExport("csv")}
+            className="w-full bg-[#0A4D3C] text-[#F5F1E8] rounded-[16px] p-[14px] text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-opacity duration-150 flex items-center justify-center gap-2 disabled:opacity-60 font-sans cursor-pointer"
+          >
+            {loadingType === "csv" ? (
+              <Loader2 className="w-4 h-4 animate-spin text-[#F5F1E8]" />
+            ) : (
+              <Table className="w-4 h-4 text-[#F5F1E8]" />
+            )}
+            <span>{t("export_csv")}</span>
+          </button>
+        </Tooltip>
 
         {/* PDF */}
-        <button
-          type="button"
-          disabled={loadingType !== null}
-          onClick={() => handleExport("pdf")}
-          className="bg-[#0A4D3C] text-[#F5F1E8] rounded-[16px] p-[14px] text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-opacity duration-150 flex items-center justify-center gap-2 disabled:opacity-60 font-sans cursor-pointer"
-        >
-          {loadingType === "pdf" ? (
-            <Loader2 className="w-4 h-4 animate-spin text-[#F5F1E8]" />
-          ) : (
-            <FileText className="w-4 h-4 text-[#F5F1E8]" />
-          )}
-          <span>{t("export_pdf")}</span>
-        </button>
+        <Tooltip content={t("tooltip_export_pdf")} position="top">
+          <button
+            type="button"
+            disabled={loadingType !== null}
+            onClick={() => handleExport("pdf")}
+            className="w-full bg-[#0A4D3C] text-[#F5F1E8] rounded-[16px] p-[14px] text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-opacity duration-150 flex items-center justify-center gap-2 disabled:opacity-60 font-sans cursor-pointer"
+          >
+            {loadingType === "pdf" ? (
+              <Loader2 className="w-4 h-4 animate-spin text-[#F5F1E8]" />
+            ) : (
+              <FileText className="w-4 h-4 text-[#F5F1E8]" />
+            )}
+            <span>{t("export_pdf")}</span>
+          </button>
+        </Tooltip>
 
         {/* Excel */}
-        <button
-          type="button"
-          disabled={loadingType !== null}
-          onClick={() => handleExport("excel")}
-          className="bg-[#0A4D3C] text-[#F5F1E8] rounded-[16px] p-[14px] text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-opacity duration-150 flex items-center justify-center gap-2 disabled:opacity-60 font-sans cursor-pointer"
-        >
-          {loadingType === "excel" ? (
-            <Loader2 className="w-4 h-4 animate-spin text-[#F5F1E8]" />
-          ) : (
-            <FileSpreadsheet className="w-4 h-4 text-[#F5F1E8]" />
-          )}
-          <span>{t("export_excel")}</span>
-        </button>
+        <Tooltip content={t("tooltip_export_excel")} position="top">
+          <button
+            type="button"
+            disabled={loadingType !== null}
+            onClick={() => handleExport("excel")}
+            className="w-full bg-[#0A4D3C] text-[#F5F1E8] rounded-[16px] p-[14px] text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-opacity duration-150 flex items-center justify-center gap-2 disabled:opacity-60 font-sans cursor-pointer"
+          >
+            {loadingType === "excel" ? (
+              <Loader2 className="w-4 h-4 animate-spin text-[#F5F1E8]" />
+            ) : (
+              <FileSpreadsheet className="w-4 h-4 text-[#F5F1E8]" />
+            )}
+            <span>{t("export_excel")}</span>
+          </button>
+        </Tooltip>
 
         {/* JSON */}
-        <button
-          type="button"
-          disabled={loadingType !== null}
-          onClick={() => handleExport("json")}
-          className="bg-[#0A4D3C] text-[#F5F1E8] rounded-[16px] p-[14px] text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-opacity duration-150 flex items-center justify-center gap-2 disabled:opacity-60 font-sans cursor-pointer"
-        >
-          {loadingType === "json" ? (
-            <Loader2 className="w-4 h-4 animate-spin text-[#F5F1E8]" />
-          ) : (
-            <FileJson className="w-4 h-4 text-[#F5F1E8]" />
-          )}
-          <span>{t("export_json")}</span>
-        </button>
+        <Tooltip content={t("tooltip_export_json")} position="top">
+          <button
+            type="button"
+            disabled={loadingType !== null}
+            onClick={() => handleExport("json")}
+            className="w-full bg-[#0A4D3C] text-[#F5F1E8] rounded-[16px] p-[14px] text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-opacity duration-150 flex items-center justify-center gap-2 disabled:opacity-60 font-sans cursor-pointer"
+          >
+            {loadingType === "json" ? (
+              <Loader2 className="w-4 h-4 animate-spin text-[#F5F1E8]" />
+            ) : (
+              <FileJson className="w-4 h-4 text-[#F5F1E8]" />
+            )}
+            <span>{t("export_json")}</span>
+          </button>
+        </Tooltip>
       </div>
     </div>
   );

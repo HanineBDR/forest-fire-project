@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { PredictionResult, WeatherData } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
+import { Tooltip } from "@/components/Tooltip";
 import {
   Thermometer,
   Wind,
@@ -444,11 +445,12 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
 
       {/* FEATURE 3: OFFICIAL ZONE REPORT PDF BUTTON */}
       <div className="pt-1">
-        <button
-          onClick={onExportZoneReport}
-          disabled={isExportingReport}
-          className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition"
-        >
+        <Tooltip content={t("tooltip_export_report")} position="top">
+          <button
+            onClick={onExportZoneReport}
+            disabled={isExportingReport}
+            className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition"
+          >
           {isExportingReport ? (
             <>
               <div className="w-3.5 h-3.5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin" />
@@ -460,28 +462,33 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
               <span>{t("export_zone_report")} (PDF)</span>
             </>
           )}
-        </button>
+          </button>
+        </Tooltip>
       </div>
 
       {/* What-If Simulation Accordion */}
       <div className="border-t border-slate-800 pt-3">
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => setShowWhatIf(!showWhatIf)}
-            className="flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition rounded"
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>{showWhatIf ? t("hide_what_if") : t("what_if_simulator")}</span>
-          </button>
+          <Tooltip content={t("tooltip_what_if")} position="top">
+            <button
+              onClick={() => setShowWhatIf(!showWhatIf)}
+              className="flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition rounded"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>{showWhatIf ? t("hide_what_if") : t("what_if_simulator")}</span>
+            </button>
+          </Tooltip>
 
           {isCustomOverrideActive && (
-            <button
-              onClick={onResetToLiveWeather}
-              className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-white transition rounded"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>{t("reset_to_live")}</span>
-            </button>
+            <Tooltip content={t("tooltip_reset_weather")} position="top">
+              <button
+                onClick={onResetToLiveWeather}
+                className="flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-white transition rounded"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>{t("reset_to_live")}</span>
+              </button>
+            </Tooltip>
           )}
         </div>
 

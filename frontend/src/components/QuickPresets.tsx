@@ -3,6 +3,7 @@
 import React from "react";
 import { RegionPreset } from "@/types";
 import { MapPin, Info } from "lucide-react";
+import { Tooltip } from "@/components/Tooltip";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface QuickPresetsProps {
@@ -88,21 +89,16 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
 
         {/* Visual Legend for Wilaya numbers */}
         <div className="flex items-center gap-2 text-xs">
-          <div 
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/90 border border-slate-700/80 text-slate-300"
-            title={
-              language === "ar"
-                ? "الرقم المشار إليه في أعلى اليمين يمثل الرمز الإداري للولاية (مثلاً: 15 = تيزي وزو، 06 = بجاية، 09 = البليدة)"
-                : language === "en"
-                ? "The number in the top right of each card corresponds to the official Wilaya code (e.g., 15 = Tizi Ouzou, 06 = Bejaia, 09 = Blida, 36 = El Tarf)"
-                : "Le numéro indiqué en haut à droite de chaque carte correspond au matricule officiel de la Wilaya (ex: 15 = Tizi Ouzou, 06 = Béjaïa, 09 = Blida, 36 = El Tarf)"
-            }
-          >
-            <Info className="w-3.5 h-3.5 text-red-400 shrink-0" aria-hidden="true" />
-            <span className="text-slate-400">{t("legend_title")}</span>
-            <span className="font-mono text-white font-semibold">[W. N°]</span>
-            <span className="text-slate-400 font-normal">{t("legend_wilaya_code")}</span>
-          </div>
+          <Tooltip content={t("tooltip_legend_info")} position="top">
+            <div 
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/90 border border-slate-700/80 text-slate-300 cursor-help"
+            >
+              <Info className="w-3.5 h-3.5 text-red-400 shrink-0" aria-hidden="true" />
+              <span className="text-slate-400">{t("legend_title")}</span>
+              <span className="font-mono text-white font-semibold">[W. N°]</span>
+              <span className="text-slate-400 font-normal">{t("legend_wilaya_code")}</span>
+            </div>
+          </Tooltip>
 
           <span className="text-[11px] text-slate-400 hidden md:inline font-medium">
             {t("click_to_inspect")}
