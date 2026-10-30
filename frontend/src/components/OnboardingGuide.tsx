@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Shield,
   BarChart3,
@@ -31,6 +31,7 @@ import {
   Layers,
   Camera,
   History,
+  Search,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { getStoredUser, UserRole } from "@/lib/auth";
@@ -49,10 +50,16 @@ interface TutorialDef {
   id: string;
   titleKey: string;
   descKey: string;
-  category: "operational" | "admin";
+  category: "field" | "admin";
   duration: number; // in minutes
   roles: UserRole[];
   icon: React.ComponentType<{ className?: string }>;
+  themeColor: {
+    bg: string;
+    border: string;
+    text: string;
+    badge: string;
+  };
   steps: TutorialStep[];
 }
 
@@ -60,51 +67,78 @@ export const OnboardingGuide: React.FC = () => {
   const { t, isRTL, language } = useLanguage();
   const { showToast } = useNotifications();
   const pathname = usePathname();
-  const router = useRouter();
 
-  // Dialog & Active State
+  // State
   const [mounted, setMounted] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>("CIVIL_PROTECTION");
+  const [userId, setUserId] = useState<string>("default");
+
+  // Modal & Tutorial state
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
   const [activeTutorial, setActiveTutorial] = useState<TutorialDef | null>(null);
   const [isFullTourActive, setIsFullTourActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
-  const [userRole, setUserRole] = useState<UserRole>("CIVIL_PROTECTION");
-  const [activeTab, setActiveTab] = useState<"all" | "operational" | "admin">("all");
-  
-  // Interactive spotlight state
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const [wrongClickShake, setWrongClickShake] = useState(false);
-  const [actionSuccessPulse, setActionSuccessPulse] = useState(false);
-  const [completedTutorials, setCompletedTutorials] = useState<string[]>([]);
 
-  // Load user role and completed tutorials from localStorage
+  // Search & Filtering
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<"all" | "field" | "admin">("all");
+
+  // Progress Tracking in LocalStorage
+  const [completedTutorials, setCompletedTutorials] = useState<string[]>([]);
+  const [hasCompletedFullTour, setHasCompletedFullTour] = useState(false);
+
+  // Interactive Spotlight & Target positioning
+  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [shakeWarning, setShakeWarning] = useState(false);
+
+  // Load user info & saved progress
   useEffect(() => {
     setMounted(true);
     const u = getStoredUser();
-    if (u?.role) {
-      setUserRole(u.role);
-    }
+    const effectiveRole = u?.role || "CIVIL_PROTECTION";
+    const effectiveId = u?.id || effectiveRole.toLowerCase();
+    setUserRole(effectiveRole);
+    setUserId(effectiveId);
+
+    // Load completed tutorials for this specific user
     try {
-      const stored = localStorage.getItem("inkad_completed_tutorials");
-      if (stored) {
-        setCompletedTutorials(JSON.parse(stored));
+      const storageKey = `completed_tutorials_${effectiveId}`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        setCompletedTutorials(JSON.parse(saved));
       }
-    } catch {
-      // storage unavailable
+      const tourSaved = localStorage.getItem(`tour_completed_${effectiveId}`);
+      if (tourSaved === "true") {
+        setHasCompletedFullTour(true);
+      }
+    } catch (e) {
+      console.error("Error reading tutorial progress from localStorage", e);
     }
   }, []);
 
-  // Listen for custom trigger events from the header Help button
+  // Listen for role updates or custom tour triggers from header / buttons
   useEffect(() => {
     const handleUserUpdate = (e: any) => {
       const u = e.detail || getStoredUser();
-      if (u?.role) setUserRole(u.role);
+      if (u?.role) {
+        setUserRole(u.role);
+        const effectiveId = u.id || u.role.toLowerCase();
+        setUserId(effectiveId);
+        try {
+          const saved = localStorage.getItem(`completed_tutorials_${effectiveId}`);
+          setCompletedTutorials(saved ? JSON.parse(saved) : []);
+          const tourSaved = localStorage.getItem(`tour_completed_${effectiveId}`);
+          setHasCompletedFullTour(tourSaved === "true");
+        } catch {
+          setCompletedTutorials([]);
+        }
+      }
     };
 
     const handleStartTour = (e: any) => {
       const explicitRole = e?.detail?.role || getStoredUser()?.role || userRole;
       if (explicitRole) setUserRole(explicitRole);
-      
+
       const specificTutId = e?.detail?.tutorialId;
       if (specificTutId) {
         const found = allTutorials.find((tut) => tut.id === specificTutId);
@@ -113,7 +147,7 @@ export const OnboardingGuide: React.FC = () => {
           return;
         }
       }
-      
+
       // Default: Open the Help Center Catalog
       setIsHelpCenterOpen(true);
     };
@@ -137,15 +171,21 @@ export const OnboardingGuide: React.FC = () => {
   // Role-Aware Tutorial Definitions
   // -------------------------------------------------------------
   const allTutorials: TutorialDef[] = useMemo(() => [
-    // 1. Tactical Map (All Roles)
+    // 1. Tactical Map (All Roles: ADMIN, CIVIL_PROTECTION, FOREST_GUARD)
     {
       id: "tactical_map",
       titleKey: "tut_map_title",
       descKey: "tut_map_desc",
-      category: "operational",
+      category: "field",
       duration: 3,
       roles: ["ADMIN", "CIVIL_PROTECTION", "FOREST_GUARD"],
       icon: Map,
+      themeColor: {
+        bg: "bg-emerald-950/60",
+        border: "border-emerald-700/60",
+        text: "text-emerald-400",
+        badge: "bg-emerald-950/80 border-emerald-800 text-emerald-300",
+      },
       steps: [
         {
           id: "map_surface",
@@ -178,49 +218,21 @@ export const OnboardingGuide: React.FC = () => {
       ],
     },
 
-    // 2. Language & Settings (All Roles)
-    {
-      id: "settings_profile",
-      titleKey: "tut_settings_title",
-      descKey: "tut_settings_desc",
-      category: "operational",
-      duration: 2,
-      roles: ["ADMIN", "CIVIL_PROTECTION", "FOREST_GUARD"],
-      icon: Sliders,
-      steps: [
-        {
-          id: "lang_switcher",
-          target: '[data-tour="lang-switcher"]',
-          titleKey: "tut_settings_s1_title",
-          descKey: "tut_settings_s1_desc",
-          hintKey: "tut_settings_s1_hint",
-        },
-        {
-          id: "profile_avatar",
-          target: '[data-tour="profile"]',
-          titleKey: "tut_settings_s2_title",
-          descKey: "tut_settings_s2_desc",
-          hintKey: "tut_settings_s2_hint",
-        },
-        {
-          id: "notif_bell",
-          target: '[data-tour="bell"]',
-          titleKey: "tut_settings_s3_title",
-          descKey: "tut_settings_s3_desc",
-          hintKey: "tut_settings_s3_hint",
-        },
-      ],
-    },
-
-    // 3. Dispatch Alert: SMS / Email (Civil Protection & Forest Guard & Admin)
+    // 2. Alert Dispatch: SMS / Email (ADMIN & CIVIL_PROTECTION ONLY)
     {
       id: "dispatch_alert",
       titleKey: "tut_dispatch_title",
       descKey: "tut_dispatch_desc",
-      category: "operational",
+      category: "field",
       duration: 3,
-      roles: ["CIVIL_PROTECTION", "FOREST_GUARD", "ADMIN"],
+      roles: ["CIVIL_PROTECTION", "ADMIN"],
       icon: Radio,
+      themeColor: {
+        bg: "bg-red-950/60",
+        border: "border-red-700/60",
+        text: "text-red-400",
+        badge: "bg-red-950/80 border-red-800 text-red-300",
+      },
       steps: [
         {
           id: "active_alerts",
@@ -248,15 +260,21 @@ export const OnboardingGuide: React.FC = () => {
       ],
     },
 
-    // 4. Report Citizen Signal (Civil Protection & Forest Guard & Admin)
+    // 3. Citizen Signals & Email Reports (ADMIN & CIVIL_PROTECTION ONLY)
     {
       id: "citizen_signal",
       titleKey: "tut_citizen_title",
       descKey: "tut_citizen_desc",
-      category: "operational",
+      category: "field",
       duration: 3,
-      roles: ["CIVIL_PROTECTION", "FOREST_GUARD", "ADMIN"],
+      roles: ["CIVIL_PROTECTION", "ADMIN"],
       icon: Camera,
+      themeColor: {
+        bg: "bg-amber-950/60",
+        border: "border-amber-700/60",
+        text: "text-amber-400",
+        badge: "bg-amber-950/80 border-amber-800 text-amber-300",
+      },
       steps: [
         {
           id: "more_menu",
@@ -284,7 +302,49 @@ export const OnboardingGuide: React.FC = () => {
       ],
     },
 
-    // 5. AI Model Health (ADMIN ONLY)
+    // 4. IoT Vigies & Thermal Drones (ADMIN & FOREST_GUARD ONLY)
+    {
+      id: "iot_drones",
+      titleKey: "tut_iot_title",
+      descKey: "tut_iot_desc",
+      category: "field",
+      duration: 3,
+      roles: ["FOREST_GUARD", "ADMIN"],
+      icon: Plane,
+      themeColor: {
+        bg: "bg-cyan-950/60",
+        border: "border-cyan-700/60",
+        text: "text-cyan-400",
+        badge: "bg-cyan-950/80 border-cyan-800 text-cyan-300",
+      },
+      steps: [
+        {
+          id: "more_tools",
+          target: '[data-tour="nav-more"]',
+          fallbackTarget: '[data-tour="nav"]',
+          titleKey: "tut_iot_s1_title",
+          descKey: "tut_iot_s1_desc",
+          hintKey: "tut_iot_s1_hint",
+        },
+        {
+          id: "iot_vigies",
+          target: '[data-tour="iot"]',
+          fallbackTarget: '[data-tour="nav-more"]',
+          titleKey: "tut_iot_s2_title",
+          descKey: "tut_iot_s2_desc",
+          hintKey: "tut_iot_s2_hint",
+        },
+        {
+          id: "massif_telemetry",
+          target: '[data-tour="status-bar"]',
+          titleKey: "tut_iot_s3_title",
+          descKey: "tut_iot_s3_desc",
+          hintKey: "tut_iot_s3_hint",
+        },
+      ],
+    },
+
+    // 5. AI Model Health & Telemetry (ADMIN ONLY)
     {
       id: "ai_model_health",
       titleKey: "tut_ai_title",
@@ -293,6 +353,12 @@ export const OnboardingGuide: React.FC = () => {
       duration: 4,
       roles: ["ADMIN"],
       icon: Activity,
+      themeColor: {
+        bg: "bg-purple-950/60",
+        border: "border-purple-700/60",
+        text: "text-purple-400",
+        badge: "bg-purple-950/80 border-purple-800 text-purple-300",
+      },
       steps: [
         {
           id: "ml_analytics_nav",
@@ -319,7 +385,7 @@ export const OnboardingGuide: React.FC = () => {
       ],
     },
 
-    // 6. User Management & Accreditations (ADMIN ONLY)
+    // 6. User Management & Institutional Accreditations (ADMIN ONLY)
     {
       id: "user_management",
       titleKey: "tut_users_title",
@@ -328,6 +394,12 @@ export const OnboardingGuide: React.FC = () => {
       duration: 3,
       roles: ["ADMIN"],
       icon: Users,
+      themeColor: {
+        bg: "bg-blue-950/60",
+        border: "border-blue-700/60",
+        text: "text-blue-400",
+        badge: "bg-blue-950/80 border-blue-800 text-blue-300",
+      },
       steps: [
         {
           id: "admin_more_nav",
@@ -355,81 +427,156 @@ export const OnboardingGuide: React.FC = () => {
     },
   ], []);
 
-  // Filter tutorials strictly accessible by current user role (RBAC compliance)
-  const accessibleTutorials = useMemo(() => {
+  // -------------------------------------------------------------
+  // STRICT RBAC FILTERING: Remove unauthorized tutorials from DOM
+  // ADMIN -> 6 tutorials
+  // CIVIL_PROTECTION -> 3 tutorials (Map, Alerts, Citizen Reports)
+  // FOREST_GUARD -> 2 tutorials (Map, IoT/Drones)
+  // -------------------------------------------------------------
+  const roleTutorials = useMemo(() => {
     return allTutorials.filter((tut) => tut.roles.includes(userRole));
   }, [allTutorials, userRole]);
 
-  // Tab-filtered list in Help Center
+  // Categories strictly present in the accessible tutorials
+  const availableCategories = useMemo(() => {
+    const cats = new Set(roleTutorials.map((tut) => tut.category));
+    return Array.from(cats);
+  }, [roleTutorials]);
+
+  // Reset category tab to 'all' if active tab becomes unavailable
+  useEffect(() => {
+    if (selectedCategory !== "all" && !availableCategories.includes(selectedCategory)) {
+      setSelectedCategory("all");
+    }
+  }, [availableCategories, selectedCategory]);
+
+  // Dynamic category filtering
+  const categoryTutorials = useMemo(() => {
+    if (selectedCategory === "all") return roleTutorials;
+    return roleTutorials.filter((tut) => tut.category === selectedCategory);
+  }, [roleTutorials, selectedCategory]);
+
+  // Dynamic search query filtering (case-insensitive across translated title and description)
   const displayedTutorials = useMemo(() => {
-    if (activeTab === "operational") {
-      return accessibleTutorials.filter((t) => t.category === "operational");
+    if (!searchQuery.trim()) return categoryTutorials;
+    const q = searchQuery.toLowerCase().trim();
+    return categoryTutorials.filter((tut) => {
+      const title = (t(tut.titleKey) || "").toLowerCase();
+      const desc = (t(tut.descKey) || "").toLowerCase();
+      return title.includes(q) || desc.includes(q);
+    });
+  }, [categoryTutorials, searchQuery, t]);
+
+  // Progress metrics
+  const completedCount = useMemo(() => {
+    return roleTutorials.filter((tut) => completedTutorials.includes(tut.id)).length;
+  }, [roleTutorials, completedTutorials]);
+
+  const totalCount = roleTutorials.length;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  // Mark tutorial as completed in LocalStorage
+  const recordTutorialCompletion = useCallback((tutId: string) => {
+    const currentUserId = userId || "default";
+    const storageKey = `completed_tutorials_${currentUserId}`;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      const set = new Set<string>(saved ? JSON.parse(saved) : []);
+      set.add(tutId);
+      const updated = Array.from(set);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+      setCompletedTutorials(updated);
+    } catch (e) {
+      console.error("Failed to save completed tutorial", e);
     }
-    if (activeTab === "admin") {
-      return accessibleTutorials.filter((t) => t.category === "admin");
+  }, [userId]);
+
+  // Mark full tour completed in LocalStorage
+  const recordFullTourCompletion = useCallback(() => {
+    const currentUserId = userId || "default";
+    try {
+      localStorage.setItem(`tour_completed_${currentUserId}`, "true");
+      setHasCompletedFullTour(true);
+      recordTutorialCompletion("full_tour");
+    } catch (e) {
+      console.error("Failed to save full tour completion", e);
     }
-    return accessibleTutorials;
-  }, [accessibleTutorials, activeTab]);
+  }, [userId, recordTutorialCompletion]);
 
   // -------------------------------------------------------------
-  // Full Onboarding Tour Fallback Steps
+  // Full Dashboard Onboarding Tour Steps (Role-Aware)
   // -------------------------------------------------------------
   const fullTourSteps: TutorialStep[] = useMemo(() => {
-    const list: TutorialStep[] = [
+    const steps: TutorialStep[] = [
       {
-        id: "ft_roles",
-        target: '[data-tour="roles"]',
-        titleKey: "tour_step_roles_title",
-        descKey: userRole === "ADMIN" ? "tour_step_roles_desc_admin" : userRole === "CIVIL_PROTECTION" ? "tour_step_roles_desc_protection" : "tour_step_roles_desc_foret",
-        hintKey: "tut_map_s2_hint",
-      },
-      {
-        id: "ft_status",
-        target: '[data-tour="status-bar"]',
-        titleKey: "tour_step_status_bar_title",
-        descKey: "tour_step_status_bar_desc",
-        hintKey: "tut_map_s2_hint",
-      },
-      {
-        id: "ft_massifs",
-        target: '[data-tour="massifs"]',
-        titleKey: "tour_step_massifs_title",
-        descKey: "tour_step_massifs_desc",
-        hintKey: "tut_map_s3_hint",
-      },
-      {
-        id: "ft_map",
-        target: '[data-tour="map"]',
-        titleKey: "tour_step_map_title",
-        descKey: "tour_step_map_desc",
+        id: "tour_brand",
+        target: '[data-tour="brand"]',
+        titleKey: "tour_step_brand_title",
+        descKey: "tour_step_brand_desc",
         hintKey: "tut_map_s1_hint",
       },
       {
-        id: "ft_risk",
+        id: "tour_roles",
+        target: '[data-tour="roles"]',
+        titleKey: "tour_step_roles_title",
+        descKey: "tour_step_roles_desc",
+        hintKey: "tut_settings_s2_hint",
+      },
+      {
+        id: "tour_nav",
+        target: '[data-tour="nav"]',
+        titleKey: "tour_step_nav_title",
+        descKey: "tour_step_nav_desc",
+        hintKey: "tut_dispatch_s1_hint",
+      },
+      {
+        id: "tour_status_bar",
+        target: '[data-tour="status-bar"]',
+        titleKey: "tut_map_s2_title",
+        descKey: "tut_map_s2_desc",
+        hintKey: "tut_map_s2_hint",
+      },
+      {
+        id: "tour_massifs",
+        target: '[data-tour="massifs"]',
+        titleKey: "tut_map_s3_title",
+        descKey: "tut_map_s3_desc",
+        hintKey: "tut_map_s3_hint",
+      },
+      {
+        id: "tour_map",
+        target: '[data-tour="map"]',
+        titleKey: "tut_map_s1_title",
+        descKey: "tut_map_s1_desc",
+        hintKey: "tut_map_s1_hint",
+      },
+      {
+        id: "tour_risk_panel",
         target: '[data-tour="risk-panel"]',
-        titleKey: "tour_step_risk_title",
-        descKey: "tour_step_risk_desc",
+        titleKey: "tut_map_s4_title",
+        descKey: "tut_map_s4_desc",
         hintKey: "tut_map_s4_hint",
       },
       {
-        id: "ft_bell",
+        id: "tour_bell",
         target: '[data-tour="bell"]',
-        titleKey: "tour_step_bell_title",
-        descKey: "tour_step_bell_desc",
+        titleKey: "tut_settings_s3_title",
+        descKey: "tut_settings_s3_desc",
         hintKey: "tut_settings_s3_hint",
       },
       {
-        id: "ft_profile",
+        id: "tour_profile",
         target: '[data-tour="profile"]',
-        titleKey: "tour_step_profile_title",
-        descKey: "tour_step_profile_desc",
+        titleKey: "tut_settings_s2_title",
+        descKey: "tut_settings_s2_desc",
         hintKey: "tut_settings_s2_hint",
       },
     ];
-    return list;
-  }, [userRole]);
 
-  // Active steps array
+    return steps;
+  }, []);
+
+  // Determine active steps list
   const currentStepList: TutorialStep[] = useMemo(() => {
     if (activeTutorial) return activeTutorial.steps;
     if (isFullTourActive) return fullTourSteps;
@@ -438,9 +585,7 @@ export const OnboardingGuide: React.FC = () => {
 
   const currentStep = currentStepList[stepIndex] || null;
 
-  // -------------------------------------------------------------
-  // Measure and Spotlight Target Element
-  // -------------------------------------------------------------
+  // Resolve target element and rect in DOM
   const updateTargetPosition = useCallback(() => {
     if (!currentStep) {
       setTargetRect(null);
@@ -448,71 +593,53 @@ export const OnboardingGuide: React.FC = () => {
     }
 
     let el = document.querySelector(currentStep.target) as HTMLElement | null;
-    if (!el && currentStep.fallbackTarget) {
+    if ((!el || el.offsetParent === null) && currentStep.fallbackTarget) {
       el = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
     }
 
-    if (!el) {
+    if (el) {
+      try {
+        el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      } catch {}
+      const rect = el.getBoundingClientRect();
+      setTargetRect(rect);
+    } else {
       setTargetRect(null);
-      return;
-    }
-
-    const rect = el.getBoundingClientRect();
-    setTargetRect(rect);
-
-    // Scroll smoothly into view if offscreen
-    if (rect.top < 0 || rect.bottom > window.innerHeight) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [currentStep]);
 
   useEffect(() => {
-    if (!currentStep) return;
     updateTargetPosition();
-
-    const handleResize = () => updateTargetPosition();
-    const handleScroll = () => updateTargetPosition();
-
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("resize", updateTargetPosition);
+    window.addEventListener("scroll", updateTargetPosition, true);
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", updateTargetPosition);
+      window.removeEventListener("scroll", updateTargetPosition, true);
     };
-  }, [currentStep, updateTargetPosition]);
+  }, [updateTargetPosition]);
 
-  // -------------------------------------------------------------
-  // Interactive Action Detection ("Try it now" click listener)
-  // -------------------------------------------------------------
+  // "Try it now" Action: Click on highlighted element automatically advances to next step
   useEffect(() => {
     if (!currentStep) return;
 
     let el = document.querySelector(currentStep.target) as HTMLElement | null;
-    if (!el && currentStep.fallbackTarget) {
+    if ((!el || el.offsetParent === null) && currentStep.fallbackTarget) {
       el = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
     }
 
     if (!el) return;
 
-    const handleActionClick = () => {
-      setActionSuccessPulse(true);
-      setTimeout(() => setActionSuccessPulse(false), 500);
-
-      // Automatically advance to the next step when clicked
-      setTimeout(() => {
-        handleNext();
-      }, 350);
+    const handleTargetClick = () => {
+      handleNext();
     };
 
-    el.addEventListener("click", handleActionClick, { once: true });
+    el.addEventListener("click", handleTargetClick, { once: true });
     return () => {
-      el?.removeEventListener("click", handleActionClick);
+      el?.removeEventListener("click", handleTargetClick);
     };
   }, [currentStep, stepIndex]);
 
-  // -------------------------------------------------------------
-  // Navigation Controls
-  // -------------------------------------------------------------
+  // Navigation handlers
   const handleNext = () => {
     if (stepIndex < currentStepList.length - 1) {
       setStepIndex((prev) => prev + 1);
@@ -527,45 +654,44 @@ export const OnboardingGuide: React.FC = () => {
     }
   };
 
-  const finishTutorial = () => {
-    if (activeTutorial) {
-      const tutId = activeTutorial.id;
-      const updated = Array.from(new Set([...completedTutorials, tutId]));
-      setCompletedTutorials(updated);
-      try {
-        localStorage.setItem("inkad_completed_tutorials", JSON.stringify(updated));
-      } catch {
-        // storage unavailable
-      }
+  const handleSkip = () => {
+    setActiveTutorial(null);
+    setIsFullTourActive(false);
+    setStepIndex(0);
+  };
 
-      showToast({
-        title: t("tutorial_toast_completed_title"),
-        message: t("tutorial_toast_completed_msg", { name: t(activeTutorial.titleKey) }),
-        risk_level: "low",
-      });
+  const finishTutorial = () => {
+    const completedName = activeTutorial 
+      ? t(activeTutorial.titleKey) 
+      : t("help_center_general_tour_title");
+
+    if (activeTutorial) {
+      recordTutorialCompletion(activeTutorial.id);
+    } else if (isFullTourActive) {
+      recordFullTourCompletion();
     }
 
     setActiveTutorial(null);
     setIsFullTourActive(false);
     setStepIndex(0);
-    setTargetRect(null);
+
+    // Trigger success notification toast via NotificationContext
+    showToast({
+      title: t("tutorial_toast_completed_title"),
+      message: t("tutorial_toast_completed_msg", { name: completedName }),
+      risk_level: "low",
+      sender_role: "INKAD System",
+    });
   };
 
-  const handleSkip = () => {
-    setActiveTutorial(null);
-    setIsFullTourActive(false);
-    setStepIndex(0);
-    setTargetRect(null);
-  };
-
-  // Wrong click prompt
-  const handleOverlayWrongClick = (e: React.MouseEvent) => {
+  // Wrong-click shake handler
+  const handleWrongClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setWrongClickShake(true);
-    setTimeout(() => setWrongClickShake(false), 450);
+    setShakeWarning(true);
+    setTimeout(() => setShakeWarning(false), 800);
   };
 
-  // Start specific tutorial from catalog
+  // Start specific task tutorial
   const startTutorial = (tut: TutorialDef) => {
     setIsHelpCenterOpen(false);
     setIsFullTourActive(false);
@@ -587,28 +713,30 @@ export const OnboardingGuide: React.FC = () => {
   const isLast = stepIndex === currentStepList.length - 1;
 
   // Smart floating position for the non-blocking side panel
-  // If target element is in bottom right, shift panel to top or left
-  const isTargetBottomRight = targetRect && targetRect.bottom > window.innerHeight * 0.55 && targetRect.right > window.innerWidth * 0.55;
+  const isTargetBottomRight =
+    targetRect &&
+    targetRect.bottom > (typeof window !== "undefined" ? window.innerHeight * 0.55 : 500) &&
+    targetRect.right > (typeof window !== "undefined" ? window.innerWidth * 0.55 : 500);
 
   return (
     <>
       {/* ============================================================ */}
-      {/* 1. HELP CENTER & TUTORIAL CATALOG MODAL */}
+      {/* 1. ADVANCED HELP CENTER & TUTORIAL CATALOG MODAL            */}
       {/* ============================================================ */}
       {isHelpCenterOpen && (
-        <div 
+        <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="help-center-heading"
           className="fixed inset-0 z-[2900] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200"
           onClick={() => setIsHelpCenterOpen(false)}
         >
-          <div 
-            className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+          <div
+            className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 border-b border-slate-800 bg-slate-950/60 flex items-start justify-between gap-4">
+            <div className="p-4 sm:p-6 border-b border-slate-800 bg-slate-950/70 flex items-start justify-between gap-4">
               <div className="flex items-start gap-3.5">
                 <div className="p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-700/80 text-emerald-400 shrink-0">
                   <BookOpen className="w-6 h-6" aria-hidden="true" />
@@ -637,14 +765,50 @@ export const OnboardingGuide: React.FC = () => {
               </button>
             </div>
 
+            {/* Overall Tutorial Progress Bar */}
+            <div className="px-4 sm:px-6 py-2.5 bg-slate-950/90 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="text-xs font-semibold text-slate-300">
+                  {t("help_center_progress_title")}:
+                </span>
+                <span className="text-xs font-mono font-bold text-emerald-400">
+                  {completedCount} / {totalCount}
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  ({progressPercent}%)
+                </span>
+              </div>
+
+              <div className="flex-1 max-w-xs sm:max-w-sm flex items-center gap-3">
+                <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700/60">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+                {completedCount === totalCount && totalCount > 0 && (
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full shrink-0">
+                    {t("help_center_all_completed")}
+                  </span>
+                )}
+              </div>
+            </div>
+
             {/* General Tour Hero Banner */}
-            <div className="p-4 sm:p-6 bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-emerald-400" />
                   <h3 className="text-sm font-bold text-white">
                     {t("help_center_general_tour_title")}
                   </h3>
+                  {hasCompletedFullTour && (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-700/80 px-2 py-0.5 rounded-full shrink-0">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>{t("help_center_completed_badge")}</span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
                   {t("help_center_general_tour_desc")}
@@ -655,258 +819,319 @@ export const OnboardingGuide: React.FC = () => {
                 onClick={startFullTour}
                 className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/50 transition-all shrink-0 min-h-[38px]"
               >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>{t("help_center_start_tour")}</span>
+                {hasCompletedFullTour ? (
+                  <>
+                    <RotateCcw className="w-3.5 h-3.5 text-white" />
+                    <span>{t("help_center_resume_tour")}</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>{t("help_center_start_tour")}</span>
+                  </>
+                )}
               </button>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="px-4 sm:px-6 pt-4 pb-2 border-b border-slate-800/60 flex items-center gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => setActiveTab("all")}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
-                  activeTab === "all"
-                    ? "bg-slate-800 text-white border border-slate-700"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                {t("help_center_tab_all")} ({accessibleTutorials.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("operational")}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
-                  activeTab === "operational"
-                    ? "bg-slate-800 text-white border border-slate-700"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                {t("help_center_tab_operational")}
-              </button>
-              {userRole === "ADMIN" && (
+            {/* Search Bar & Category Filter Tabs */}
+            <div className="p-4 sm:px-6 sm:py-3.5 border-b border-slate-800 bg-slate-950/50 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+              {/* Search Input with Clear Button */}
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 rtl:left-auto rtl:right-3 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t("help_center_search_placeholder")}
+                  className="w-full bg-slate-900 border border-slate-700/80 focus:border-emerald-500/80 rounded-xl pl-9 pr-9 rtl:pl-9 rtl:pr-9 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    aria-label={t("help_center_clear_search")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-2.5 p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Strict Category Tabs (Administration tab is strictly removed for non-admin) */}
+              <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 border border-slate-800 rounded-xl shrink-0 overflow-x-auto">
                 <button
                   type="button"
-                  onClick={() => setActiveTab("admin")}
-                  className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
-                    activeTab === "admin"
-                      ? "bg-slate-800 text-white border border-slate-700"
-                      : "text-slate-400 hover:text-white"
+                  onClick={() => setSelectedCategory("all")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    selectedCategory === "all"
+                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-950"
+                      : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
-                  {t("help_center_tab_admin")}
+                  {t("help_center_tab_all")} ({roleTutorials.length})
                 </button>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("field")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    selectedCategory === "field"
+                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-950"
+                      : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                  }`}
+                >
+                  {t("help_center_tab_field")} ({roleTutorials.filter((t) => t.category === "field").length})
+                </button>
+                {availableCategories.includes("admin") && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategory("admin")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      selectedCategory === "admin"
+                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-950"
+                        : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                    }`}
+                  >
+                    {t("help_center_tab_admin")} ({roleTutorials.filter((t) => t.category === "admin").length})
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Tutorial Cards Grid */}
             <div className="p-4 sm:p-6 overflow-y-auto space-y-3 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {displayedTutorials.map((tut) => {
-                  const Icon = tut.icon;
-                  const isDone = completedTutorials.includes(tut.id);
-
-                  return (
-                    <div
-                      key={tut.id}
-                      className="p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-900/60 transition-all flex flex-col justify-between gap-3 group"
+              {displayedTutorials.length === 0 ? (
+                <div className="py-12 px-4 flex flex-col items-center justify-center text-center gap-3">
+                  <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700 text-slate-400">
+                    <Search className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-300">
+                    {searchQuery.trim() ? t("help_center_no_results") : t("help_center_no_tutorials_role")}
+                  </h4>
+                  {searchQuery.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="text-xs text-emerald-400 hover:underline font-semibold"
                     >
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 group-hover:text-emerald-400 transition-colors">
-                              <Icon className="w-4 h-4" />
+                      {t("help_center_clear_search")}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {displayedTutorials.map((tut) => {
+                    const Icon = tut.icon;
+                    const isDone = completedTutorials.includes(tut.id);
+
+                    return (
+                      <div
+                        key={tut.id}
+                        className="p-4 sm:p-5 rounded-2xl border border-slate-800 bg-slate-950/70 hover:border-slate-700 hover:bg-slate-900/80 hover:shadow-xl hover:shadow-black/50 transition-all duration-200 flex flex-col justify-between gap-3.5 group"
+                      >
+                        <div className="space-y-2.5">
+                          {/* Top Row: Icon, Title, and Completed Badge */}
+                          <div className="flex items-start justify-between gap-2.5">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2.5 rounded-xl border ${tut.themeColor.bg} ${tut.themeColor.border} ${tut.themeColor.text} group-hover:scale-105 transition-transform`}>
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h4 className="text-xs sm:text-sm font-bold text-white tracking-wide group-hover:text-emerald-300 transition-colors">
+                                  {t(tut.titleKey)}
+                                </h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${tut.themeColor.badge}`}>
+                                    {tut.category === "admin" ? t("help_center_category_badge_admin") : t("help_center_category_badge_field")}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-mono">
+                                    {tut.steps.length} {t("help_center_steps_label")}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <h4 className="text-xs sm:text-sm font-bold text-white tracking-wide">
-                              {t(tut.titleKey)}
-                            </h4>
+
+                            {isDone && (
+                              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-800 px-2 py-0.5 rounded-full shadow-sm shrink-0">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>{t("help_center_completed_badge")}</span>
+                              </span>
+                            )}
                           </div>
-                          {isDone && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full shrink-0">
-                              <CheckCircle2 className="w-3 h-3" />
-                              <span>{t("help_center_completed_badge")}</span>
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-400 leading-relaxed">
-                          {t(tut.descKey)}
-                        </p>
-                      </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
-                        <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-slate-500" />
-                            <span>{t("help_center_duration", { min: tut.duration })}</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Layers className="w-3 h-3 text-slate-500" />
-                            <span>{t("help_center_steps_count", { count: tut.steps.length })}</span>
-                          </span>
+                          {/* Description */}
+                          <p className="text-xs text-slate-300 leading-relaxed pl-0.5">
+                            {t(tut.descKey)}
+                          </p>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => startTutorial(tut)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-emerald-600 text-slate-200 hover:text-white border border-slate-700 hover:border-emerald-500 transition-all"
-                        >
-                          {isDone ? (
-                            <>
-                              <RotateCcw className="w-3 h-3" />
-                              <span>{t("help_center_restart_tutorial")}</span>
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-3 h-3 fill-current" />
-                              <span>{t("help_center_start_tutorial")}</span>
-                            </>
-                          )}
-                        </button>
+                        {/* Footer: Duration estimate & Action Button */}
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
+                          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                            <Clock className="w-3.5 h-3.5 text-slate-500" />
+                            <span>~{tut.duration} {t("tutorial_min")}</span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => startTutorial(tut)}
+                            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all shadow-md min-h-[36px] ${
+                              isDone
+                                ? "bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-emerald-500/50"
+                                : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/60"
+                            }`}
+                          >
+                            {isDone ? (
+                              <>
+                                <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>{t("help_center_btn_replay")}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-3.5 h-3.5 fill-current" />
+                                <span>{t("help_center_btn_start")}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* ============================================================ */}
-      {/* 2. INTERACTIVE SPOTLIGHT CUTOUT OVERLAY */}
+      {/* 2. INTERACTIVE SPOTLIGHT OVERLAY WITH SVG CUTOUT             */}
       {/* ============================================================ */}
       {isRunnerActive && targetRect && (
-        <div
-          role="presentation"
-          onClick={handleOverlayWrongClick}
-          className="fixed inset-0 z-[2500] pointer-events-auto cursor-default transition-all duration-200"
+        <svg
+          className="fixed inset-0 z-[2800] w-full h-full pointer-events-none transition-all duration-300 ease-out"
           style={{ width: "100vw", height: "100vh" }}
         >
-          <svg
-            className="w-full h-full"
-            style={{ width: "100%", height: "100%", display: "block" }}
-          >
-            <defs>
-              <mask id="tutorial-spotlight-mask">
-                {/* Opaque white covers entire screen */}
-                <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                {/* Cutout rectangle exposing target element */}
-                <rect
-                  x={Math.max(0, targetRect.left - 6)}
-                  y={Math.max(0, targetRect.top - 6)}
-                  width={targetRect.width + 12}
-                  height={targetRect.height + 12}
-                  rx="12"
-                  ry="12"
-                  fill="black"
-                />
-              </mask>
-            </defs>
-            <rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              fill="rgba(2, 6, 23, 0.78)"
-              mask="url(#tutorial-spotlight-mask)"
-            />
-          </svg>
+          <defs>
+            <mask id="tutorial-spotlight-cutout">
+              {/* Solid white covers whole screen (makes it opaque) */}
+              <rect x="0" y="0" width="100%" height="100%" fill="white" />
+              {/* Black rounded cutout over target element (makes it transparent) */}
+              <rect
+                x={targetRect.left - 6}
+                y={targetRect.top - 6}
+                width={targetRect.width + 12}
+                height={targetRect.height + 12}
+                rx="12"
+                ry="12"
+                fill="black"
+              />
+            </mask>
+          </defs>
 
-          {/* Glowing Beacon Ring around targeted element */}
-          <div
-            className={`fixed rounded-xl border-2 pointer-events-none transition-all duration-300 ${
-              actionSuccessPulse
-                ? "border-emerald-300 ring-8 ring-emerald-400/50 scale-105"
-                : wrongClickShake
-                ? "border-amber-400 ring-4 ring-amber-400/40"
-                : "border-emerald-400 ring-4 ring-emerald-500/20"
-            }`}
-            style={{
-              top: Math.max(0, targetRect.top - 6),
-              left: Math.max(0, targetRect.left - 6),
-              width: targetRect.width + 12,
-              height: targetRect.height + 12,
-              zIndex: 2510,
-            }}
+          {/* Dark semi-transparent backdrop with cutout hole */}
+          <rect
+            x="0"
+            y="0"
+            width="100%" height="100%"
+            fill="rgba(2, 6, 23, 0.78)"
+            mask="url(#tutorial-spotlight-cutout)"
+            className="pointer-events-auto cursor-not-allowed"
+            onClick={handleWrongClick}
           />
-        </div>
+
+          {/* Pulsing emerald focus ring directly over target */}
+          <rect
+            x={targetRect.left - 6}
+            y={targetRect.top - 6}
+            width={targetRect.width + 12}
+            height={targetRect.height + 12}
+            rx="12"
+            ry="12"
+            fill="none"
+            stroke="#10b981"
+            strokeWidth="2.5"
+            strokeDasharray="6 4"
+            className="animate-pulse"
+          />
+        </svg>
       )}
 
       {/* ============================================================ */}
-      {/* 3. NON-BLOCKING FLOATING TUTORIAL PANEL */}
+      {/* 3. NON-BLOCKING FLOATING SIDE PANEL (NIELSEN HEURISTICS)    */}
       {/* ============================================================ */}
-      {isRunnerActive && currentStep && (
+      {isRunnerActive && (
         <aside
-          role="dialog"
-          aria-label={t(currentStep.titleKey)}
-          className={`fixed z-[2600] max-w-sm sm:max-w-md w-full bg-slate-900/95 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-2xl backdrop-blur-md transition-all duration-200 ${
-            wrongClickShake ? "animate-[bounce_0.4s_ease-in-out]" : ""
+          role="region"
+          aria-label={t("tour_guide_title")}
+          className={`fixed z-[2850] w-[92vw] sm:w-[420px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-black/80 transition-all duration-300 ease-out ${
+            shakeWarning ? "animate-bounce ring-2 ring-amber-500" : ""
           } ${
-            isTargetBottomRight ? "top-20" : "bottom-6"
-          } ${
-            isRTL ? "left-4 sm:left-6" : "right-4 sm:right-6"
+            isTargetBottomRight
+              ? "top-6 right-4 sm:right-6 rtl:right-auto rtl:left-4 sm:rtl:left-6"
+              : "bottom-6 right-4 sm:right-6 rtl:right-auto rtl:left-4 sm:rtl:left-6"
           }`}
-          style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto" }}
         >
-          {/* Panel Header */}
-          <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-800">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-950 text-emerald-400 border border-emerald-800">
-                  {activeTutorial ? t(activeTutorial.titleKey) : t("help_center_general_tour_title")}
-                </span>
-              </div>
-              <div className="text-[11px] font-mono text-slate-400">
-                {t("tutorial_step_counter", { current: stepIndex + 1, total: currentStepList.length })}
-              </div>
+          {/* Header row: badge + step count + close */}
+          <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <Sparkles className="w-3.5 h-3.5" />
+              </span>
+              <span className="text-xs font-bold text-white tracking-wide uppercase">
+                {activeTutorial ? t(activeTutorial.titleKey) : t("help_center_general_tour_title")}
+              </span>
             </div>
-            <button
-              type="button"
-              onClick={handleSkip}
-              aria-label={t("tutorial_exit")}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full">
+                {stepIndex + 1} / {currentStepList.length}
+              </span>
+              <button
+                type="button"
+                onClick={handleSkip}
+                aria-label={t("tutorial_exit")}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          {/* Step Body */}
-          <div className="py-3.5 space-y-3">
-            <h3 className="text-sm sm:text-base font-bold text-white tracking-wide">
-              {t(currentStep.titleKey)}
+          {/* Progress bar line */}
+          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-3">
+            <div
+              className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-300"
+              style={{ width: `${((stepIndex + 1) / currentStepList.length) * 100}%` }}
+            />
+          </div>
+
+          {/* Step content */}
+          <div className="py-3.5 space-y-2">
+            <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+              <span>{t(currentStep.titleKey)}</span>
             </h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               {t(currentStep.descKey)}
             </p>
 
-            {/* Interactive "Try it now" Action Prompt Banner */}
-            <div
-              className={`p-3 rounded-xl border flex items-start gap-2.5 transition-all ${
-                actionSuccessPulse
-                  ? "bg-emerald-950/80 border-emerald-500 text-emerald-200 ring-2 ring-emerald-400/50"
-                  : wrongClickShake
-                  ? "bg-amber-950/80 border-amber-500 text-amber-200"
-                  : "bg-slate-950/70 border-slate-800 text-slate-200"
-              }`}
-            >
-              <MousePointerClick
-                className={`w-4 h-4 shrink-0 mt-0.5 ${
-                  actionSuccessPulse ? "text-emerald-400 animate-spin" : "text-emerald-400"
-                }`}
-              />
-              <div className="text-xs space-y-0.5">
-                <span className="font-bold uppercase tracking-wider text-[10px] text-emerald-400 block">
-                  {t("tutorial_try_it_now")}
-                </span>
-                <p className="leading-snug">
-                  {wrongClickShake
-                    ? t("tutorial_wrong_target_prompt")
-                    : t(currentStep.hintKey)}
-                </p>
+            {/* "Try it now" Action Hint Box */}
+            <div className="mt-3 p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60 flex items-start gap-2.5">
+              <MousePointerClick className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5 animate-pulse" />
+              <div className="text-xs text-emerald-300/90 leading-tight">
+                <span className="font-bold text-emerald-400">{t("tutorial_action_required")}: </span>
+                <span>{t(currentStep.hintKey)}</span>
               </div>
             </div>
 
-            {/* Clickable Step Progress Dots */}
+            {/* Wrong click alert if user clicked outside */}
+            {shakeWarning && (
+              <div className="p-2 rounded-lg bg-amber-950/80 border border-amber-700/80 text-amber-300 text-xs flex items-center gap-2 animate-in fade-in duration-150">
+                <Info className="w-4 h-4 shrink-0 text-amber-400" />
+                <span>{t("tutorial_wrong_target_hint")}</span>
+              </div>
+            )}
+
+            {/* Step navigation dots */}
             <div className="flex items-center justify-start gap-1.5 pt-1">
               {currentStepList.map((_, i) => (
                 <button
@@ -959,6 +1184,7 @@ export const OnboardingGuide: React.FC = () => {
           </div>
         </aside>
       )}
+
       {/* Floating launcher trigger button (accessible at all times when modal/runner not active) */}
       {!isHelpCenterOpen && !isRunnerActive && (
         <button
