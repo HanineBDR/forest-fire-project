@@ -423,7 +423,10 @@ export const Map: React.FC<MapProps> = ({
 
         polyline.bindTooltip(`
           <div style="font-family: sans-serif; font-size: 11px;">
-            <div style="color: #f59e0b; font-weight: bold;">🌪️ ${c.name}</div>
+            <div style="color: #f59e0b; font-weight: bold; display: flex; align-items: center; gap: 4px;">
+              <svg style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+              <span>${c.name}</span>
+            </div>
             <div style="color: #ffffff; font-weight: bold;">${c.multiplier_label}</div>
             <div style="color: #cbd5e1; font-size: 10px;">${t("sirocco_corridor_axis")} ${c.wind_axis}</div>
           </div>
@@ -436,12 +439,13 @@ export const Map: React.FC<MapProps> = ({
         const corridorBadge = L.divIcon({
           className: "custom-sirocco-badge",
           html: `
-            <div class="px-2 py-0.5 rounded bg-amber-950/90 border border-amber-500 text-amber-300 font-mono text-[9px] font-bold shadow-md animate-pulse">
-              🌪️ SIROCCO ${c.propagation_multiplier}x
+            <div class="px-2 py-0.5 rounded bg-amber-950/95 border border-amber-500/80 text-amber-300 font-mono text-[9px] font-bold shadow-md animate-pulse flex items-center gap-1.5">
+              <svg class="w-3 h-3 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+              <span>SIROCCO ${c.propagation_multiplier}x</span>
             </div>
           `,
-          iconSize: [80, 20],
-          iconAnchor: [40, 10],
+          iconSize: [92, 22],
+          iconAnchor: [46, 11],
         });
         group.addLayer(L.marker(midPoint, { icon: corridorBadge }));
       });
@@ -475,7 +479,7 @@ export const Map: React.FC<MapProps> = ({
           html: `
             <div class="relative flex items-center justify-center w-8 h-8 rounded-full bg-slate-950 border-2 border-violet-500 shadow-xl cursor-pointer hover:scale-110 transition">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-60"></span>
-              <span class="text-sm">🛸</span>
+              <svg class="w-4 h-4 text-violet-300 relative z-10 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
               <span class="absolute -bottom-1 px-1 rounded bg-black/80 text-[8px] font-mono font-bold text-violet-300 border border-violet-700">FLIR</span>
             </div>
           `,

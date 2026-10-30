@@ -116,7 +116,7 @@ def trigger_anomaly_demo(admin_user: dict = Depends(get_admin_user)):
         "type": "SENSOR_SATURATION_ANOMALY",
         "location": "(36.735, 4.435) - Tizi Ouzou (Yakouren)",
         "consecutive_100_percent_count": 52,
-        "message": "⚠️ CRITICAL ANOMALY: Location (36.735, 4.435) returned 100% risk 50+ times continuously. Flagged for ground sensor calibration.",
+        "message": "CRITICAL ANOMALY: Location (36.735, 4.435) returned 100% risk 50+ times continuously. Flagged for ground sensor calibration.",
         "severity": "HIGH"
     }
     ANOMALIES_DETECTED.insert(0, sample_anomaly)

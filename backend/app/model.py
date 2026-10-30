@@ -152,21 +152,21 @@ class WildfirePredictor:
         # Explanatory factors
         factors = []
         if is_sirocco:
-            factors.append("💨 Sirocco (Chergui) desert wind active: extreme heat + desiccation.")
+            factors.append("Sirocco (Chergui) desert wind active: extreme heat + desiccation.")
         if temp >= 38.0:
-            factors.append(f"🔥 Severe heatwave anomaly: {temp}°C accelerates moisture vaporization.")
+            factors.append(f"Severe heatwave anomaly: {temp}°C accelerates moisture vaporization.")
         if humidity <= 20.0:
-            factors.append(f"🌵 Critical dry air: {humidity}% relative humidity leaves dead fuel hyper-flammable.")
+            factors.append(f"Critical dry air: {humidity}% relative humidity leaves dead fuel hyper-flammable.")
         if wind >= 35.0:
-            factors.append(f"🌪️ High wind velocity: {wind} km/h fuels aggressive convective oxygen feed.")
+            factors.append(f"High wind velocity: {wind} km/h fuels aggressive convective oxygen feed.")
         if fwi_dict["isi"] >= 15.0:
-            factors.append(f"⚡ High Initial Spread Index (ISI: {fwi_dict['isi']}): rapid ignition potential.")
+            factors.append(f"High Initial Spread Index (ISI: {fwi_dict['isi']}): rapid ignition potential.")
         if in_dense_forest:
-            factors.append("🌲 Dense Mediterranean forest canopy (Tell Atlas / Coastal Mountain belt).")
+            factors.append("Dense Mediterranean forest canopy (Tell Atlas / Coastal Mountain belt).")
         if rain > 0.0:
-            factors.append(f"🌧️ Dampening factor: {rain} mm precipitation temporarily suppresses ignition.")
+            factors.append(f"Dampening factor: {rain} mm precipitation temporarily suppresses ignition.")
         if not factors:
-            factors.append("✅ Ambient conditions within normal seasonal safety thresholds.")
+            factors.append("Ambient conditions within normal seasonal safety thresholds.")
 
         # Civil Protection Recommendations (Protection Civile Algérienne / DGF)
         if score >= 75.0:
