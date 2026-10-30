@@ -503,18 +503,18 @@ export default function UsersManagementPage() {
     <RoleGate allowedRoles={["ADMIN"]} redirectTo="/dashboard" showToast={true}>
       <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 text-[11px] font-semibold">
                 {t("users_admin_badge")}
               </span>
             </div>
-            <h1 className="text-xl font-bold text-white flex items-center gap-2 mt-1">
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mt-1">
               <Users className="w-5 h-5 text-blue-400" />
               <span>{t("users_title")}</span>
             </h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
               {t("users_subtitle")}
             </p>
           </div>
@@ -545,10 +545,10 @@ export default function UsersManagementPage() {
         )}
 
         {/* Users Table */}
-        <div className="rounded-lg border border-slate-800 bg-slate-900 overflow-hidden shadow-xl">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm dark:shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 font-medium">
+              <thead className="bg-slate-50 dark:bg-slate-950/80 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 font-bold">
                 <tr>
                   <th className="py-3 px-4">{t("users_col_personnel")}</th>
                   <th className="py-3 px-4">{t("users_col_email")}</th>
@@ -559,13 +559,13 @@ export default function UsersManagementPage() {
                   <th className="py-3 px-4 text-right">{language === "ar" ? "الإجراءات" : "Actions"}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60">
                 {users.map((u) => {
                   const isSuperAdmin = u.email.toLowerCase() === "admin@inkad.dz" || u.email.toLowerCase() === "admin@in9ad.dz";
                   const isBlocked = !!u.is_blocked || u.status === "BLOCKED";
 
                   return (
-                    <tr key={u.id || u.email} className={`hover:bg-slate-800/40 transition ${isBlocked ? "bg-rose-950/15" : ""}`}>
+                    <tr key={u.id || u.email} className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 transition ${isBlocked ? "bg-rose-50 dark:bg-rose-950/15" : ""}`}>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full bg-slate-800 border flex items-center justify-center text-slate-300 shrink-0 overflow-hidden ${isBlocked ? "border-rose-700/60 ring-1 ring-rose-500/40" : "border-slate-700"}`}>
@@ -578,13 +578,13 @@ export default function UsersManagementPage() {
                             )}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-200">{getLocalizedUserName(u.name, u.role, language)}</div>
-                            <div className="text-[10px] text-slate-500 font-mono">ID: {u.id || "usr-assigned"}</div>
+                            <div className="font-semibold text-slate-900 dark:text-slate-200">{getLocalizedUserName(u.name, u.role, language)}</div>
+                            <div className="text-[10px] text-slate-600 dark:text-slate-400 font-mono font-medium">ID: {u.id || "usr-assigned"}</div>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 font-mono text-slate-300">
+                      <td className="py-3 px-4 font-mono text-slate-800 dark:text-slate-300 font-medium">
                         {u.email}
                       </td>
 
@@ -621,11 +621,11 @@ export default function UsersManagementPage() {
                         )}
                       </td>
 
-                      <td className="py-3 px-4 font-mono text-slate-400">
+                      <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-400 font-medium">
                         {u.phone || "—"}
                       </td>
 
-                      <td className="py-3 px-4 text-slate-300">
+                      <td className="py-3 px-4 text-slate-800 dark:text-slate-300 font-medium">
                         {language === "ar"
                           ? u.organization_ar || u.organization || "N/A"
                           : language === "en"

@@ -84,3 +84,4 @@ Contributors and operators should adhere to the following core security principl
 ## Attribution & Acknowledgments
 
 We deeply appreciate security researchers, Thirduni mentors, and peer developers who responsibly disclose vulnerabilities to keep INKAD robust and trustworthy. Contributors who submit verified security reports will be acknowledged in our release notes (unless anonymity is requested).
+

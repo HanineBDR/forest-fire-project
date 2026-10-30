@@ -410,7 +410,7 @@ export default function AlertsPage() {
               {criticalCount} {t("risk_extreme").toUpperCase()}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
             {t("alerts_subtitle")}
           </p>
         </div>
@@ -419,7 +419,7 @@ export default function AlertsPage() {
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono tabular-nums shadow-sm">
             <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
-            <span className="text-slate-400">{t("last_check")}</span>
+            <span className="text-slate-600 dark:text-slate-400 font-medium">{t("last_check")}</span>
             <span className="font-semibold text-slate-900 dark:text-white">{relativeTime}</span>
           </div>
 
@@ -457,7 +457,7 @@ export default function AlertsPage() {
         className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs shadow-sm transition-colors duration-150"
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-slate-400 flex items-center gap-1 font-medium">
+          <span className="text-slate-700 dark:text-slate-300 flex items-center gap-1 font-semibold">
             <Filter className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> {t("filter_level")}:
           </span>
           {["ALL", "CRITIQUE", "VERY_HIGH", "HIGH"].map((lvl) => (
@@ -469,7 +469,7 @@ export default function AlertsPage() {
               className={`px-2.5 py-1 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 filterLevel === lvl
                   ? "bg-slate-800 text-white border border-slate-700 font-semibold"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                  : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40"
               }`}
             >
               {lvl === "ALL" ? t("filter_all_levels") : lvl === "CRITIQUE" ? `${t("risk_extreme")} (>85%)` : lvl === "VERY_HIGH" ? t("risk_very_high") : t("risk_high")}
@@ -478,7 +478,7 @@ export default function AlertsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-slate-400 font-medium">{t("filter_status")} :</span>
+          <span className="text-slate-700 dark:text-slate-300 font-semibold">{t("filter_status")} :</span>
           {["ALL", "DETECTED", "PRISE_EN_COMPTE", "UNITES_DEPLOYEES", "MAITRISE"].map((st) => (
             <button
               key={st}
@@ -488,7 +488,7 @@ export default function AlertsPage() {
               className={`px-2.5 py-1 rounded-md font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 filterStatus === st
                   ? "bg-slate-800 text-white border border-slate-700 font-semibold"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                  : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40"
               }`}
             >
               {st === "ALL"
@@ -619,9 +619,9 @@ export default function AlertsPage() {
                       <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-rose-400" />
                         <span>{alert.forest_name}</span>
-                        <span className="text-xs text-slate-400 font-normal">({alert.wilaya})</span>
+                        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">({alert.wilaya})</span>
                       </h2>
-                      <p className="text-xs text-slate-400 font-mono mt-0.5">
+                      <p className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-0.5">
                         {language === "ar" ? "الإحداثيات الجغرافية" : language === "en" ? "GPS Coordinates" : "Coordonnées GPS"}: {alert.lat.toFixed(4)}°N, {alert.lon.toFixed(4)}°E · {language === "ar" ? "رُصد في" : language === "en" ? "Detected at" : "Détecté le"} {new Date(alert.created_at).toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
                       </p>
                     </div>
@@ -629,19 +629,19 @@ export default function AlertsPage() {
                     {/* Meteorological Conditions Strip */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
                       <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
-                        <div className="text-[10px] text-slate-500 font-sans uppercase">{t("temperature")}</div>
+                        <div className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold font-sans uppercase">{t("temperature")}</div>
                         <div className="font-bold text-rose-400 mt-0.5 text-sm">{alert.temp}°C</div>
                       </div>
                       <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
-                        <div className="text-[10px] text-slate-500 font-sans uppercase">{t("relative_humidity")}</div>
+                        <div className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold font-sans uppercase">{t("relative_humidity")}</div>
                         <div className="font-bold text-amber-400 mt-0.5 text-sm">{alert.humidity}%</div>
                       </div>
                       <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
-                        <div className="text-[10px] text-slate-500 font-sans uppercase">{t("wind_speed")}</div>
-                        <div className="font-bold text-white mt-0.5 text-sm">{alert.wind} km/h</div>
+                        <div className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold font-sans uppercase">{t("wind_speed")}</div>
+                        <div className="font-bold text-slate-900 dark:text-white mt-0.5 text-sm">{alert.wind} km/h</div>
                       </div>
                       <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
-                        <div className="text-[10px] text-slate-500 font-sans uppercase">{t("wind_direction")}</div>
+                        <div className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold font-sans uppercase">{t("wind_direction")}</div>
                         <div className="font-bold text-slate-200 mt-0.5 text-sm">{formatWindDir(alert.wind_dir || "Sud (Sirocco)")}</div>
                       </div>
                     </div>
@@ -650,7 +650,7 @@ export default function AlertsPage() {
                     <div className="border-t border-slate-800/80 pt-3 space-y-2">
                       <button
                         onClick={() => toggleInlineHistory(alert.alert_id)}
-                        className="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 font-medium"
+                        className="text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 font-semibold"
                       >
                         <HistoryIcon className="w-3.5 h-3.5 text-ember-400" />
                         <span>{t("status_history_load")} ({historyList.length > 0 ? historyList.length : t("load_data")})</span>
@@ -669,11 +669,11 @@ export default function AlertsPage() {
                                 <span className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-ember-500" />
                                 <div className="space-y-0.5">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-mono text-slate-400">
+                                    <span className="font-mono text-slate-600 dark:text-slate-400">
                                       {new Date(h.changed_at).toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", { hour: "2-digit", minute: "2-digit" })}
                                     </span>
                                     <span className="font-bold text-white">{getLocalizedStatusName(h.new_status, language)}</span>
-                                    <span className="text-slate-400">{language === "ar" ? "بواسطة " : language === "en" ? "by " : "par "}{getLocalizedOperatorName(h.changed_by, language)}</span>
+                                    <span className="text-slate-700 dark:text-slate-300 font-medium">{language === "ar" ? "بواسطة " : language === "en" ? "by " : "par "}{getLocalizedOperatorName(h.changed_by, language)}</span>
                                   </div>
                                   <p className="text-slate-300 font-sans leading-relaxed">{getLocalizedAuditNote(h.note, language)}</p>
                                 </div>

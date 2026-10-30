@@ -348,21 +348,20 @@ alt="INKAD Logo"
               const Icon = item.icon;
               const active = pathname === item.href;
               return (
-                <Tooltip key={item.href} content={item.tooltipKey ? t(item.tooltipKey) : item.label} position="bottom">
-                  <Link
-                    href={item.href}
-                    data-tour={item.dataTour}
-                    aria-current={active ? "page" : undefined}
-                    className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
-                      active
-                        ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm ring-1 ring-slate-300 dark:ring-slate-700/60"
-                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-transparent"
-                    }`}
-                  >
-                    <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
-                    <span>{item.label}</span>
-                  </Link>
-                </Tooltip>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  data-tour={item.dataTour}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
+                    active
+                      ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm ring-1 ring-slate-300 dark:ring-slate-700/60"
+                      : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-transparent"
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? "text-red-500" : "text-slate-500 dark:text-slate-400"}`} aria-hidden="true" />
+                  <span>{item.label}</span>
+                </Link>
               );
             })}
 

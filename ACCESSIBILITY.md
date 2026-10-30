@@ -73,3 +73,4 @@ We welcome your feedback on the accessibility of INKAD. If you encounter any acc
 - **Response Commitment**: We aim to respond to accessibility inquiries within **48 hours** with a viable workaround or timeline for remediation.
 
 *This statement was created on October 31, 2026, as part of the INKAD Capstone Project for the Thirduni AI Cohort.*
+

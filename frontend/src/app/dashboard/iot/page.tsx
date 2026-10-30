@@ -1028,11 +1028,11 @@ export default function IoTPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <Cpu className="w-5 h-5 text-emerald-400" aria-hidden="true" />
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               {t("iot_network_title")}
             </h1>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
             {t("iot_network_sub")}
           </p>
         </div>
@@ -1120,7 +1120,7 @@ export default function IoTPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-            <h2 className="text-sm font-bold text-white tracking-tight">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">
               {language === "ar"
                 ? "حاسبة مخاطر الذكاء الاصطناعي عبر بيانات المستشعرات"
                 : language === "en"
@@ -1150,7 +1150,7 @@ export default function IoTPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Temperature: -10°C to 100°C */}
           <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-2.5">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
               <span className="flex items-center gap-1.5 font-medium">
                 <Thermometer className="w-4 h-4 text-rose-400" />
                 {language === "ar" ? "درجة الحرارة" : language === "en" ? "Temperature" : "Température"}
@@ -1186,7 +1186,7 @@ export default function IoTPage() {
 
           {/* 2. Relative Humidity: 0% to 100% */}
           <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-2.5">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
               <span className="flex items-center gap-1.5 font-medium">
                 <Droplets className="w-4 h-4 text-sky-400" />
                 {language === "ar" ? "الرطوبة النسبية" : language === "en" ? "Relative Humidity" : "Humidité Relative"}
@@ -1222,7 +1222,7 @@ export default function IoTPage() {
 
           {/* 3. Wind Speed (0 - 120 km/h) & Direction */}
           <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-2.5">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
               <span className="flex items-center gap-1.5 font-medium">
                 <Wind className="w-4 h-4 text-teal-400" />
                 {language === "ar" ? "الرياح والاتجاه" : language === "en" ? "Wind & Direction" : "Vent & Direction"}
@@ -1269,7 +1269,7 @@ export default function IoTPage() {
 
           {/* 4. CO2 & Smoke Particles: 350 to 2000 ppm */}
           <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-2.5">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
               <span className="flex items-center gap-1.5 font-medium">
                 <CloudFog className="w-4 h-4 text-amber-400" />
                 {language === "ar" ? "ثاني أكسيد الكربون والدخان" : language === "en" ? "CO2 & Smoke" : "CO2 & Fumée"}
@@ -1308,7 +1308,7 @@ export default function IoTPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center bg-slate-950 p-4 rounded-lg border border-slate-800">
           {/* Left: Probabilities & Risk Level */}
           <div className="lg:col-span-4 space-y-1">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
               {language === "ar"
                 ? "مؤشر خطر الذكاء الاصطناعي (XGBoost + FWI)"
                 : language === "en"
@@ -1316,7 +1316,7 @@ export default function IoTPage() {
                 : "Indice de Risque IA (XGBoost + FWI)"}
             </div>
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-extrabold font-mono text-white tracking-tight">
+              <span className="text-3xl font-extrabold font-mono text-slate-900 dark:text-white tracking-tight">
                 {mlInference.riskScore}%
               </span>
               <span className={`px-2.5 py-1 rounded text-xs font-bold border font-mono ${mlInference.badgeColor}`}>
@@ -1466,7 +1466,7 @@ export default function IoTPage() {
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-slate-800 text-slate-300 border border-slate-700">
                         {node.wilayaCode}
                       </span>
-                      <h3 className="text-xs font-bold text-white tracking-tight">
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">
                         {getLocalizedNodeName(node.name)}
                       </h3>
                     </div>
@@ -1560,7 +1560,7 @@ export default function IoTPage() {
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-950/80 text-emerald-400 border border-emerald-800">
                     HUB
                   </span>
-                  <h3 className="text-xs font-bold text-white tracking-tight">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">
                     {language === "ar" ? "بوابة LoRaWAN المركزية" : language === "en" ? "Central LoRaWAN Gateway" : "Passerelle LoRaWAN Centrale"}
                   </h3>
                 </div>

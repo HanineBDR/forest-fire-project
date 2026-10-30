@@ -348,7 +348,7 @@ export default function AdminCitizenReportsPage() {
     <RoleGate allowedRoles={["ADMIN", "CIVIL_PROTECTION"]} redirectTo="/dashboard" showToast={true}>
       <div className={`p-4 sm:p-6 max-w-7xl mx-auto space-y-6 ${isRTL ? "font-arabic" : ""}`}>
         {/* Strategic Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
@@ -356,28 +356,28 @@ export default function AdminCitizenReportsPage() {
               {t("community_reports_badge") || "PROTECTION CIVILE ALGÉRIENNE · DIRECTION GÉNÉRALE DES FORÊTS (DGF)"}
             </span>
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5 mt-1">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5 mt-1">
             <Camera className="w-7 h-7 text-red-500" />
             <span>{t("community_reports_page_title") || "Signalements Citoyens & Vérification Tactique"}</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1 max-w-3xl leading-relaxed">
             {t("community_reports_page_subtitle") || "File opérationnelle des observations citoyennes : vérification stricte des images avec rejet automatique des visages."}
           </p>
         </div>
 
         {/* Quick Operational Counters */}
         <div className="flex items-center gap-2 text-xs">
-          <div className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
+          <div className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 shadow-sm">
             <Clock className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-slate-400">{t("community_filter_pending")}:</span>
             <span className="font-mono font-bold text-amber-400">{pendingCount}</span>
           </div>
-          <div className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
+          <div className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 shadow-sm">
             <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-slate-400">{t("community_filter_verified")}:</span>
             <span className="font-mono font-bold text-emerald-400">{verifiedCount}</span>
           </div>
-          <div className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
+          <div className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 shadow-sm">
             <XCircle className="w-3.5 h-3.5 text-slate-400" />
             <span className="text-slate-400">{t("community_filter_rejected")}:</span>
             <span className="font-mono font-bold text-slate-300">{rejectedCount}</span>
@@ -405,15 +405,15 @@ export default function AdminCitizenReportsPage() {
       {/* ========================================================================= */}
       <div className="space-y-4">
         {/* Top Actions & Filters Bar */}
-        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm">
           <div>
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-red-500" />
-              <h3 className="font-bold text-white text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">
                 {t("community_queue_title") || "File de Vérification Tactique des Signalements Citoyens"}
               </h3>
             </div>
-            <p className="text-slate-400 mt-0.5">
+            <p className="text-slate-600 dark:text-slate-400 font-medium mt-0.5">
               {t("community_queue_subtitle") || "Filtrage strict : images vérifiées (forêt, fumée, brûlis, vigie) avec rejet automatique des visages / personnes."}
             </p>
           </div>

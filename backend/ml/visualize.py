@@ -115,7 +115,7 @@ def generate_model_performance_diagram():
     f1 = f1_score(y_test, y_pred)
 
     # Plot setup
-    fig = plt.figure(figsize=(16, 6.5), dpi=300)
+    fig = plt.figure(figsize=(16, 7.5), dpi=300)
     fig.patch.set_facecolor("#ffffff")
     gs = gridspec.GridSpec(1, 3, width_ratios=[1.1, 1.1, 1.1], wspace=0.32)
 
@@ -211,9 +211,9 @@ def generate_model_performance_diagram():
     ax3.set_title("Performance & Deployment Metrics", fontsize=13, fontweight="bold", pad=12)
 
     # Super Title
-    fig.suptitle("INKAD Model - How it works\nXGBoost Wildfire Prediction Performance for Northern Algeria", fontsize=16, fontweight="bold", y=0.98)
+    fig.suptitle("INKAD Model - How it works\nXGBoost Wildfire Prediction Performance for Northern Algeria", fontsize=15, fontweight="bold", y=0.975)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.93])
+    plt.tight_layout(rect=[0, 0, 1, 0.89])
     plt.savefig(MODEL_PERF_PATH, dpi=300)
     plt.close()
     logger.info(f"Model performance diagram successfully saved to: {MODEL_PERF_PATH}")

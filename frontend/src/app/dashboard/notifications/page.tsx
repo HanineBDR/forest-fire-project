@@ -175,7 +175,7 @@ export default function NotificationsPage() {
               {t("notifications_page_title")}
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium mt-1 max-w-3xl leading-relaxed">
             {t("notifications_page_subtitle")}
           </p>
         </div>
@@ -223,56 +223,56 @@ export default function NotificationsPage() {
       <section aria-label="Signaux environnementaux et télémétrie" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* 1. Sirocco Status */}
         <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
             <span>{t("notifications_sirocco_card_title")}</span>
             <Compass className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-base font-bold text-white mt-1">
+          <div className="text-base font-bold text-slate-900 dark:text-white mt-1">
             {isSirocco ? t("notifications_sirocco_active") : t("notifications_sirocco_standard")}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
             {t("notifications_sirocco_desc")}
           </p>
         </div>
 
         {/* 2. Drones FLIR Thermal */}
         <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
             <span>{t("notifications_drones_card_title")}</span>
             <Radio className="w-4 h-4 text-red-400" />
           </div>
-          <div className="text-base font-bold text-white mt-1">
+          <div className="text-base font-bold text-slate-900 dark:text-white mt-1">
             {isDronePatrolActive ? t("notifications_drones_active") : t("notifications_drones_standby")}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
             {t("notifications_drones_desc")}
           </p>
         </div>
 
         {/* 3. Vent Fort */}
         <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
             <span>{t("notifications_wind_card_title")}</span>
             <Wind className="w-4 h-4 text-blue-400" />
           </div>
-          <div className="text-base font-bold text-white mt-1">
+          <div className="text-base font-bold text-slate-900 dark:text-white mt-1">
             {isWindStrong ? t("notifications_wind_strong") : t("notifications_wind_moderate")}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
             {t("notifications_wind_desc")}
           </p>
         </div>
 
         {/* 4. Vigies DGF Status */}
         <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
             <span>{t("notifications_vigies_card_title")}</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-base font-bold text-white mt-1">
+          <div className="text-base font-bold text-slate-900 dark:text-white mt-1">
             {vigiesStatus.active_count} / {vigiesStatus.total_count} {t("notifications_vigies_online_suffix")}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 truncate">
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 truncate">
             {vigiesStatus.reporting_stations.join(", ")}
           </p>
         </div>
@@ -281,7 +281,7 @@ export default function NotificationsPage() {
       {/* Role Navigation Bar & Channel Filter */}
       <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 font-medium">{t("notifications_active_post")}</span>
+          <span className="text-xs text-slate-700 dark:text-slate-300 font-bold">{t("notifications_active_post")}</span>
           {[
             { id: "protection_civile", label: t("role_protection_civile") },
             { id: "mohafadat_ghabat", label: t("role_dgf") },
@@ -293,8 +293,8 @@ export default function NotificationsPage() {
               onClick={() => setActiveRole(r.id)}
               className={`h-8 px-3 rounded-md text-xs font-semibold transition-colors ${
                 activeRole === r.id
-                  ? "bg-slate-800 text-white border border-slate-700"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-slate-900 dark:bg-slate-800 text-white border border-slate-900 dark:border-slate-700 shadow-sm"
+                  : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800/60"
               }`}
             >
               {r.label}
@@ -303,8 +303,8 @@ export default function NotificationsPage() {
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-slate-400">{t("notifications_channel")}</span>
-          <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200 font-mono text-[11px]">
+          <span className="text-slate-700 dark:text-slate-300 font-medium">{t("notifications_channel")}</span>
+          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-mono text-[11px] font-semibold">
             {connectionType === "realtime-ws"
               ? "Neon Realtime (WebSocket)"
               : connectionType === "sse"
@@ -328,7 +328,7 @@ export default function NotificationsPage() {
               className={`h-10 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === "timeline"
                   ? "border-red-500 text-slate-900 dark:text-white"
-                  : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                  : "border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span>{t("notifications_tab_timeline")}</span>
@@ -344,11 +344,11 @@ export default function NotificationsPage() {
               className={`h-10 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === "all"
                   ? "border-red-500 text-slate-900 dark:text-white"
-                  : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                  : "border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span>{t("notifications_tab_alerts")}</span>
-              <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-slate-300">
+              <span className="px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-[10px] text-slate-800 dark:text-slate-300 font-bold">
                 {notifications.length}
               </span>
             </button>
@@ -358,7 +358,7 @@ export default function NotificationsPage() {
               className={`h-10 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === "unread"
                   ? "border-red-500 text-slate-900 dark:text-white"
-                  : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                  : "border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span>{t("notifications_tab_unread")}</span>
@@ -438,7 +438,7 @@ export default function NotificationsPage() {
                           </h2>
                         </div>
 
-                        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 font-medium">
                           <Clock className="w-3.5 h-3.5" />
                           <time dateTime={item.created_at}>
                             {new Date(item.created_at).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
@@ -451,15 +451,15 @@ export default function NotificationsPage() {
                       </p>
 
                       {/* Metadata bar */}
-                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800/60">
+                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-700 dark:text-slate-300 font-medium border-t border-slate-200 dark:border-slate-800/60">
                         {item.massif && (
                           <span>
-                            {t("notifications_massif_label")} <strong className="text-slate-800 dark:text-slate-200">{getLocalizedMassifName(item.massif, language)}</strong>
+                            {t("notifications_massif_label")} <strong className="text-slate-900 dark:text-white font-bold">{getLocalizedMassifName(item.massif, language)}</strong>
                           </span>
                         )}
                         {item.wilaya && (
                           <span>
-                            {t("notifications_wilaya_label")} <strong className="text-slate-800 dark:text-slate-200">{getLocalizedWilayaName(item.wilaya, language)}</strong>
+                            {t("notifications_wilaya_label")} <strong className="text-slate-900 dark:text-white font-bold">{getLocalizedWilayaName(item.wilaya, language)}</strong>
                           </span>
                         )}
                         {item.risk_level && (
@@ -469,17 +469,17 @@ export default function NotificationsPage() {
                         )}
                         {item.sender_role && (
                           <span>
-                            {t("notifications_from_label")} <span className="text-slate-700 dark:text-slate-300">{getLocalizedRole(item.sender_role, language)}</span>
+                            {t("notifications_from_label")} <span className="text-slate-900 dark:text-slate-100 font-semibold">{getLocalizedRole(item.sender_role, language)}</span>
                           </span>
                         )}
                         {item.recipient_role && (
                           <span>
-                            {t("notifications_to_label")} <span className="text-slate-700 dark:text-slate-300">{getLocalizedRole(item.recipient_role, language)}</span>
+                            {t("notifications_to_label")} <span className="text-slate-900 dark:text-slate-100 font-semibold">{getLocalizedRole(item.recipient_role, language)}</span>
                           </span>
                         )}
                         {item.user_role && (
                           <span>
-                            {t("notifications_operator_label")} <span className="text-slate-700 dark:text-slate-300">{getLocalizedRole(item.user_role, language)}</span>
+                            {t("notifications_operator_label")} <span className="text-slate-900 dark:text-slate-100 font-semibold">{getLocalizedRole(item.user_role, language)}</span>
                           </span>
                         )}
                       </div>
@@ -566,8 +566,8 @@ export default function NotificationsPage() {
                       key={n.id}
                       className={`p-4 rounded-lg border text-xs space-y-2 transition-colors ${
                         isUnread
-                          ? "bg-slate-900 border-red-900/60 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
-                          : "bg-slate-900/70 border-slate-800"
+                          ? "bg-red-50/70 dark:bg-slate-900 border-red-200 dark:border-red-900/60 shadow-sm"
+                          : "bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 shadow-sm"
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -587,7 +587,7 @@ export default function NotificationsPage() {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 font-medium">
                           <time dateTime={n.created_at}>
                             {new Date(n.created_at).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
                           </time>
@@ -614,9 +614,9 @@ export default function NotificationsPage() {
                         </div>
                       </div>
 
-                      <p className="text-slate-300 leading-relaxed">{translateNotificationMessage(n.message, language)}</p>
+                      <p className="text-slate-800 dark:text-slate-300 leading-relaxed">{translateNotificationMessage(n.message, language)}</p>
 
-                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800/60">
+                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-700 dark:text-slate-300 font-medium border-t border-slate-200 dark:border-slate-800/60">
                         <span>
                           {t("notifications_from_label")} <strong className="text-slate-800 dark:text-slate-200">{getLocalizedRole(n.sender_role, language)}</strong>
                         </span>

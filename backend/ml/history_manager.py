@@ -998,3 +998,122 @@ def get_unified_audit_log(
     }
 
 
+
+
+# -------------------------------------------------------------
+# Realtime Notifications & Intercom Helpers (Feature 7)
+# -------------------------------------------------------------
+
+def get_notifications_list(role: Optional[str] = None, unread_only: bool = False, limit: int = 50) -> List[Dict[str, Any]]:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM notifications WHERE 1=1"
+        params: List[Any] = []
+        if role and role != "all":
+            query += " AND (recipient_role = ? OR recipient_role = 'all' OR sender_role = ?)"
+            params.extend([role, role])
+        if unread_only:
+            query += " AND is_read = 0"
+        query += " ORDER BY created_at DESC LIMIT ?"
+        params.append(limit)
+        cursor.execute(query, params)
+        rows = [dict(r) for r in cursor.fetchall()]
+        for r in rows:
+            r["is_read"] = bool(r.get("is_read", 0))
+        return rows
+
+
+def get_notifications_timeline(limit: int = 60) -> List[Dict[str, Any]]:
+    timeline = []
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM notifications ORDER BY created_at DESC LIMIT ?", (limit,))
+        for r in cursor.fetchall():
+            row = dict(r)
+            row["item_type"] = "notification"
+            row["is_read"] = bool(row.get("is_read", 0))
+            timeline.append(row)
+        cursor.execute("SELECT * FROM alert_acknowledgments ORDER BY created_at DESC LIMIT ?", (limit,))
+        for r in cursor.fetchall():
+            row = dict(r)
+            row["item_type"] = "acknowledgment"
+            timeline.append(row)
+    timeline.sort(key=lambda x: str(x.get("created_at", "")), reverse=True)
+    return timeline[:limit]
+
+
+def record_acknowledgment(alert_id: str, user_role: str, action: str, comment: Optional[str] = None, target_role: Optional[str] = None) -> Dict[str, Any]:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("""
+            INSERT INTO alert_acknowledgments (alert_id, user_role, action, comment, target_role, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (alert_id, user_role, action, comment or "", target_role or "all", now_str))
+        ack_id = cursor.lastrowid
+        conn.commit()
+        return {
+            "id": ack_id,
+            "alert_id": alert_id,
+            "user_role": user_role,
+            "action": action,
+            "comment": comment,
+            "target_role": target_role,
+            "created_at": now_str
+        }
+
+
+def record_notification(
+    alert_id: str,
+    sender_role: str,
+    recipient_role: str,
+    title: str,
+    message: str,
+    risk_level: str = "Elevé",
+    risk_score: float = 85.0,
+    massif: str = "Yakouren",
+    wilaya: str = "Tizi Ouzou",
+    lat: float = 36.735,
+    lon: float = 4.435
+) -> Dict[str, Any]:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("""
+            INSERT INTO notifications (alert_id, sender_role, recipient_role, title, message, risk_level, risk_score, massif, wilaya, lat, lon, is_read, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+        """, (alert_id, sender_role, recipient_role, title, message, risk_level, risk_score, massif, wilaya, lat, lon, now_str))
+        notif_id = cursor.lastrowid
+        conn.commit()
+        return {
+            "id": notif_id,
+            "alert_id": alert_id,
+            "sender_role": sender_role,
+            "recipient_role": recipient_role,
+            "title": title,
+            "message": message,
+            "risk_level": risk_level,
+            "risk_score": risk_score,
+            "massif": massif,
+            "wilaya": wilaya,
+            "lat": lat,
+            "lon": lon,
+            "is_read": False,
+            "created_at": now_str
+        }
+
+
+def mark_notification_as_read(notif_id: int) -> bool:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE notifications SET is_read = 1 WHERE id = ?", (notif_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+
+
+def delete_notification_by_id(notif_id: int) -> bool:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM notifications WHERE id = ?", (notif_id,))
+        conn.commit()
+        return cursor.rowcount > 0

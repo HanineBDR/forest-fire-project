@@ -242,3 +242,4 @@ Machine learning is at the core of INKAD. When updating the wildfire risk predic
 - **Security Vulnerabilities**: Please consult [SECURITY.md](SECURITY.md) for private disclosure instructions.
 
 Thank you for contributing to the protection of Northern Algeria's forest massifs and communities!
+

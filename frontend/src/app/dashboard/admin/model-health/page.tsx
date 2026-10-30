@@ -280,7 +280,7 @@ export default function ModelHealthPage() {
             <Activity className="w-5 h-5 text-emerald-400" />
             <span>{t("mh_title")}</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
             {t("mh_subtitle")}
           </p>
         </div>
@@ -371,7 +371,7 @@ export default function ModelHealthPage() {
               key={check.service}
               className={`rounded-lg border p-4 space-y-3 bg-slate-900/80 transition ${
                 status === "healthy"
-                  ? "border-slate-800 hover:border-slate-700"
+                  ? "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/80 shadow-sm"
                   : status === "degraded"
                   ? "border-amber-900/90 bg-amber-950/20"
                   : "border-red-900 bg-red-950/30"
@@ -382,7 +382,7 @@ export default function ModelHealthPage() {
                   <div className="p-1.5 rounded bg-slate-950 border border-slate-800 text-slate-300">
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-xs font-semibold text-white">{serviceTitle}</span>
+                  <span className="text-xs font-semibold text-slate-900 dark:text-white">{serviceTitle}</span>
                 </div>
 
                 {status === "healthy" && (
@@ -407,15 +407,15 @@ export default function ModelHealthPage() {
 
               <div className="space-y-1">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-[11px] text-slate-400">{t("mh_avg_latency")}</span>
-                  <span className="text-xs font-mono font-bold text-slate-200">
+                  <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">{t("mh_avg_latency")}</span>
+                  <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
                     {isDegraded ? "2450 ms" : `${check.latency_ms.toFixed(1)} ms`}
                   </span>
                 </div>
 
                 {check.accuracy !== undefined && (
                   <div className="flex items-baseline justify-between">
-                    <span className="text-[11px] text-slate-400">{t("mh_verified_accuracy")}</span>
+                    <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">{t("mh_verified_accuracy")}</span>
                     <span className="text-xs font-mono font-bold text-emerald-400">
                       {(check.accuracy * 100).toFixed(1)}%
                     </span>
@@ -423,7 +423,7 @@ export default function ModelHealthPage() {
                 )}
               </div>
 
-              <p className="text-[11px] text-slate-400 leading-relaxed border-t border-slate-800/80 pt-2">
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed border-t border-slate-200 dark:border-slate-800/80 pt-2">
                 {isDegraded
                   ? (language === "ar" ? "تجاوز مهلة الاتصال (محاكاة)" : "Connection timeout (simulation)")
                   : getLocalizedAuditNote(check.details || "", language) || (language === "ar" ? "الخدمة نشطة وسليمة." : "Service active and healthy.")}
@@ -549,7 +549,7 @@ export default function ModelHealthPage() {
                 <BarChart2 className="w-4 h-4 text-cyan-400" />
                 <span>{t("mh_hourly_volume_title")}</span>
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
                 {t("mh_hourly_volume_sub")}
               </p>
             </div>

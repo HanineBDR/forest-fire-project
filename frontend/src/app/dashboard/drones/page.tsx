@@ -39,11 +39,11 @@ export default function DronesPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <Plane className="w-5 h-5 text-emerald-400" aria-hidden="true" />
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               {t("drones_page_title")}
             </h1>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
             {t("drones_page_subtitle")}
           </p>
         </div>
@@ -128,7 +128,7 @@ export default function DronesPage() {
             {/* Telemetry Metric Cards in Monospace */}
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <div className="flex items-center justify-between text-[11px] text-slate-700 dark:text-slate-300 font-semibold">
                   <span>{t("drones_altitude_agl")}</span>
                   <Compass className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                 </div>
@@ -137,7 +137,7 @@ export default function DronesPage() {
               </div>
 
               <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <div className="flex items-center justify-between text-[11px] text-slate-700 dark:text-slate-300 font-semibold">
                   <span>{t("drones_autonomy")}</span>
                   <Battery className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                 </div>
@@ -146,7 +146,7 @@ export default function DronesPage() {
               </div>
 
               <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <div className="flex items-center justify-between text-[11px] text-slate-700 dark:text-slate-300 font-semibold">
                   <span>{t("drones_flir_sensor")}</span>
                   <Thermometer className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                 </div>
@@ -155,7 +155,7 @@ export default function DronesPage() {
               </div>
 
               <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <div className="flex items-center justify-between text-[11px] text-slate-700 dark:text-slate-300 font-semibold">
                   <span>{t("drones_c2_link")}</span>
                   <Signal className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                 </div>
@@ -166,28 +166,28 @@ export default function DronesPage() {
 
             {/* Hardware Specification Sheet */}
             <div className="rounded-lg bg-slate-950 border border-slate-800 p-3 space-y-2 text-xs">
-              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                 {t("drones_spec_sheet")}
               </div>
               <div className="space-y-1.5 text-slate-300 font-mono text-[11px]">
                 <div className="flex justify-between border-b border-slate-800/60 pb-1">
-                  <span className="text-slate-500">{t("drones_vector")}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">{t("drones_vector")}</span>
                   <span className="text-slate-200">DJI Matrice 300 RTK</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-800/60 pb-1">
-                  <span className="text-slate-500">{t("drones_payload")}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">{t("drones_payload")}</span>
                   <span className="text-slate-200">Zenmuse H20T (LWIR + 20MP Zoom)</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-800/60 pb-1">
-                  <span className="text-slate-500">{t("drones_range")}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">{t("drones_range")}</span>
                   <span className="text-slate-200">15 km (AES-256)</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-800/60 pb-1">
-                  <span className="text-slate-500">{t("drones_wind_resistance")}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">{t("drones_wind_resistance")}</span>
                   <span className="text-slate-200">15 m/s (54 km/h)</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">{t("drones_ground_station")}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">{t("drones_ground_station")}</span>
                   <span className="text-slate-200">{t("drones_base_yakouren")}</span>
                 </div>
               </div>
@@ -201,7 +201,7 @@ export default function DronesPage() {
         <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
           <div className="flex items-center gap-2">
             <Camera className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-            <h2 className="text-sm font-bold text-white">{t("drones_flir_feed_title")}</h2>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">{t("drones_flir_feed_title")}</h2>
             <span className="text-[10px] font-mono text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
               RTSP / H.265
             </span>

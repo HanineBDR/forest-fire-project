@@ -65,6 +65,12 @@ try:
         get_all_community_reports,
         update_community_report_status,
         get_unified_audit_log,
+        get_notifications_list,
+        get_notifications_timeline,
+        record_acknowledgment,
+        record_notification,
+        mark_notification_as_read,
+        delete_notification_by_id,
     )
 except ImportError:
     # Direct relative fallback if running from within backend/
@@ -93,6 +99,12 @@ except ImportError:
         get_all_community_reports,
         update_community_report_status,
         get_unified_audit_log,
+        get_notifications_list,
+        get_notifications_timeline,
+        record_acknowledgment,
+        record_notification,
+        mark_notification_as_read,
+        delete_notification_by_id,
     )
 
 from app.weather import fetch_live_weather
@@ -1759,3 +1771,98 @@ async def start_periodic_wildfire_scanner():
 
 if os.environ.get("TESTING") != "1":
     app.on_event("startup")(start_periodic_wildfire_scanner)
+
+
+# ============================================================================
+# 23. REALTIME NOTIFICATIONS & INTERCOM API (FEATURE 7)
+# ============================================================================
+
+@app.get("/api/notifications/timeline")
+def api_get_notifications_timeline(limit: int = Query(60, ge=1, le=200)):
+    """Streams operational timeline of AI notifications and inter-agency acknowledgments."""
+    timeline = get_notifications_timeline(limit=limit)
+    return {
+        "ok": True,
+        "count": len(timeline),
+        "data": timeline,
+        "timeline": timeline,
+    }
+
+
+@app.get("/api/notifications")
+def api_get_notifications(
+    role: Optional[str] = Query(None),
+    unread_only: bool = Query(False),
+    limit: int = Query(50, ge=1, le=200)
+):
+    """Returns alert notifications filtered by authority role."""
+    notifs = get_notifications_list(role=role, unread_only=unread_only, limit=limit)
+    unread_cnt = len([n for n in notifs if not n.get("is_read", False)])
+    return {
+        "ok": True,
+        "count": len(notifs),
+        "unread_count": unread_cnt,
+        "data": notifs,
+    }
+
+
+class NotificationAckInput(BaseModel):
+    alert_id: str
+    user_role: str
+    action: str
+    comment: Optional[str] = None
+    target_role: Optional[str] = None
+
+
+@app.post("/api/notifications/acknowledge")
+def api_post_notification_ack(payload: NotificationAckInput):
+    """Records an acknowledgment from an operational role (e.g. Protection Civile)."""
+    ack = record_acknowledgment(
+        alert_id=payload.alert_id,
+        user_role=payload.user_role,
+        action=payload.action,
+        comment=payload.comment,
+        target_role=payload.target_role,
+    )
+    return {"ok": True, "data": ack}
+
+
+class NotificationIntercomInput(BaseModel):
+    sender_role: str
+    target_role: str
+    title: str
+    message: str
+    risk_level: Optional[str] = "Elevé"
+    alert_id: Optional[str] = "ALT-2026-DZ-01"
+    massif: Optional[str] = "Massif de Yakouren"
+    wilaya: Optional[str] = "Tizi Ouzou"
+
+
+@app.post("/api/notifications/alert-panel")
+def api_post_intercom_notification(payload: NotificationIntercomInput):
+    """Sends an intercom alert from one command post to another."""
+    notif = record_notification(
+        alert_id=payload.alert_id or "ALT-2026-DZ-01",
+        sender_role=payload.sender_role,
+        recipient_role=payload.target_role,
+        title=payload.title,
+        message=payload.message,
+        risk_level=payload.risk_level or "Elevé",
+        massif=payload.massif or "Massif de Yakouren",
+        wilaya=payload.wilaya or "Tizi Ouzou",
+    )
+    return {"ok": True, "data": notif}
+
+
+@app.post("/api/notifications/{notif_id}/read")
+def api_mark_notification_read(notif_id: int):
+    """Marks a notification as read."""
+    success = mark_notification_as_read(notif_id)
+    return {"ok": success}
+
+
+@app.delete("/api/notifications/{notif_id}")
+def api_delete_notification(notif_id: int):
+    """Deletes an archived notification."""
+    success = delete_notification_by_id(notif_id)
+    return {"ok": success}

@@ -120,11 +120,15 @@ export const Tooltip: React.FC<TooltipProps> = ({
     content && (typeof content !== "string" || content.trim().length > 0)
   );
 
+  const isClickDismissedRef = useRef(false);
+
   const show = useCallback(() => {
-    if (disabled || !hasValidContent) return;
+    if (disabled || !hasValidContent || isClickDismissedRef.current) return;
     clearTimer();
     timerRef.current = setTimeout(() => {
-      setIsVisible(true);
+      if (!isClickDismissedRef.current) {
+        setIsVisible(true);
+      }
     }, effectiveDelay);
   }, [clearTimer, effectiveDelay, disabled, hasValidContent]);
 
@@ -162,22 +166,33 @@ export const Tooltip: React.FC<TooltipProps> = ({
       }
     },
     onMouseEnter: (e: React.MouseEvent) => {
+      isClickDismissedRef.current = false;
       show();
       children.props.onMouseEnter?.(e);
     },
     onMouseLeave: (e: React.MouseEvent) => {
+      isClickDismissedRef.current = false;
       hide();
       children.props.onMouseLeave?.(e);
     },
+    onMouseDown: (e: React.MouseEvent) => {
+      isClickDismissedRef.current = true;
+      hide();
+      children.props.onMouseDown?.(e);
+    },
     onFocus: (e: React.FocusEvent) => {
-      show();
+      if (!isClickDismissedRef.current) {
+        show();
+      }
       children.props.onFocus?.(e);
     },
     onBlur: (e: React.FocusEvent) => {
+      isClickDismissedRef.current = false;
       hide();
       children.props.onBlur?.(e);
     },
     onClick: (e: React.MouseEvent) => {
+      isClickDismissedRef.current = true;
       hide();
       children.props.onClick?.(e);
     },

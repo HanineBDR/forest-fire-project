@@ -19,6 +19,7 @@ import {
 import { loginUser, DEMO_ACCOUNTS, UserRole, getStoredToken, getStoredUser } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import CitizenReportModal from "@/components/CitizenReportModal";
 
 export default function LoginPage() {
@@ -92,21 +93,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-red-900 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-red-900 selection:text-white transition-colors duration-150">
       {/* Institutional Top Ribbon */}
-      <div className="border-b border-slate-800 bg-slate-900/60 backdrop-blur px-6 py-3">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur px-6 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-xs text-slate-400">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-200 uppercase tracking-wider">
+            <span className="font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
               {t("login_republic")}
             </span>
-            <span className="text-slate-600">|</span>
+            <span className="text-slate-400 dark:text-slate-600">|</span>
             <span>{t("login_ministry")}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+            <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-mono text-[11px]">
               {t("login_secured_system")}
             </span>
+            <ThemeToggle />
             <LanguageSwitcher />
           </div>
         </div>
@@ -127,13 +129,13 @@ export default function LoginPage() {
                 priority
               />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               {t("login_portal_title")}
             </h1>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
               {t("login_portal_desc")}
             </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-slate-900 border border-slate-800 text-xs text-slate-300">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 font-medium">
               <Lock className="w-3.5 h-3.5 text-emerald-400" />
               <span>{t("login_secure_tag")}</span>
             </div>
@@ -166,9 +168,9 @@ export default function LoginPage() {
           </button>
 
           {/* Quick Profile Selector for Operational Testing */}
-          <div className="rounded-lg border border-slate-800 bg-slate-900/80 p-4 space-y-3">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-4 space-y-3 shadow-sm">
             <div className="flex items-center justify-between text-xs text-slate-300">
-              <span className="font-semibold uppercase tracking-wider text-slate-400">
+              <span className="font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 text-[11px]">
                 {t("login_quick_profiles")}
               </span>
               <span className="text-[11px] text-emerald-400 font-mono font-medium">
@@ -191,10 +193,10 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => handleDemoSelect(acc)}
                     disabled={loading}
-                    className="w-full text-left p-2.5 rounded-md border border-slate-800 hover:border-slate-700 bg-slate-950/60 hover:bg-slate-800/80 transition-colors duration-150 flex items-center justify-between group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    className="w-full text-left p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors duration-150 flex items-center justify-between group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                   >
                     <div className="space-y-0.5">
-                      <div className="text-xs font-semibold text-slate-200 group-hover:text-white flex items-center gap-1.5">
+                      <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-slate-950 dark:group-hover:text-white flex items-center gap-1.5">
                         {acc.role === "CIVIL_PROTECTION" && (
                           <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-hidden="true" />
                         )}
@@ -206,7 +208,7 @@ export default function LoginPage() {
                         )}
                         {localizedRoleLabel}
                       </div>
-                      <div className="text-[11px] text-slate-400 font-mono">
+                      <div className="text-[11px] text-slate-600 dark:text-slate-400 font-mono">
                         {acc.email}
                       </div>
                     </div>
@@ -221,7 +223,7 @@ export default function LoginPage() {
           </div>
 
           {/* Login Form */}
-          <div className="rounded-lg border border-slate-800 bg-slate-900 p-6 space-y-4">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 space-y-4 shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div
@@ -234,7 +236,7 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-1.5">
-                <label htmlFor="login-email" className="text-xs font-semibold text-slate-300 block">
+                <label htmlFor="login-email" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                   {t("login_email_label")}
                 </label>
                 <div className="relative">
@@ -245,14 +247,14 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="officier@inkad.dz"
                     required
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-md text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors duration-150"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-md text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors duration-150"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="login-password" className="text-xs font-semibold text-slate-300 block">
+                  <label htmlFor="login-password" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                     {t("login_password_label")}
                   </label>
                   <span className="text-[11px] text-slate-500">{t("login_case_sensitive")}</span>
@@ -265,7 +267,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     required
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-md text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors duration-150 font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-md text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors duration-150 font-mono"
                   />
                 </div>
               </div>
@@ -286,8 +288,8 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="pt-3 border-t border-slate-800 flex flex-col items-center gap-2 text-center">
-              <p className="text-xs text-slate-400">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 text-center">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                 {t("login_public_disabled")}
               </p>
               <button
@@ -302,8 +304,8 @@ export default function LoginPage() {
           </div>
 
           {/* Security Notice */}
-          <div className="p-3 rounded border border-slate-800/80 bg-slate-950/40 text-[11px] text-slate-400 space-y-1">
-            <div className="font-semibold text-slate-300 flex items-center gap-1.5">
+          <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800/80 bg-slate-100/80 dark:bg-slate-950/40 text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
+            <div className="font-bold text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5 text-amber-500" />
               <span>{t("login_security_notice_title")}</span>
             </div>
@@ -321,7 +323,7 @@ export default function LoginPage() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-3 px-6 text-center text-xs text-slate-500">
+      <footer className="border-t border-slate-200 dark:border-slate-800/80 py-3 px-6 text-center text-xs text-slate-600 dark:text-slate-500">
         {t("login_footer")}
       </footer>
     </div>
