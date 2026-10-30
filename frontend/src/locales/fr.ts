@@ -1046,4 +1046,10 @@ export const fr = {
   tut_iot_s3_title: "Niveau de Menace et Vigilance",
   tut_iot_s3_desc: "Croisez les alertes de capteurs IoT avec le statut opérationnel pour prioriser les patrouilles sur les massifs.",
   tut_iot_s3_hint: "Cliquez sur la barre de statut opérationnel pour terminer.",
+  tutorial_action_required: "Action requise",
+  tutorial_wrong_target_title: "Action sur la cible en surbrillance",
+  tutorial_wrong_target_hint: "Veuillez cliquer sur l'élément en surbrillance pour continuer.",
+  tutorial_waiting_click: "En attente de votre clic sur la cible...",
+  tutorial_click_target_prompt: "Cliquez ici pour continuer",
+  tutorial_reopen_menu_hint: "Cliquez sur 'Plus' pour afficher l'élément du menu",
 };

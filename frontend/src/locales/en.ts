@@ -1046,4 +1046,10 @@ export const en = {
   tut_iot_s3_title: "Massif Vigilance & Threat Level",
   tut_iot_s3_desc: "Cross-reference IoT sensor spikes with the operational watch status to prioritize massif patrol deployments.",
   tut_iot_s3_hint: "Click the operational status bar to finish.",
+  tutorial_action_required: "Action Required",
+  tutorial_wrong_target_title: "Action on Highlighted Target",
+  tutorial_wrong_target_hint: "Please click the highlighted element to continue.",
+  tutorial_waiting_click: "Waiting for your click on the target...",
+  tutorial_click_target_prompt: "Click here to proceed",
+  tutorial_reopen_menu_hint: "Click 'More' to reveal the menu item",
 };

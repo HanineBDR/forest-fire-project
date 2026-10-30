@@ -72,8 +72,46 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const t = (key: TranslationKey | string, params?: Record<string, string | number>): string => {
+    if (!key) return "";
+    const cleanKey = String(key).trim();
     const dict = translations[language] || translations.en;
-    let text = dict[key] || translations.en[key as keyof typeof en] || translations.fr[key as keyof typeof fr] || key;
+    
+    // 1. Direct dictionary match
+    let text = dict[cleanKey] || translations.en[cleanKey as keyof typeof en] || translations.fr[cleanKey as keyof typeof fr];
+
+    // 2. Fallback: try prefix variations if not found directly
+    if (!text) {
+      const candidates = [
+        cleanKey.replace(/^(tutorial_|tut_|guide_|help_center_)/, ""),
+        `tutorial_${cleanKey}`,
+        `tut_${cleanKey}`,
+        `help_center_${cleanKey}`,
+        cleanKey.replace(/^guide\./, ""),
+        cleanKey.replace(/\./g, "_"),
+      ];
+      for (const cand of candidates) {
+        if (dict[cand]) {
+          text = dict[cand];
+          break;
+        }
+        if (translations.en[cand as keyof typeof en]) {
+          text = translations.en[cand as keyof typeof en];
+          break;
+        }
+        if (translations.fr[cand as keyof typeof fr]) {
+          text = translations.fr[cand as keyof typeof fr];
+          break;
+        }
+      }
+    }
+
+    // 3. Fallback: format key cleanly instead of leaking raw snake_case identifier into UI
+    if (!text) {
+      text = cleanKey
+        .replace(/^(tutorial_|tut_|guide_|help_center_)/, "")
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+    }
 
     if (params) {
       Object.entries(params).forEach(([paramKey, paramVal]) => {

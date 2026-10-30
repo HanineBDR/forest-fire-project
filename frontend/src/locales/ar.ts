@@ -1046,4 +1046,10 @@ export const ar = {
   tut_iot_s3_title: "اليقظة الميدانية ومستوى التهديد",
   tut_iot_s3_desc: "مطابقة قراءات الحساسات مع شريط المراقبة العملياتي لتوجيه دوريات التدخل السريع في الكتل الغابية.",
   tut_iot_s3_hint: "انقر على شريط الحالة العملياتي لإنهاء الدرس.",
+  tutorial_action_required: "الإجراء المطلوب",
+  tutorial_wrong_target_title: "إجراء مطلوب على العنصر المميز",
+  tutorial_wrong_target_hint: "يرجى النقر على العنصر المميز للمتابعة.",
+  tutorial_waiting_click: "في انتظار نقرك على العنصر المستهدف...",
+  tutorial_click_target_prompt: "انقر هنا للمتابعة",
+  tutorial_reopen_menu_hint: "انقر على 'المزيد' لعرض عنصر القائمة",
 };

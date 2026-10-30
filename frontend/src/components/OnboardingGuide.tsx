@@ -32,6 +32,7 @@ import {
   Camera,
   History,
   Search,
+  Loader2,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { getStoredUser, UserRole } from "@/lib/auth";
@@ -65,7 +66,7 @@ interface TutorialDef {
 
 export const OnboardingGuide: React.FC = () => {
   const { t, isRTL, language } = useLanguage();
-  const { showToast } = useNotifications();
+  const { showToast, dismissToast } = useNotifications();
   const pathname = usePathname();
 
   // State
@@ -87,9 +88,12 @@ export const OnboardingGuide: React.FC = () => {
   const [completedTutorials, setCompletedTutorials] = useState<string[]>([]);
   const [hasCompletedFullTour, setHasCompletedFullTour] = useState(false);
 
-  // Interactive Spotlight & Target positioning
+  // Target positioning & Spotlight
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [activeTargetSelector, setActiveTargetSelector] = useState<string>("");
   const [shakeWarning, setShakeWarning] = useState(false);
+
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   // Load user info & saved progress
   useEffect(() => {
@@ -100,7 +104,6 @@ export const OnboardingGuide: React.FC = () => {
     setUserRole(effectiveRole);
     setUserId(effectiveId);
 
-    // Load completed tutorials for this specific user
     try {
       const storageKey = `completed_tutorials_${effectiveId}`;
       const saved = localStorage.getItem(storageKey);
@@ -136,6 +139,7 @@ export const OnboardingGuide: React.FC = () => {
     };
 
     const handleStartTour = (e: any) => {
+      dismissToast(); // Clean up existing toasts
       const explicitRole = e?.detail?.role || getStoredUser()?.role || userRole;
       if (explicitRole) setUserRole(explicitRole);
 
@@ -158,13 +162,22 @@ export const OnboardingGuide: React.FC = () => {
       window.removeEventListener("inkad_user_updated", handleUserUpdate);
       window.removeEventListener("inkad_start_tour", handleStartTour);
     };
-  }, [userRole]);
+  }, [userRole, dismissToast]);
 
-  // Close tutorial runner on route changes
+  // Clean up toasts when help center opens
   useEffect(() => {
-    setIsHelpCenterOpen(false);
-    setActiveTutorial(null);
-    setIsFullTourActive(false);
+    if (isHelpCenterOpen) {
+      dismissToast();
+    }
+  }, [isHelpCenterOpen, dismissToast]);
+
+  // Cancel guide only if user navigates to public/login pages
+  useEffect(() => {
+    if (pathname === "/login" || pathname === "/") {
+      setIsHelpCenterOpen(false);
+      setActiveTutorial(null);
+      setIsFullTourActive(false);
+    }
   }, [pathname]);
 
   // -------------------------------------------------------------
@@ -429,9 +442,6 @@ export const OnboardingGuide: React.FC = () => {
 
   // -------------------------------------------------------------
   // STRICT RBAC FILTERING: Remove unauthorized tutorials from DOM
-  // ADMIN -> 6 tutorials
-  // CIVIL_PROTECTION -> 3 tutorials (Map, Alerts, Citizen Reports)
-  // FOREST_GUARD -> 2 tutorials (Map, IoT/Drones)
   // -------------------------------------------------------------
   const roleTutorials = useMemo(() => {
     return allTutorials.filter((tut) => tut.roles.includes(userRole));
@@ -456,7 +466,7 @@ export const OnboardingGuide: React.FC = () => {
     return roleTutorials.filter((tut) => tut.category === selectedCategory);
   }, [roleTutorials, selectedCategory]);
 
-  // Dynamic search query filtering (case-insensitive across translated title and description)
+  // Dynamic search query filtering
   const displayedTutorials = useMemo(() => {
     if (!searchQuery.trim()) return categoryTutorials;
     const q = searchQuery.toLowerCase().trim();
@@ -475,7 +485,7 @@ export const OnboardingGuide: React.FC = () => {
   const totalCount = roleTutorials.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  // Mark tutorial as completed in LocalStorage
+  // LocalStorage record helpers
   const recordTutorialCompletion = useCallback((tutId: string) => {
     const currentUserId = userId || "default";
     const storageKey = `completed_tutorials_${currentUserId}`;
@@ -491,7 +501,6 @@ export const OnboardingGuide: React.FC = () => {
     }
   }, [userId]);
 
-  // Mark full tour completed in LocalStorage
   const recordFullTourCompletion = useCallback(() => {
     const currentUserId = userId || "default";
     try {
@@ -503,11 +512,9 @@ export const OnboardingGuide: React.FC = () => {
     }
   }, [userId, recordTutorialCompletion]);
 
-  // -------------------------------------------------------------
-  // Full Dashboard Onboarding Tour Steps (Role-Aware)
-  // -------------------------------------------------------------
+  // Full Tour Steps
   const fullTourSteps: TutorialStep[] = useMemo(() => {
-    const steps: TutorialStep[] = [
+    return [
       {
         id: "tour_brand",
         target: '[data-tour="brand"]',
@@ -572,11 +579,8 @@ export const OnboardingGuide: React.FC = () => {
         hintKey: "tut_settings_s2_hint",
       },
     ];
-
-    return steps;
   }, []);
 
-  // Determine active steps list
   const currentStepList: TutorialStep[] = useMemo(() => {
     if (activeTutorial) return activeTutorial.steps;
     if (isFullTourActive) return fullTourSteps;
@@ -585,16 +589,23 @@ export const OnboardingGuide: React.FC = () => {
 
   const currentStep = currentStepList[stepIndex] || null;
 
-  // Resolve target element and rect in DOM
+  // Resolve target element and bounding rect
   const updateTargetPosition = useCallback(() => {
     if (!currentStep) {
       setTargetRect(null);
+      setActiveTargetSelector("");
       return;
     }
 
     let el = document.querySelector(currentStep.target) as HTMLElement | null;
+    let chosenSelector = currentStep.target;
+
     if ((!el || el.offsetParent === null) && currentStep.fallbackTarget) {
-      el = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
+      const fallbackEl = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
+      if (fallbackEl && fallbackEl.offsetParent !== null) {
+        el = fallbackEl;
+        chosenSelector = currentStep.fallbackTarget;
+      }
     }
 
     if (el) {
@@ -603,64 +614,81 @@ export const OnboardingGuide: React.FC = () => {
       } catch {}
       const rect = el.getBoundingClientRect();
       setTargetRect(rect);
+      setActiveTargetSelector(chosenSelector);
     } else {
       setTargetRect(null);
+      setActiveTargetSelector("");
     }
   }, [currentStep]);
 
+  // Re-calculate target position on step change, resize, scroll
   useEffect(() => {
     updateTargetPosition();
-    window.addEventListener("resize", updateTargetPosition);
-    window.addEventListener("scroll", updateTargetPosition, true);
+    const handleEvents = () => updateTargetPosition();
+    window.addEventListener("resize", handleEvents);
+    window.addEventListener("scroll", handleEvents, true);
     return () => {
-      window.removeEventListener("resize", updateTargetPosition);
-      window.removeEventListener("scroll", updateTargetPosition, true);
+      window.removeEventListener("resize", handleEvents);
+      window.removeEventListener("scroll", handleEvents, true);
     };
   }, [updateTargetPosition]);
 
-  // "Try it now" Action: Click on highlighted element automatically advances to next step
+  // SMART STATE DETECTION: Observe DOM mutations (e.g. dropdowns opening/closing)
   useEffect(() => {
     if (!currentStep) return;
 
-    let el = document.querySelector(currentStep.target) as HTMLElement | null;
-    if ((!el || el.offsetParent === null) && currentStep.fallbackTarget) {
-      el = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
+    const observer = new MutationObserver(() => {
+      updateTargetPosition();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "aria-expanded"],
+    });
+
+    return () => observer.disconnect();
+  }, [currentStep, updateTargetPosition]);
+
+  // SMART MENU STATE DETECTION: If target is "nav-more" but the menu is ALREADY OPEN, automatically advance to Step 2
+  useEffect(() => {
+    if (!currentStep || stepIndex !== 0) return;
+
+    if (currentStep.target === '[data-tour="nav-more"]') {
+      const openMenu = document.querySelector('[role="menu"]');
+      if (openMenu) {
+        const timer = setTimeout(() => {
+          handleNext();
+        }, 200);
+        return () => clearTimeout(timer);
+      }
     }
-
-    if (!el) return;
-
-    const handleTargetClick = () => {
-      handleNext();
-    };
-
-    el.addEventListener("click", handleTargetClick, { once: true });
-    return () => {
-      el?.removeEventListener("click", handleTargetClick);
-    };
   }, [currentStep, stepIndex]);
 
   // Navigation handlers
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (stepIndex < currentStepList.length - 1) {
       setStepIndex((prev) => prev + 1);
     } else {
       finishTutorial();
     }
-  };
+  }, [stepIndex, currentStepList]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (stepIndex > 0) {
       setStepIndex((prev) => prev - 1);
     }
-  };
+  }, [stepIndex]);
 
-  const handleSkip = () => {
+  const handleSkip = useCallback(() => {
     setActiveTutorial(null);
     setIsFullTourActive(false);
     setStepIndex(0);
-  };
+    dismissToast();
+  }, [dismissToast]);
 
-  const finishTutorial = () => {
+  const finishTutorial = useCallback(() => {
     const completedName = activeTutorial 
       ? t(activeTutorial.titleKey) 
       : t("help_center_general_tour_title");
@@ -675,24 +703,75 @@ export const OnboardingGuide: React.FC = () => {
     setIsFullTourActive(false);
     setStepIndex(0);
 
-    // Trigger success notification toast via NotificationContext
+    // Trigger success notification toast
     showToast({
       title: t("tutorial_toast_completed_title"),
       message: t("tutorial_toast_completed_msg", { name: completedName }),
       risk_level: "low",
       sender_role: "INKAD System",
     });
-  };
+  }, [activeTutorial, isFullTourActive, t, recordTutorialCompletion, recordFullTourCompletion, showToast]);
 
-  // Wrong-click shake handler
-  const handleWrongClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Wrong Click Handling: Show friendly red toast and trigger shake
+  const handleWrongClick = useCallback((e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setShakeWarning(true);
     setTimeout(() => setShakeWarning(false), 800);
-  };
+
+    showToast({
+      title: t("tutorial_wrong_target_title"),
+      message: t("tutorial_wrong_target_hint"),
+      risk_level: "critical",
+      sender_role: "INKAD System",
+    });
+  }, [showToast, t]);
+
+  // ROBUST CLICK DETECTION VIA CAPTURE PHASE:
+  // Detects when the user interacts with the real target element and advances smoothly
+  useEffect(() => {
+    const isRunnerActive = (activeTutorial !== null || isFullTourActive) && currentStep !== null;
+    if (!isRunnerActive || !currentStep) return;
+
+    const handleGlobalClickCapture = (e: MouseEvent) => {
+      // 1. Clicks inside the floating panel should execute normally
+      if (panelRef.current && (panelRef.current === e.target || panelRef.current.contains(e.target as Node))) {
+        return;
+      }
+
+      // 2. Locate target element in DOM
+      let targetEl = document.querySelector(currentStep.target) as HTMLElement | null;
+      if ((!targetEl || targetEl.offsetParent === null) && currentStep.fallbackTarget) {
+        targetEl = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
+      }
+
+      // 3. User clicked the highlighted target element!
+      if (targetEl && (targetEl === e.target || targetEl.contains(e.target as Node))) {
+        // Native interaction executes, then advance tour step
+        setTimeout(() => {
+          handleNext();
+        }, 180);
+        return;
+      }
+
+      // 4. If current target is an item inside "More", but user clicked the "More" toggle button to open it:
+      const moreBtn = document.querySelector('[data-tour="nav-more"]');
+      if (moreBtn && (moreBtn === e.target || moreBtn.contains(e.target as Node))) {
+        return; // Allow menu to open
+      }
+    };
+
+    window.addEventListener("click", handleGlobalClickCapture, true); // CAPTURE!
+    return () => {
+      window.removeEventListener("click", handleGlobalClickCapture, true);
+    };
+  }, [activeTutorial, isFullTourActive, currentStep, handleNext]);
 
   // Start specific task tutorial
   const startTutorial = (tut: TutorialDef) => {
+    dismissToast(); // Clear clutter toasts
     setIsHelpCenterOpen(false);
     setIsFullTourActive(false);
     setActiveTutorial(tut);
@@ -701,6 +780,7 @@ export const OnboardingGuide: React.FC = () => {
 
   // Start Full Tour from catalog
   const startFullTour = () => {
+    dismissToast(); // Clear clutter toasts
     setIsHelpCenterOpen(false);
     setActiveTutorial(null);
     setIsFullTourActive(true);
@@ -712,11 +792,14 @@ export const OnboardingGuide: React.FC = () => {
   const isRunnerActive = (activeTutorial !== null || isFullTourActive) && currentStep !== null;
   const isLast = stepIndex === currentStepList.length - 1;
 
-  // Smart floating position for the non-blocking side panel
+  // Determine pointer direction and panel placement
   const isTargetBottomRight =
     targetRect &&
     targetRect.bottom > (typeof window !== "undefined" ? window.innerHeight * 0.55 : 500) &&
     targetRect.right > (typeof window !== "undefined" ? window.innerWidth * 0.55 : 500);
+
+  // Is target in menu fallback mode?
+  const isFallbackActive = activeTargetSelector === currentStep?.fallbackTarget;
 
   return (
     <>
@@ -1004,67 +1087,104 @@ export const OnboardingGuide: React.FC = () => {
       )}
 
       {/* ============================================================ */}
-      {/* 2. INTERACTIVE SPOTLIGHT OVERLAY WITH SVG CUTOUT             */}
+      {/* 2. 4-PANEL SPOTLIGHT OVERLAY WITH ZERO-OBSTRUCTION CUTOUT   */}
       {/* ============================================================ */}
       {isRunnerActive && targetRect && (
-        <svg
-          className="fixed inset-0 z-[2800] w-full h-full pointer-events-none transition-all duration-300 ease-out"
-          style={{ width: "100vw", height: "100vh" }}
-        >
-          <defs>
-            <mask id="tutorial-spotlight-cutout">
-              {/* Solid white covers whole screen (makes it opaque) */}
-              <rect x="0" y="0" width="100%" height="100%" fill="white" />
-              {/* Black rounded cutout over target element (makes it transparent) */}
-              <rect
-                x={targetRect.left - 6}
-                y={targetRect.top - 6}
-                width={targetRect.width + 12}
-                height={targetRect.height + 12}
-                rx="12"
-                ry="12"
-                fill="black"
-              />
-            </mask>
-          </defs>
-
-          {/* Dark semi-transparent backdrop with cutout hole */}
-          <rect
-            x="0"
-            y="0"
-            width="100%" height="100%"
-            fill="rgba(2, 6, 23, 0.78)"
-            mask="url(#tutorial-spotlight-cutout)"
-            className="pointer-events-auto cursor-not-allowed"
+        <div className="fixed inset-0 z-[2800] pointer-events-auto" style={{ width: "100vw", height: "100vh" }}>
+          {/* Top dark backdrop */}
+          <div
+            className="absolute top-0 left-0 w-full bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 cursor-not-allowed"
+            style={{ height: Math.max(0, targetRect.top - 6) }}
+            onClick={handleWrongClick}
+          />
+          {/* Bottom dark backdrop */}
+          <div
+            className="absolute left-0 w-full bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 cursor-not-allowed"
+            style={{
+              top: targetRect.bottom + 6,
+              height: Math.max(0, (typeof window !== "undefined" ? window.innerHeight : 800) - (targetRect.bottom + 6)),
+            }}
+            onClick={handleWrongClick}
+          />
+          {/* Left dark backdrop */}
+          <div
+            className="absolute bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 cursor-not-allowed"
+            style={{
+              top: Math.max(0, targetRect.top - 6),
+              left: 0,
+              width: Math.max(0, targetRect.left - 6),
+              height: targetRect.height + 12,
+            }}
+            onClick={handleWrongClick}
+          />
+          {/* Right dark backdrop */}
+          <div
+            className="absolute bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 cursor-not-allowed"
+            style={{
+              top: Math.max(0, targetRect.top - 6),
+              left: targetRect.right + 6,
+              width: Math.max(0, (typeof window !== "undefined" ? window.innerWidth : 1200) - (targetRect.right + 6)),
+              height: targetRect.height + 12,
+            }}
             onClick={handleWrongClick}
           />
 
-          {/* Pulsing emerald focus ring directly over target */}
-          <rect
-            x={targetRect.left - 6}
-            y={targetRect.top - 6}
-            width={targetRect.width + 12}
-            height={targetRect.height + 12}
-            rx="12"
-            ry="12"
-            fill="none"
-            stroke="#10b981"
-            strokeWidth="2.5"
-            strokeDasharray="6 4"
-            className="animate-pulse"
+          {/* Pulsing glowing focus ring directly framing target (pointer-events-none so real element receives click) */}
+          <div
+            className="absolute pointer-events-none rounded-xl border-2 border-emerald-400 ring-4 ring-emerald-500/30 transition-all duration-150 animate-pulse shadow-[0_0_25px_rgba(16,185,129,0.5)] z-[2810]"
+            style={{
+              top: targetRect.top - 6,
+              left: targetRect.left - 6,
+              width: targetRect.width + 12,
+              height: targetRect.height + 12,
+            }}
           />
-        </svg>
+
+          {/* Animated Bouncing Pointer Arrow with prompt */}
+          <div
+            className="absolute pointer-events-none flex flex-col items-center z-[2820] transition-all duration-150"
+            style={{
+              left: Math.max(10, Math.min(
+                (typeof window !== "undefined" ? window.innerWidth - 180 : 800),
+                targetRect.left + (targetRect.width / 2) - 80
+              )),
+              top: (targetRect.bottom + 65 < (typeof window !== "undefined" ? window.innerHeight : 800))
+                ? targetRect.bottom + 12
+                : Math.max(10, targetRect.top - 58),
+              width: 160,
+            }}
+          >
+            {(targetRect.bottom + 65 < (typeof window !== "undefined" ? window.innerHeight : 800)) ? (
+              <div className="flex flex-col items-center animate-bounce">
+                <div className="w-0 h-0 border-x-[6px] border-x-transparent border-b-[8px] border-b-emerald-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+                <div className="bg-emerald-500 text-slate-950 text-[11px] font-black px-3 py-1 rounded-full shadow-xl shadow-black/90 flex items-center gap-1.5 mt-0.5 whitespace-nowrap">
+                  <MousePointerClick className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
+                  <span>{t("tutorial_click_target_prompt")}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center animate-bounce">
+                <div className="bg-emerald-500 text-slate-950 text-[11px] font-black px-3 py-1 rounded-full shadow-xl shadow-black/90 flex items-center gap-1.5 mb-0.5 whitespace-nowrap">
+                  <MousePointerClick className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
+                  <span>{t("tutorial_click_target_prompt")}</span>
+                </div>
+                <div className="w-0 h-0 border-x-[6px] border-x-transparent border-t-[8px] border-t-emerald-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ============================================================ */}
-      {/* 3. NON-BLOCKING FLOATING SIDE PANEL (NIELSEN HEURISTICS)    */}
+      {/* 3. NON-BLOCKING FLOATING SIDE PANEL (SUPER-DEVELOPED UX)    */}
       {/* ============================================================ */}
       {isRunnerActive && (
         <aside
+          ref={panelRef}
           role="region"
           aria-label={t("tour_guide_title")}
-          className={`fixed z-[2850] w-[92vw] sm:w-[420px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-black/80 transition-all duration-300 ease-out ${
-            shakeWarning ? "animate-bounce ring-2 ring-amber-500" : ""
+          className={`fixed z-[2850] w-[92vw] sm:w-[420px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-black/80 transition-all duration-300 ease-out pointer-events-auto ${
+            shakeWarning ? "animate-bounce ring-2 ring-red-500 shadow-red-950/60" : ""
           } ${
             isTargetBottomRight
               ? "top-6 right-4 sm:right-6 rtl:right-auto rtl:left-4 sm:rtl:left-6"
@@ -1106,7 +1226,7 @@ export const OnboardingGuide: React.FC = () => {
           </div>
 
           {/* Step content */}
-          <div className="py-3.5 space-y-2">
+          <div className="py-3.5 space-y-2.5">
             <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
               <span>{t(currentStep.titleKey)}</span>
             </h3>
@@ -1114,19 +1234,35 @@ export const OnboardingGuide: React.FC = () => {
               {t(currentStep.descKey)}
             </p>
 
-            {/* "Try it now" Action Hint Box */}
-            <div className="mt-3 p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60 flex items-start gap-2.5">
-              <MousePointerClick className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5 animate-pulse" />
-              <div className="text-xs text-emerald-300/90 leading-tight">
-                <span className="font-bold text-emerald-400">{t("tutorial_action_required")}: </span>
-                <span>{t(currentStep.hintKey)}</span>
+            {/* "Action Required" Prompt & "Waiting for your click..." progress indicator */}
+            <div className="mt-3 p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 flex flex-col gap-2">
+              <div className="flex items-start gap-2.5">
+                <MousePointerClick className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5 animate-pulse" />
+                <div className="text-xs text-emerald-300 leading-snug">
+                  <span className="font-bold text-emerald-400">
+                    {t("tutorial_action_required")}:{" "}
+                  </span>
+                  <span>
+                    {isFallbackActive ? t("tutorial_reopen_menu_hint") : t(currentStep.hintKey)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Visual "Waiting for your click..." progress state indicator */}
+              <div className="flex items-center gap-2 pt-2 border-t border-emerald-900/60 text-[11px] text-emerald-400/90 font-medium">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />
+                <span>{t("tutorial_waiting_click")}</span>
               </div>
             </div>
 
-            {/* Wrong click alert if user clicked outside */}
+            {/* Wrong click alert notice if user clicked outside */}
             {shakeWarning && (
-              <div className="p-2 rounded-lg bg-amber-950/80 border border-amber-700/80 text-amber-300 text-xs flex items-center gap-2 animate-in fade-in duration-150">
-                <Info className="w-4 h-4 shrink-0 text-amber-400" />
+              <div className="p-2.5 rounded-xl bg-red-950/80 border border-red-700/80 text-red-300 text-xs flex items-center gap-2 animate-in fade-in duration-150">
+                <Info className="w-4 h-4 shrink-0 text-red-400" />
                 <span>{t("tutorial_wrong_target_hint")}</span>
               </div>
             )}
@@ -1189,7 +1325,10 @@ export const OnboardingGuide: React.FC = () => {
       {!isHelpCenterOpen && !isRunnerActive && (
         <button
           type="button"
-          onClick={() => setIsHelpCenterOpen(true)}
+          onClick={() => {
+            dismissToast();
+            setIsHelpCenterOpen(true);
+          }}
           title={t("tour_open_guide_tooltip") || "Tutorials"}
           aria-label={t("tour_open_guide_tooltip") || "Tutorials"}
           className="fixed bottom-4 right-4 rtl:right-auto rtl:left-4 z-[2000] flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/95 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/80 text-slate-300 hover:text-white text-xs font-semibold shadow-2xl shadow-black/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 group"
