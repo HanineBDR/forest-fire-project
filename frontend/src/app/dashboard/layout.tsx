@@ -296,9 +296,9 @@ alt="INKAD Logo"
               {isRoleSwitcherOpen && (
                 <div 
                   role="menu"
-                  className="absolute start-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-lg py-1.5 z-[2100] shadow-2xl focus:outline-none"
+                  className="absolute start-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg py-1.5 z-[2100] shadow-2xl focus:outline-none text-slate-800 dark:text-slate-200"
                 >
-                  <div className="px-3 py-1.5 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                  <div className="px-3 py-1.5 border-b border-slate-200 dark:border-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
                     <span>{t("command_panel_access")}</span>
                     <span className="text-[10px] text-emerald-400 font-mono">{t("one_click_access")}</span>
                   </div>
@@ -312,8 +312,8 @@ alt="INKAD Logo"
                           onClick={() => handleSwitchRole(acc)}
                           className={`w-full flex items-center justify-between p-2 rounded-md text-xs text-left transition-colors ${
                             isCurrent
-                              ? "bg-slate-800 text-white font-semibold border border-slate-700"
-                              : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                              ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold border border-slate-300 dark:border-slate-700"
+                              : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60"
                           }`}
                         >
                           <div className="space-y-0.5">
@@ -394,7 +394,7 @@ alt="INKAD Logo"
                     aria-orientation="vertical"
                     className="absolute start-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none animate-in fade-in slide-in-from-top-2 duration-150 text-slate-800 dark:text-slate-200"
                   >
-                    <div className="px-3 py-1.5 border-b border-slate-800 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <div className="px-3 py-1.5 border-b border-slate-200 dark:border-slate-800 text-[10px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
                       <span>{t("nav_more")} & {t("nav_operational_tools")}</span>
                       <span className="text-[10px] text-slate-500 font-mono">{moreNavItems.length}</span>
                     </div>
@@ -411,8 +411,8 @@ alt="INKAD Logo"
                             onClick={() => setIsMoreOpen(false)}
                             className={`flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors ${
                               active
-                                ? "bg-slate-800 text-white font-semibold border border-slate-700"
-                                : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold border border-slate-300 dark:border-slate-700"
+                                : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60"
                             }`}
                           >
                             <div className="flex items-center gap-2.5">
@@ -493,8 +493,8 @@ alt="INKAD Logo"
                   aria-orientation="vertical"
                   className="absolute end-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none text-slate-800 dark:text-slate-200"
                 >
-                  <div className="px-3.5 py-2.5 border-b border-slate-800 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
+                  <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0 overflow-hidden">
                       {user.avatar ? (
                         <img src={user.avatar} alt={cleanUserName} className="w-full h-full object-cover" />
                       ) : (
@@ -502,7 +502,7 @@ alt="INKAD Logo"
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-white truncate text-xs">{cleanUserName}</div>
+                      <div className="font-semibold text-slate-900 dark:text-white truncate text-xs">{cleanUserName}</div>
                       <div className="text-[10px] text-slate-400 truncate mt-0.5">{user.email}</div>
                       <div className="mt-1 inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[9px] font-semibold border bg-slate-800/80 border-slate-700 text-amber-300">
                         <Lock className="w-2.5 h-2.5 text-amber-400 shrink-0" aria-hidden="true" />
@@ -512,15 +512,15 @@ alt="INKAD Logo"
                   </div>
 
                   {/* My Profile Link */}
-                  <div className="py-1 border-b border-slate-800">
+                  <div className="py-1 border-b border-slate-200 dark:border-slate-800">
                     <Link
                       href="/dashboard/profile"
                       role="menuitem"
                       onClick={() => setIsProfileOpen(false)}
                       className={`flex items-center gap-2.5 px-3.5 py-2 text-xs transition-colors ${
                         pathname === "/dashboard/profile"
-                          ? "bg-slate-800 text-white font-semibold"
-                          : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                          ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold"
+                          : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60"
                       }`}
                     >
                       <Settings className="w-3.5 h-3.5 text-slate-400" />
@@ -533,7 +533,7 @@ alt="INKAD Logo"
                         setIsProfileOpen(false);
                         handleStartTour();
                       }}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors text-left"
                     >
                       <HelpCircle className="w-3.5 h-3.5 text-emerald-400" />
                       <span>{t("tour_open_guide_tooltip") || "Interactive Guide"}</span>
@@ -541,7 +541,7 @@ alt="INKAD Logo"
                   </div>
 
                   {/* Quick Role Switch in Profile Dropdown */}
-                  <div className="py-1 border-b border-slate-800">
+                  <div className="py-1 border-b border-slate-200 dark:border-slate-800">
                     <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
                       <span>{t("switch_command_title") || "Changer de rôle"}</span>
                       <span className="text-[9px] text-emerald-400 font-mono">{t("one_click_access") || "Instantané"}</span>
@@ -573,7 +573,7 @@ alt="INKAD Logo"
                   </div>
 
                   {/* Intercom Link */}
-                  <div className="py-1 border-b border-slate-800">
+                  <div className="py-1 border-b border-slate-200 dark:border-slate-800">
                     <Link
                       href="/dashboard/notifications"
                       role="menuitem"

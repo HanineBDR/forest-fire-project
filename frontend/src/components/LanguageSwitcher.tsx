@@ -53,7 +53,7 @@ export const LanguageSwitcher: React.FC = () => {
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-label={`Changer de langue, langue actuelle : ${activeOption.fullLabel}`}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shadow-sm"
         >
           <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
           <span aria-hidden="true">{activeOption.flag}</span>
@@ -66,7 +66,7 @@ export const LanguageSwitcher: React.FC = () => {
         <div
           role="listbox"
           aria-label="Sélectionner une langue"
-          className="absolute right-0 mt-1.5 w-36 rounded-lg bg-slate-900 border border-slate-700 py-1 shadow-xl z-50 focus:outline-none text-xs"
+          className="absolute right-0 mt-1.5 w-36 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 py-1 shadow-xl z-50 focus:outline-none text-xs text-slate-800 dark:text-slate-200"
         >
           {OPTIONS.map((opt) => {
             const isSelected = language === opt.code;
@@ -80,8 +80,8 @@ export const LanguageSwitcher: React.FC = () => {
                   setLanguage(opt.code);
                   setIsOpen(false);
                 }}
-                className={`w-full px-3 py-2 flex items-center justify-between text-left transition-colors duration-150 hover:bg-slate-800 ${
-                  isSelected ? "text-red-400 font-semibold bg-slate-800/60" : "text-slate-300"
+                className={`w-full px-3 py-2 flex items-center justify-between text-left transition-colors duration-150 hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  isSelected ? "text-red-600 dark:text-red-400 font-semibold bg-slate-100 dark:bg-slate-800/60" : "text-slate-700 dark:text-slate-300"
                 }`}
               >
                 <div className="flex items-center gap-2">

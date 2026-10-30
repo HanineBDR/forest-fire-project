@@ -194,7 +194,7 @@ export default function MyProfilePage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Avatar Upload Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-5">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 shadow-sm text-slate-800 dark:text-slate-100">
           <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
             <Camera className="w-4 h-4 text-slate-400" />
             <span>{t("profile_avatar_title") || "Official Avatar & Photo"}</span>
@@ -205,7 +205,7 @@ export default function MyProfilePage() {
 
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
             {/* Avatar Preview */}
-            <div className="relative group w-24 h-24 rounded-full border-2 border-slate-700 bg-slate-950 flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
+            <div className="relative group w-24 h-24 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-950 flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
               {avatar ? (
                 <img
                   src={avatar}
@@ -263,7 +263,7 @@ export default function MyProfilePage() {
         </div>
 
         {/* Identity Details Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 space-y-4 shadow-sm text-slate-800 dark:text-slate-100">
           <h2 className="text-sm font-bold text-white flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-slate-400" />
             <span>{t("profile_identity_title") || "Personnel Identity & Role"}</span>
@@ -282,7 +282,7 @@ export default function MyProfilePage() {
                   onChange={(e) => setName(e.target.value)}
                   required
                   placeholder="Lieutenant Karim Belkacem"
-                  className="w-full px-3 py-2 pl-9 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
+                  className="w-full px-3 py-2 pl-9 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-600"
                 />
                 <User className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
               </div>
@@ -299,7 +299,7 @@ export default function MyProfilePage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+213 550 12 34 56"
-                  className="w-full px-3 py-2 pl-9 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 font-mono"
+                  className="w-full px-3 py-2 pl-9 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-600 font-mono"
                 />
                 <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
               </div>
@@ -322,7 +322,7 @@ export default function MyProfilePage() {
                   value={currentUser.email}
                   disabled
                   readOnly
-                  className="w-full px-3 py-2 pl-9 bg-slate-950/70 border border-slate-800 rounded text-xs text-slate-400 cursor-not-allowed font-mono opacity-80 select-none"
+                  className="w-full px-3 py-2 pl-9 bg-slate-100 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded text-xs text-slate-500 dark:text-slate-400 cursor-not-allowed font-mono opacity-80 select-none"
                 />
                 <Mail className="w-4 h-4 text-slate-600 absolute left-3 top-2.5" />
                 <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5" />
@@ -335,7 +335,7 @@ export default function MyProfilePage() {
         </div>
 
         {/* Password Security Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 space-y-4 shadow-sm text-slate-800 dark:text-slate-100">
           <h2 className="text-sm font-bold text-white flex items-center gap-2">
             <Lock className="w-4 h-4 text-slate-400" />
             <span>{t("profile_security_title") || "Change Operational Password"}</span>
@@ -357,7 +357,7 @@ export default function MyProfilePage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
                   minLength={6}
-                  className="w-full px-3 py-2 pr-9 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 font-mono"
+                  className="w-full px-3 py-2 pr-9 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-600 font-mono"
                 />
                 <button
                   type="button"
@@ -380,7 +380,7 @@ export default function MyProfilePage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••••••"
                 minLength={6}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 font-mono"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400 dark:focus:border-slate-600 font-mono"
               />
             </div>
           </div>

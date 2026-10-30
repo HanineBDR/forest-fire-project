@@ -37,17 +37,17 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
   const activeStep: SimulationStep = simulation.timesteps[activeHorizonIndex] || simulation.timesteps[0];
 
   return (
-    <div className="bg-slatebg-900/90 backdrop-blur-md border border-slate-800/80 rounded-lg p-4 text-xs space-y-3">
+    <div className="bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-lg p-4 text-xs space-y-3 text-slate-800 dark:text-slate-100 shadow-sm transition-colors duration-150">
       {/* Title & Player Button */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-bold text-sm text-slate-100 flex items-center gap-1.5">
+          <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
             <span>{t("sim_huygens_title")}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700/60">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono border border-slate-200 dark:border-slate-700/60">
               {t("sim_horizons_count", { n: simulation.timesteps.length })}
             </span>
           </h3>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
             {t("sim_wind_aligned", { deg: simulation.spread_azimuth_deg })}
           </p>
         </div>
@@ -94,8 +94,8 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               aria-label={`Select +${step.hours} hour horizon, ${step.burned_area_hectares} hectares`}
               className={`py-2 px-1 rounded-lg border font-mono transition-colors duration-150 flex flex-col items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-500 ${
                 isActive
-                  ? "bg-ember-600 border-ember-500 text-white"
-                  : "bg-slate-800/60 hover:bg-slate-800 border-slate-700/60 text-slate-300"
+                  ? "bg-ember-600 border-ember-500 text-white shadow-sm"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/60 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300"
               }`}
             >
               <div className="flex items-center gap-1 text-xs font-bold tabular-nums">
@@ -109,29 +109,29 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
       </div>
 
       {/* Dynamic Telemetry for the active timestep */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-800/80">
-        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-200 dark:border-slate-800/80">
+        <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40">
           <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_burned_area_label")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
-            {activeStep.burned_area_hectares} <span className="text-xs font-normal text-slate-300">ha</span>
+            {activeStep.burned_area_hectares} <span className="text-xs font-normal text-slate-600 dark:text-slate-300">ha</span>
           </span>
         </div>
 
-        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40">
+        <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40">
           <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_rate_of_spread")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
-            {activeStep.rate_of_spread_m_h} <span className="text-xs font-normal text-slate-300">m/h</span>
+            {activeStep.rate_of_spread_m_h} <span className="text-xs font-normal text-slate-600 dark:text-slate-300">m/h</span>
           </span>
         </div>
 
-        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40">
+        <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40">
           <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_flame_length")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
-            {simulation.estimated_flame_height_m} <span className="text-xs font-normal text-slate-300">m</span>
+            {simulation.estimated_flame_height_m} <span className="text-xs font-normal text-slate-600 dark:text-slate-300">m</span>
           </span>
         </div>
 
-        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40">
+        <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40">
           <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_evacuation_radius")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
             {simulation.recommended_evacuation_radius_km} <span className="text-xs font-normal text-slate-300">km</span>

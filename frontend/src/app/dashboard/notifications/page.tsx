@@ -162,7 +162,7 @@ export default function NotificationsPage() {
   }, [notifications, activeTab, filterRole, filterRisk]);
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="flex-1 bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full transition-colors duration-150">
       {/* Page Title & Operational Actions */}
       <section className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -184,7 +184,7 @@ export default function NotificationsPage() {
             type="button"
             onClick={() => setIsSoundEnabled(!isSoundEnabled)}
             aria-label={isSoundEnabled ? t("notifications_sound_toggle_aria_on") : t("notifications_sound_toggle_aria_off")}
-            className="h-9 px-3 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-2 text-xs font-medium"
+            className="h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 text-xs font-medium shadow-sm"
           >
             {isSoundEnabled ? (
               <>
@@ -205,7 +205,7 @@ export default function NotificationsPage() {
             onClick={handleRefreshAll}
             disabled={isRefreshing}
             aria-label={t("notifications_refresh_aria")}
-            className="h-9 px-3 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-2 text-xs font-medium"
+            className="h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 text-xs font-medium shadow-sm"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-red-400" : ""}`} />
             <span>{t("notifications_refresh")}</span>
@@ -219,7 +219,7 @@ export default function NotificationsPage() {
       {/* Environmental & Telemetry Context Cards */}
       <section aria-label="Signaux environnementaux et télémétrie" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* 1. Sirocco Status */}
-        <div className="p-3.5 rounded-lg border border-slate-800 bg-slate-900">
+        <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>{t("notifications_sirocco_card_title")}</span>
             <Compass className="w-4 h-4 text-amber-400" />
@@ -233,7 +233,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* 2. Drones FLIR Thermal */}
-        <div className="p-3.5 rounded-lg border border-slate-800 bg-slate-900">
+        <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>{t("notifications_drones_card_title")}</span>
             <Radio className="w-4 h-4 text-red-400" />
@@ -247,7 +247,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* 3. Vent Fort */}
-        <div className="p-3.5 rounded-lg border border-slate-800 bg-slate-900">
+        <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>{t("notifications_wind_card_title")}</span>
             <Wind className="w-4 h-4 text-blue-400" />
@@ -261,7 +261,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* 4. Vigies DGF Status */}
-        <div className="p-3.5 rounded-lg border border-slate-800 bg-slate-900">
+        <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>{t("notifications_vigies_card_title")}</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -276,7 +276,7 @@ export default function NotificationsPage() {
       </section>
 
       {/* Role Navigation Bar & Channel Filter */}
-      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/60">
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm">
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-400 font-medium">{t("notifications_active_post")}</span>
           {[
@@ -395,7 +395,7 @@ export default function NotificationsPage() {
                   return (
                     <article
                       key={`${item.item_type}-${item.id}-${idx}`}
-                      className="relative p-4 rounded-lg border border-slate-800 bg-slate-900 text-xs space-y-2 hover:border-slate-700 transition-colors"
+                      className="relative p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs space-y-2 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm transition-colors text-slate-800 dark:text-slate-200"
                     >
                       {/* Timeline Dot */}
                       <span
@@ -425,7 +425,7 @@ export default function NotificationsPage() {
                               ? `${t("notifications_action_label")} (${item.action})`
                               : t("notifications_intercom_label")}
                           </span>
-                          <h2 className="font-semibold text-white">
+                          <h2 className="font-semibold text-slate-900 dark:text-white">
                             {translateNotificationTitle(item.title, language) || (isAck ? `${t("notifications_ack_alert")} ${item.alert_id}` : "Message")}
                           </h2>
                         </div>
@@ -438,7 +438,7 @@ export default function NotificationsPage() {
                         </div>
                       </div>
 
-                      <p className="text-slate-300 leading-relaxed text-xs">
+                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
                         {translateNotificationMessage(item.message || item.comment, language)}
                       </p>
 
@@ -514,7 +514,7 @@ export default function NotificationsPage() {
         {activeTab !== "timeline" && (
           <div className="space-y-3">
             {/* Filter controls */}
-            <div className="flex flex-wrap items-center gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-lg text-xs">
+            <div className="flex flex-wrap items-center gap-3 p-3 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-lg text-xs shadow-sm">
               <div className="flex items-center gap-1.5 text-slate-400">
                 <Filter className="w-3.5 h-3.5" />
                 <span>{t("filter_label")}:</span>
@@ -523,7 +523,7 @@ export default function NotificationsPage() {
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
                 aria-label="Filter by recipient"
-                className="h-8 px-2.5 bg-slate-800 border border-slate-700 rounded text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                className="h-8 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-800 dark:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               >
                 <option value="all">{t("notifications_filter_all_recipients")}</option>
                 <option value="protection_civile">{t("role_protection_civile")}</option>
@@ -535,7 +535,7 @@ export default function NotificationsPage() {
                 value={filterRisk}
                 onChange={(e) => setFilterRisk(e.target.value)}
                 aria-label="Filter by risk level"
-                className="h-8 px-2.5 bg-slate-800 border border-slate-700 rounded text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                className="h-8 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-800 dark:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               >
                 <option value="all">{t("notifications_filter_all_risk")}</option>
                 <option value="très">{t("intercom_urgency_critical")}</option>

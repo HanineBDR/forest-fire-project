@@ -504,20 +504,20 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         <aside
           role="status"
           aria-live="assertive"
-          className="fixed bottom-4 right-4 z-[9999] max-w-md w-full bg-slate-900 border border-slate-700 rounded-lg p-3.5 text-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+          className="fixed bottom-4 right-4 z-[9999] max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-3.5 text-slate-900 dark:text-slate-100 shadow-xl transition-colors duration-150"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <h2 className="text-xs font-bold uppercase tracking-wider text-red-400">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400">
                   {translateNotificationTitle(activeToast.title, language)}
                 </h2>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {translateNotificationMessage(activeToast.message, language)}
               </p>
-              <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-400">
+              <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
                 <span>{language === "ar" ? "المستوى" : language === "en" ? "Level" : "Niveau"}: {translateNotificationRisk(activeToast.risk_level, language)}</span>
                 <span>•</span>
                 <span>{activeToast.created_at}</span>
@@ -527,7 +527,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               type="button"
               onClick={dismissToast}
               aria-label={language === "ar" ? "إغلاق الإشعار" : language === "en" ? "Dismiss notification" : "Fermer la notification"}
-              className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded border border-slate-700 hover:bg-slate-800 transition-colors"
+              className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white text-xs px-2 py-1 rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               {language === "ar" ? "إغلاق" : language === "en" ? "Close" : "Fermer"}
             </button>

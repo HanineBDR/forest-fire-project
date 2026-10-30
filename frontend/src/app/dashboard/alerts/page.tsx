@@ -417,10 +417,10 @@ export default function AlertsPage() {
 
         {/* Live Controls */}
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 font-mono tabular-nums">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono tabular-nums shadow-sm">
             <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
             <span className="text-slate-400">{t("last_check")}</span>
-            <span className="font-semibold text-white">{relativeTime}</span>
+            <span className="font-semibold text-slate-900 dark:text-white">{relativeTime}</span>
           </div>
 
           <button
@@ -430,7 +430,7 @@ export default function AlertsPage() {
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               autoRefresh
                 ? "bg-slate-800 border-slate-600 text-white"
-                : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-850"
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm"
             }`}
           >
             <Radio className={`w-3.5 h-3.5 shrink-0 ${autoRefresh ? "text-emerald-400" : "text-slate-500"}`} aria-hidden="true" />
@@ -454,7 +454,7 @@ export default function AlertsPage() {
       <div 
         role="region" 
         aria-label="Filtres des alertes"
-        className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-slate-900/80 border border-slate-800 text-xs"
+        className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs shadow-sm transition-colors duration-150"
       >
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-slate-400 flex items-center gap-1 font-medium">
@@ -531,7 +531,7 @@ export default function AlertsPage() {
             return (
               <div
                 key={alert.alert_id}
-                className={`rounded-lg border p-5 transition-colors duration-150 bg-slate-900/80 ${
+                className={`rounded-lg border p-5 transition-colors duration-150 bg-white dark:bg-slate-900/80 shadow-sm ${
                   isCritical
                     ? "border-red-900/90"
                     : isVeryHigh
@@ -558,7 +558,7 @@ export default function AlertsPage() {
                       </span>
 
                       {/* Alert ID */}
-                      <span className="px-2.5 py-1 rounded-md bg-slate-950 text-slate-300 text-xs font-mono border border-slate-800">
+                      <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-xs font-mono border border-slate-200 dark:border-slate-800">
                         {alert.alert_id}
                       </span>
 
@@ -628,19 +628,19 @@ export default function AlertsPage() {
 
                     {/* Meteorological Conditions Strip */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-                      <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
                         <div className="text-[10px] text-slate-500 font-sans uppercase">{t("temperature")}</div>
                         <div className="font-bold text-rose-400 mt-0.5 text-sm">{alert.temp}°C</div>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
                         <div className="text-[10px] text-slate-500 font-sans uppercase">{t("relative_humidity")}</div>
                         <div className="font-bold text-amber-400 mt-0.5 text-sm">{alert.humidity}%</div>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
                         <div className="text-[10px] text-slate-500 font-sans uppercase">{t("wind_speed")}</div>
                         <div className="font-bold text-white mt-0.5 text-sm">{alert.wind} km/h</div>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
                         <div className="text-[10px] text-slate-500 font-sans uppercase">{t("wind_direction")}</div>
                         <div className="font-bold text-slate-200 mt-0.5 text-sm">{formatWindDir(alert.wind_dir || "Sud (Sirocco)")}</div>
                       </div>
@@ -689,7 +689,7 @@ export default function AlertsPage() {
                   <div className="flex flex-col gap-2 shrink-0 lg:w-48 border-t lg:border-t-0 lg:border-l border-slate-800 pt-3 lg:pt-0 lg:pl-5">
                     <Link
                       href={`/dashboard?lat=${alert.lat}&lon=${alert.lon}`}
-                      className="w-full py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
+                      className="w-full py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
                     >
                       <span>{t("view_on_map")}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -707,7 +707,7 @@ export default function AlertsPage() {
 
                     <button
                       onClick={() => openFullHistoryModal(alert)}
-                      className="w-full py-2 px-3 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium text-center transition flex items-center justify-center gap-1.5"
+                      className="w-full py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium text-center transition flex items-center justify-center gap-1.5 shadow-sm"
                     >
                       <FileText className="w-3.5 h-3.5" />
                       <span>{t("full_history")}</span>

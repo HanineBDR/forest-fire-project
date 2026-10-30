@@ -76,13 +76,13 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
   return (
     <section 
       aria-label={t("strategic_massifs_title")}
-      className="bg-slate-900/95 border border-slate-800 rounded-xl p-4 shadow-sm"
+      className="bg-white dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm transition-colors duration-150"
     >
       {/* Header with Nielsen #6 Recognition Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 animate-pulse" aria-hidden="true" />
-          <h2 className="text-xs sm:text-sm font-bold text-slate-100 tracking-wide uppercase">
+          <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 tracking-wide uppercase">
             {t("strategic_massifs_title")}
           </h2>
         </div>
@@ -91,11 +91,11 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
         <div className="flex items-center gap-2 text-xs">
           <Tooltip content={t("tooltip_legend_info")} position="top">
             <div 
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/90 border border-slate-700/80 text-slate-300 cursor-help"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 cursor-help"
             >
               <Info className="w-3.5 h-3.5 text-red-400 shrink-0" aria-hidden="true" />
               <span className="text-slate-400">{t("legend_title")}</span>
-              <span className="font-mono text-white font-semibold">[W. N°]</span>
+              <span className="font-mono text-slate-900 dark:text-white font-semibold">[W. N°]</span>
               <span className="text-slate-400 font-normal">{t("legend_wilaya_code")}</span>
             </div>
           </Tooltip>
@@ -129,8 +129,8 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
               }
               className={`group flex flex-col justify-between text-left p-3.5 rounded-xl border text-xs transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 min-h-[78px] ${
                 isSelected
-                  ? "bg-red-950/90 border-red-500 text-white font-semibold ring-1 ring-red-500/60 shadow-sm"
-                  : "bg-slate-800/50 hover:bg-slate-800 border-slate-700/60 text-slate-200 hover:text-white hover:border-slate-600"
+                  ? "bg-red-900/10 dark:bg-red-950/90 border-red-500 text-slate-900 dark:text-white font-semibold ring-1 ring-red-500/60 shadow-sm"
+                  : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border-slate-200 hover:border-slate-300 dark:border-slate-700/60 dark:hover:border-slate-600 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <div className="flex items-start justify-between w-full gap-1 mb-1.5">
@@ -148,8 +148,8 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
                   title={`Wilaya: ${reg.wilaya}`}
                   className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold shrink-0 tabular-nums ${
                     isSelected
-                      ? "bg-red-900 text-red-100 border border-red-600"
-                      : "bg-slate-900/90 text-slate-300 border border-slate-700/80 group-hover:border-slate-500"
+                      ? "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 border border-red-300 dark:border-red-600"
+                      : "bg-slate-200 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700/80 group-hover:border-slate-400 dark:group-hover:border-slate-500"
                   }`}
                 >
                   W.{wilayaCode}
@@ -158,7 +158,7 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
 
               {/* Coordinates line */}
               <div className={`flex items-center gap-1 text-[11px] font-mono tabular-nums ${
-                isSelected ? "text-red-200/90" : "text-slate-400 group-hover:text-slate-300"
+                isSelected ? "text-red-600 dark:text-red-200/90" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300"
               }`}>
                 <MapPin className={`w-3 h-3 shrink-0 ${isSelected ? "text-red-400" : "text-slate-500"}`} aria-hidden="true" />
                 <span>{reg.lat.toFixed(2)}°, {reg.lon.toFixed(2)}°</span>

@@ -843,11 +843,11 @@ export const OnboardingGuide: React.FC = () => {
           onClick={() => setIsHelpCenterOpen(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200 text-slate-800 dark:text-slate-100"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 border-b border-slate-800 bg-slate-950/70 flex items-start justify-between gap-4">
+            <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-start justify-between gap-4">
               <div className="flex items-start gap-3.5">
                 <div className="p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-700/80 text-emerald-400 shrink-0">
                   <BookOpen className="w-6 h-6" aria-hidden="true" />
@@ -857,7 +857,7 @@ export const OnboardingGuide: React.FC = () => {
                     <h2 id="help-center-heading" className="text-base sm:text-lg font-bold text-white tracking-wide">
                       {t("help_center_title")}
                     </h2>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-800 border border-slate-700 text-slate-300">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                       {userRole}
                     </span>
                   </div>
@@ -870,14 +870,14 @@ export const OnboardingGuide: React.FC = () => {
                 type="button"
                 onClick={() => setIsHelpCenterOpen(false)}
                 aria-label={t("help_center_close")}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Overall Tutorial Progress Bar */}
-            <div className="px-4 sm:px-6 py-2.5 bg-slate-950/90 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="px-4 sm:px-6 py-2.5 bg-slate-100/80 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span className="text-xs font-semibold text-slate-300">
@@ -892,7 +892,7 @@ export const OnboardingGuide: React.FC = () => {
               </div>
 
               <div className="flex-1 max-w-xs sm:max-w-sm flex items-center gap-3">
-                <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700/60">
+                <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700/60">
                   <div
                     className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
@@ -945,7 +945,7 @@ export const OnboardingGuide: React.FC = () => {
             </div>
 
             {/* Search Bar & Category Filter Tabs */}
-            <div className="p-4 sm:px-6 sm:py-3.5 border-b border-slate-800 bg-slate-950/50 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+            <div className="p-4 sm:px-6 sm:py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
               {/* Search Input with Clear Button */}
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 rtl:left-auto rtl:right-3 pointer-events-none" />
@@ -954,7 +954,7 @@ export const OnboardingGuide: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("help_center_search_placeholder")}
-                  className="w-full bg-slate-900 border border-slate-700/80 focus:border-emerald-500/80 rounded-xl pl-9 pr-9 rtl:pl-9 rtl:pr-9 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 focus:border-emerald-500/80 rounded-xl pl-9 pr-9 rtl:pl-9 rtl:pr-9 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all shadow-sm"
                 />
                 {searchQuery && (
                   <button
@@ -969,14 +969,14 @@ export const OnboardingGuide: React.FC = () => {
               </div>
 
               {/* Strict Category Tabs (Administration tab is strictly removed for non-admin) */}
-              <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 border border-slate-800 rounded-xl shrink-0 overflow-x-auto">
+              <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl shrink-0 overflow-x-auto">
                 <button
                   type="button"
                   onClick={() => setSelectedCategory("all")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     selectedCategory === "all"
                       ? "bg-emerald-600 text-white shadow-md shadow-emerald-950"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
                   }`}
                 >
                   {t("help_center_tab_all")} ({roleTutorials.length})
@@ -987,7 +987,7 @@ export const OnboardingGuide: React.FC = () => {
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     selectedCategory === "field"
                       ? "bg-emerald-600 text-white shadow-md shadow-emerald-950"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
                   }`}
                 >
                   {t("help_center_tab_field")} ({roleTutorials.filter((t) => t.category === "field").length})
@@ -999,7 +999,7 @@ export const OnboardingGuide: React.FC = () => {
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                       selectedCategory === "admin"
                         ? "bg-emerald-600 text-white shadow-md shadow-emerald-950"
-                        : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
                     }`}
                   >
                     {t("help_center_tab_admin")} ({roleTutorials.filter((t) => t.category === "admin").length})
@@ -1037,7 +1037,7 @@ export const OnboardingGuide: React.FC = () => {
                     return (
                       <div
                         key={tut.id}
-                        className="p-4 sm:p-5 rounded-2xl border border-slate-800 bg-slate-950/70 hover:border-slate-700 hover:bg-slate-900/80 hover:shadow-xl hover:shadow-black/50 transition-all duration-200 flex flex-col justify-between gap-3.5 group"
+                        className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/80 hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-3.5 group"
                       >
                         <div className="space-y-2.5">
                           {/* Top Row: Icon, Title, and Completed Badge */}
@@ -1087,7 +1087,7 @@ export const OnboardingGuide: React.FC = () => {
                             onClick={() => startTutorial(tut)}
                             className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all shadow-md min-h-[36px] ${
                               isDone
-                                ? "bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-emerald-500/50"
+                                ? "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50"
                                 : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/60"
                             }`}
                           >
@@ -1207,7 +1207,7 @@ export const OnboardingGuide: React.FC = () => {
           ref={panelRef}
           role="region"
           aria-label={t("tour_guide_title")}
-          className={`fixed z-[2850] w-[92vw] sm:w-[420px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-black/80 transition-all duration-300 ease-out pointer-events-auto ${
+          className={`fixed z-[2850] w-[92vw] sm:w-[420px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-black/30 dark:shadow-black/80 transition-all duration-300 ease-out pointer-events-auto text-slate-800 dark:text-slate-100 ${
             shakeWarning ? "animate-bounce ring-2 ring-red-500 shadow-red-950/60" : ""
           } ${
             isTargetBottomRight
@@ -1242,7 +1242,7 @@ export const OnboardingGuide: React.FC = () => {
           </div>
 
           {/* Progress bar line */}
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-3">
+          <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-3">
             <div
               className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-300"
               style={{ width: `${((stepIndex + 1) / currentStepList.length) * 100}%` }}
@@ -1324,7 +1324,7 @@ export const OnboardingGuide: React.FC = () => {
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-colors min-h-[38px]"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors min-h-[38px]"
                 >
                   <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
                   <span>{t("tutorial_back")}</span>
@@ -1355,7 +1355,7 @@ export const OnboardingGuide: React.FC = () => {
           }}
           title={t("tour_open_guide_tooltip") || "Tutorials"}
           aria-label={t("tour_open_guide_tooltip") || "Tutorials"}
-          className="fixed bottom-4 right-4 rtl:right-auto rtl:left-4 z-[2000] flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/95 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/80 text-slate-300 hover:text-white text-xs font-semibold shadow-2xl shadow-black/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 group"
+          className="fixed bottom-4 right-4 rtl:right-auto rtl:left-4 z-[2000] flex items-center gap-2 px-3 py-2 rounded-xl bg-white/95 hover:bg-slate-100 dark:bg-slate-900/95 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 hover:border-emerald-500/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold shadow-2xl shadow-black/20 dark:shadow-black/80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 group"
         >
           <HelpCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" aria-hidden="true" />
           <span>{t("tour_guide_btn") || "Guide"}</span>

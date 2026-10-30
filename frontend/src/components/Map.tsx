@@ -825,8 +825,8 @@ export const Map: React.FC<MapProps> = ({
             onClick={() => setShowWindAnimation(!showWindAnimation)}
             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               showWindAnimation
-                ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-                : "bg-slate-900/90 border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-800/60"
+                ? "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm"
+                : "bg-white/90 dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
             }`}
           >
           <Wind className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
@@ -855,8 +855,8 @@ export const Map: React.FC<MapProps> = ({
             onClick={() => setShowDgfVigies(!showDgfVigies)}
             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               showDgfVigies
-                ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-                : "bg-slate-900/90 border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-800/60"
+                ? "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm"
+                : "bg-white/90 dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
             }`}
           >
           <Radio className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
@@ -885,8 +885,8 @@ export const Map: React.FC<MapProps> = ({
             onClick={() => setShowSiroccoCorridors(!showSiroccoCorridors)}
             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               showSiroccoCorridors
-                ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-                : "bg-slate-900/90 border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-800/60"
+                ? "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm"
+                : "bg-white/90 dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
             }`}
           >
           <Wind className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
@@ -915,8 +915,8 @@ export const Map: React.FC<MapProps> = ({
             onClick={() => setShowDronePatrols(!showDronePatrols)}
             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               showDronePatrols
-                ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-                : "bg-slate-900/90 border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-800/60"
+                ? "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm"
+                : "bg-white/90 dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
             }`}
           >
           <Plane className="w-3.5 h-3.5 text-violet-400 shrink-0" aria-hidden="true" />
@@ -943,7 +943,7 @@ export const Map: React.FC<MapProps> = ({
               type="button"
               onClick={() => setShowOfflineMenu(!showOfflineMenu)}
               aria-expanded={showOfflineMenu}
-              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md text-xs font-medium text-slate-300 hover:text-white transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+              className="px-2.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shadow-sm"
             >
               <Download className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
               <span>{t("offline_map_btn")}</span>
@@ -951,7 +951,7 @@ export const Map: React.FC<MapProps> = ({
           </Tooltip>
 
           {showOfflineMenu && (
-            <div className="absolute left-0 mt-1.5 w-72 bg-slate-900 border border-slate-700 rounded-lg p-2 z-50 space-y-1.5 text-xs shadow-lg">
+            <div className="absolute left-0 mt-1.5 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 z-50 space-y-1.5 text-xs shadow-2xl text-slate-800 dark:text-slate-200">
               <div className="font-bold text-slate-200 px-2 py-1 border-b border-slate-800 flex justify-between items-center">
                 <span>{t("offline_zones_title")}</span>
                 <button 
@@ -968,7 +968,7 @@ export const Map: React.FC<MapProps> = ({
                 type="button"
                 onClick={() => handleDownloadOfflineZone("yakouren", "Yakouren", "45 Mo")}
                 disabled={downloadingZone !== null}
-                className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
+                className="w-full text-left p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex justify-between items-center"
               >
                 <div>
                   <div className="font-semibold text-white">{t("offline_zone1_title")}</div>
@@ -981,7 +981,7 @@ export const Map: React.FC<MapProps> = ({
                 type="button"
                 onClick={() => handleDownloadOfflineZone("akfadou", "Akfadou", "58 Mo")}
                 disabled={downloadingZone !== null}
-                className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
+                className="w-full text-left p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex justify-between items-center"
               >
                 <div>
                   <div className="font-semibold text-white">{t("offline_zone2_title")}</div>
@@ -994,7 +994,7 @@ export const Map: React.FC<MapProps> = ({
                 type="button"
                 onClick={() => handleDownloadOfflineZone("kabylie", "Grande Kabylie", "125 Mo")}
                 disabled={downloadingZone !== null}
-                className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
+                className="w-full text-left p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex justify-between items-center"
               >
                 <div>
                   <div className="font-semibold text-white">{t("offline_zone3_title")}</div>

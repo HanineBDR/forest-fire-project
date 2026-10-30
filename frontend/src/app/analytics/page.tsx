@@ -266,10 +266,10 @@ export default function AnalyticsPage() {
 
   return (
     <RoleGate allowedRoles={["ADMIN"]} redirectTo="/dashboard" showToast={true}>
-      <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-ember-500/30">
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-ember-500/30 transition-colors duration-150">
       {/* Toast Notification */}
       {toast && (
-        <div className={`fixed bottom-6 ${isRTL ? "left-6" : "right-6"} z-50 max-w-md p-4 rounded-xl border border-slate-700 bg-slate-900/95 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-3 ${isRTL ? "text-right" : "text-left"}`}>
+        <div className={`fixed bottom-6 ${isRTL ? "left-6" : "right-6"} z-50 max-w-md p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/95 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-3 text-slate-900 dark:text-slate-100 ${isRTL ? "text-right" : "text-left"}`}>
           <div className="flex items-start gap-3">
             {toast.type === "success" ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0" />
@@ -277,10 +277,10 @@ export default function AnalyticsPage() {
               <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
             )}
             <div className="flex-1">
-              <h4 className="text-xs font-bold text-white tracking-wide">{toast.title}</h4>
-              <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">{toast.message}</p>
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white tracking-wide">{toast.title}</h4>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">{toast.message}</p>
             </div>
-            <button onClick={() => setToast(null)} className="text-slate-400 hover:text-white">
+            <button onClick={() => setToast(null)} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -288,12 +288,12 @@ export default function AnalyticsPage() {
       )}
 
       {/* Top Navigation Bar with Refresh Controls */}
-      <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 sm:px-6">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 sm:px-6 shadow-sm transition-colors duration-150">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-xs font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-medium transition-colors shadow-sm"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>{t("nav_tactical_map")}</span>
@@ -318,7 +318,7 @@ export default function AnalyticsPage() {
                     {t("dynamic_system_live")}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-600 dark:text-slate-400">
                   {t("analytics_subtitle")}
                 </p>
               </div>
@@ -334,10 +334,10 @@ export default function AnalyticsPage() {
             <LanguageSwitcher />
 
             {/* Last updated indicator */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-mono">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono shadow-sm">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-slate-400">{t("last_check")}</span>
-              <span className="font-semibold text-white">{relativeTime}</span>
+              <span className="font-semibold text-slate-900 dark:text-white">{relativeTime}</span>
             </div>
 
             {/* Auto-refresh toggle */}
@@ -346,7 +346,7 @@ export default function AnalyticsPage() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
                 autoRefresh
                   ? "bg-emerald-950/60 border-emerald-700/80 text-emerald-300 shadow-sm"
-                  : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
+                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 shadow-sm"
               }`}
             >
               <Radio className={`w-3.5 h-3.5 ${autoRefresh ? "animate-pulse text-emerald-400" : ""}`} />
@@ -366,7 +366,7 @@ export default function AnalyticsPage() {
             <a
               href={`${apiBase}/outputs/burn_stats.csv`}
               download="algeria_burn_stats.csv"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-200 font-medium transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium transition-colors shadow-sm"
             >
               <Download className="w-3.5 h-3.5" />
               <span>CSV</span>
@@ -389,17 +389,17 @@ export default function AnalyticsPage() {
             {/* Card 1: ROC-AUC */}
             <div
               onClick={() => setActiveKpiModal(activeKpiModal === "roc_auc" ? null : "roc_auc")}
-              className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden ${
+              className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden shadow-sm ${
                 activeKpiModal === "roc_auc"
-                  ? "bg-slate-900 border-ember-500 ring-1 ring-ember-500/50 "
-                  : "bg-slate-900/80 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
+                  ? "bg-white dark:bg-slate-900 border-ember-500 ring-1 ring-ember-500/50 shadow-md"
+                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium">{t("model_roc_auc")}</span>
                 <TrendingUp className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="mt-1 text-2xl font-bold text-white font-mono">{rocValue}</div>
+              <div className="mt-1 text-2xl font-bold text-slate-900 dark:text-white font-mono">{rocValue}</div>
               <div className="mt-1 text-xs text-emerald-400 flex items-center gap-1 font-medium">
                 <CheckCircle2 className="w-3 h-3" />
                 <span>{t("calibrated_runs")}</span>
@@ -413,17 +413,17 @@ export default function AnalyticsPage() {
             {/* Card 2: Accuracy & F1 */}
             <div
               onClick={() => setActiveKpiModal(activeKpiModal === "accuracy" ? null : "accuracy")}
-              className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden ${
+              className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden shadow-sm ${
                 activeKpiModal === "accuracy"
-                  ? "bg-slate-900 border-amber-500 ring-1 ring-amber-500/50 "
-                  : "bg-slate-900/80 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
+                  ? "bg-white dark:bg-slate-900 border-amber-500 ring-1 ring-amber-500/50 shadow-md"
+                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium">{t("test_precision_f1")}</span>
                 <BarChart3 className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="mt-1 text-2xl font-bold text-white font-mono">{accuracyValue}% / {f1Value}</div>
+              <div className="mt-1 text-2xl font-bold text-slate-900 dark:text-white font-mono">{accuracyValue}% / {f1Value}</div>
               <div className="mt-1 text-xs text-slate-300 font-mono">
                 {modelDrift?.drift_detected ? (
                   <span className="text-amber-400 font-semibold">{t("drift_detected")}</span>
@@ -440,17 +440,17 @@ export default function AnalyticsPage() {
             {/* Card 3: Total Burn Points */}
             <div
               onClick={() => setActiveKpiModal(activeKpiModal === "burn_points" ? null : "burn_points")}
-              className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden ${
+              className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden shadow-sm ${
                 activeKpiModal === "burn_points"
-                  ? "bg-slate-900 border-rose-500 ring-1 ring-rose-500/50 "
-                  : "bg-slate-900/80 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
+                  ? "bg-white dark:bg-slate-900 border-rose-500 ring-1 ring-rose-500/50 shadow-md"
+                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium">{t("satellite_hotspots")}</span>
                 <Flame className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" />
               </div>
-              <div suppressHydrationWarning className="mt-1 text-2xl font-bold text-white font-mono">{formatNumber(totalPoints)}</div>
+              <div suppressHydrationWarning className="mt-1 text-2xl font-bold text-slate-900 dark:text-white font-mono">{formatNumber(totalPoints)}</div>
               <div className="mt-1 text-xs text-rose-400 font-medium">{t("nasa_firms_viirs_modis")}</div>
               <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
                 <span>{t("click_for_evolution")}</span>
@@ -461,17 +461,17 @@ export default function AnalyticsPage() {
             {/* Card 4: Estimated Burned Area */}
             <div
               onClick={() => setActiveKpiModal(activeKpiModal === "burned_area" ? null : "burned_area")}
-              className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden ${
+              className={`p-4 rounded-xl border transition-all cursor-pointer select-none group relative overflow-hidden shadow-sm ${
                 activeKpiModal === "burned_area"
-                  ? "bg-slate-900 border-orange-500 ring-1 ring-orange-500/50 "
-                  : "bg-slate-900/80 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900"
+                  ? "bg-white dark:bg-slate-900 border-orange-500 ring-1 ring-orange-500/50 shadow-md"
+                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium">{t("estimated_burned_area")}</span>
                 <Layers className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="mt-1 text-2xl font-bold text-white font-mono">
+              <div className="mt-1 text-2xl font-bold text-slate-900 dark:text-white font-mono">
                 {formatNumber(totalAreaHa)} ha
               </div>
               <div className="mt-1 text-xs text-orange-400 font-medium">{t("arc_tellien_kabylie")}</div>
@@ -484,11 +484,11 @@ export default function AnalyticsPage() {
 
           {/* Expandable Drawer when any KPI card is clicked */}
           {activeKpiModal && (
-            <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/95 space-y-3 animate-in fade-in duration-200">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/95 space-y-3 animate-in fade-in duration-200 shadow-lg">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
                 <div className="flex items-center gap-2">
                   <HistoryIcon className="w-4 h-4 text-ember-400" />
-                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                     {activeKpiModal === "roc_auc" && (language === "ar" ? "سجل التمييز ROC-AUC (آخر 20 تشغيلاً)" : language === "en" ? "ROC-AUC Discrimination History (Last 20 runs)" : "Historique de Discrimination ROC-AUC (20 derniers runs)")}
                     {activeKpiModal === "accuracy" && (language === "ar" ? "قياسات الانجراف ودقة النموذج" : language === "en" ? "Model Drift Telemetry & Precision" : "Télémétrie de Dérive & Précision du Modèle")}
                     {activeKpiModal === "burn_points" && (language === "ar" ? "تطور نقاط الشذوذ الحراري" : language === "en" ? "Thermal Anomaly Hotspots Growth" : "Accroissement des Points d'Anomalie Thermique")}
@@ -497,7 +497,7 @@ export default function AnalyticsPage() {
                 </div>
                 <button
                   onClick={() => setActiveKpiModal(null)}
-                  className="text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800"
+                  className="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800"
                 >
                   {language === "ar" ? "إغلاق" : language === "en" ? "Close" : "Fermer"}
                 </button>
@@ -514,7 +514,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
                     {modelRuns.slice(-4).map((r) => (
-                      <div key={r.id} className="p-2 rounded bg-slate-950 border border-slate-800">
+                      <div key={r.id} className="p-2 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                         <div className="text-slate-400 text-[10px]">{r.model_version}</div>
                         <div className="text-ember-400 font-bold text-sm">ROC: {r.roc_auc.toFixed(3)}</div>
                         <div className="text-[10px] text-slate-400 truncate">{r.notes}</div>
@@ -526,9 +526,9 @@ export default function AnalyticsPage() {
 
               {activeKpiModal === "accuracy" && (
                 <div className="space-y-2 text-xs">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-950 border border-slate-800">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                     <div>
-                      <div className="font-semibold text-white">{language === "ar" ? "تشخيص الانجراف الإحصائي (Model Drift)" : language === "en" ? "Statistical Drift Diagnosis (Model Drift)" : "Diagnostic de Dérive Statistique (Model Drift)"}</div>
+                      <div className="font-semibold text-slate-900 dark:text-white">{language === "ar" ? "تشخيص الانجراف الإحصائي (Model Drift)" : language === "en" ? "Statistical Drift Diagnosis (Model Drift)" : "Diagnostic de Dérive Statistique (Model Drift)"}</div>
                       <div className="text-slate-400 text-[11px] mt-0.5">
                         {language === "ar" 
                           ? `المتوسط على ${modelDrift?.runs_analyzed || 7} تشغيلات: ${(modelDrift?.average_accuracy ? modelDrift.average_accuracy * 100 : 93.8).toFixed(1)}% | العتبة الحرجة: 85.0%`
@@ -551,7 +551,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1">
                     {burnSnapshots.map((s) => (
-                      <div key={s.id} className="p-2.5 rounded bg-slate-950 border border-slate-800">
+                      <div key={s.id} className="p-2.5 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                         <div className="text-slate-400 text-[10px]">{new Date(s.timestamp).toLocaleDateString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}</div>
                         <div suppressHydrationWarning className="text-white font-bold text-sm">{formatNumber(s.total_points)} points</div>
                         <div suppressHydrationWarning className="text-rose-400 text-[10px]">{formatNumber(s.total_ha)} ha</div>
@@ -570,7 +570,7 @@ export default function AnalyticsPage() {
                       ? "Estimate calculated using NASA VIIRS sensor spatial resolution (375m / pixel corresponding to ~14.06 ha per confirmed thermal anomaly hotspot)."
                       : "Estimation calculée selon la résolution spatiale du capteur VIIRS (375m / pixel équivalant à ~14.06 ha par point d'anomalie thermique confirmée)."}
                   </p>
-                  <div className="p-2.5 rounded bg-slate-950 border border-slate-800 font-mono text-[11px] text-slate-300 flex justify-between">
+                  <div className="p-2.5 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300 flex justify-between">
                     <span suppressHydrationWarning>{language === "ar" ? "إجمالي الجزائر:" : language === "en" ? "Total Algeria:" : "Total Algérie:"} <strong>{formatNumber(totalAreaHa)} ha</strong></span>
                     <span suppressHydrationWarning className="text-rose-400">{language === "ar" ? "منطقة القبائل الكبرى:" : language === "en" ? "Greater Kabylie:" : "Grande Kabylie:"} <strong>~{formatNumber(totalAreaHa * 0.59)} ha</strong></span>
                   </div>
@@ -585,7 +585,7 @@ export default function AnalyticsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-white">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">
                   1. {t("section_model_perf_title")}
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px] font-mono flex items-center gap-1">
@@ -603,7 +603,7 @@ export default function AnalyticsPage() {
                 type="button"
                 onClick={handleRegenerateModel}
                 disabled={isRegeneratingModel}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold transition-colors duration-150 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-colors duration-150 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shadow-sm"
               >
                 <RefreshCw className={`w-3.5 h-3.5 text-slate-300 ${isRegeneratingModel ? "animate-spin" : ""}`} aria-hidden="true" />
                 <span>{isRegeneratingModel ? t("retraining") : t("regenerate_latest_data")}</span>
@@ -613,7 +613,7 @@ export default function AnalyticsPage() {
                 href={`${apiBase}/outputs/model_performance.png`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900/80 hover:bg-slate-800 text-slate-300 text-xs font-medium"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium shadow-sm"
               >
                 <span>{t("hd_png")}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -621,8 +621,8 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-4">
-            <div className="overflow-hidden rounded-lg border border-slate-800/80 bg-slate-950">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 p-4 space-y-4 shadow-sm">
+            <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950">
               <img
                 src={`${apiBase}/outputs/model_performance.png?t=${lastUpdated.getTime()}`}
                 alt="Performance du Modèle INKAD - Matrice de Confusion et Courbe ROC"
@@ -635,10 +635,10 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Model Historic Status Sub-Chart */}
-            <div className="p-4 rounded-lg bg-slate-950 border border-slate-800/90 space-y-3">
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/90 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-emerald-400" />
                     {t("model_historic_status")}
                   </h3>
@@ -705,10 +705,10 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Feature Importance Diagram */}
-            <div className="p-4 rounded-lg bg-slate-950 border border-slate-800/90 space-y-3">
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/90 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                     <BarChart3 className="w-4 h-4 text-slate-300 shrink-0" aria-hidden="true" />
                     {t("feature_importance_title")}
                   </h3>
@@ -720,13 +720,13 @@ export default function AnalyticsPage() {
                   href={`${apiBase}/outputs/feature_importance.png`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium shadow-sm"
                 >
                   <span>HD PNG</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>
-              <div className="overflow-hidden rounded-lg border border-slate-800/80 bg-slate-900/60 p-2">
+              <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-900/60 p-2">
                 <img
                   src={`${apiBase}/outputs/feature_importance.png?t=${lastUpdated.getTime()}`}
                   alt="Importance des Variables INKAD - Poids XGBoost"
@@ -744,7 +744,7 @@ export default function AnalyticsPage() {
         {/* SECTION 2: Model Historic Evolution (NEW SECTION) */}
         <section className="space-y-4">
           <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <HistoryIcon className="w-4 h-4 text-ember-400" />
               <span>2. {t("section_historic_evolution")}</span>
             </h2>
@@ -754,21 +754,21 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Explanatory callout */}
-          <div className="p-3.5 rounded-lg border border-slate-800 bg-slate-900/60 flex items-start gap-3">
+          <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-start gap-3">
             <HistoryIcon className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" aria-hidden="true" />
             <div className="text-xs space-y-1">
-              <span className="font-semibold text-white">{t("analytics_traceability_title")}</span>
-              <p className="text-slate-300 leading-relaxed">
+              <span className="font-semibold text-slate-900 dark:text-white">{t("analytics_traceability_title")}</span>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                 {t("analytics_traceability_desc")}
               </p>
             </div>
           </div>
 
           {/* Model Runs Table */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden ">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 overflow-hidden shadow-sm transition-colors duration-150 ">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-800/80 border-b border-slate-700/80 text-slate-300 font-medium">
+                <thead className="bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 font-medium">
                   <tr>
                     <th className="py-2.5 px-3">{t("col_version")}</th>
                     <th className="py-2.5 px-3">{t("col_execution_date")}</th>
@@ -779,14 +779,14 @@ export default function AnalyticsPage() {
                     <th className="py-2.5 px-3">{t("col_evolution_notes")}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 font-mono">
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono">
                   {modelRuns.map((r, idx) => {
                     const isLatest = idx === modelRuns.length - 1;
                     return (
                       <tr
                         key={r.id}
                         className={`transition-colors ${
-                          isLatest ? "bg-slate-800/60 font-semibold" : "hover:bg-slate-800/30 text-slate-300"
+                          isLatest ? "bg-slate-100 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100 font-semibold" : "hover:bg-slate-50 dark:hover:bg-slate-800/30 text-slate-700 dark:text-slate-300"
                         }`}
                       >
                         <td className="py-2.5 px-3">
@@ -794,7 +794,7 @@ export default function AnalyticsPage() {
                             className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold border ${
                               isLatest
                                 ? "bg-emerald-950 text-emerald-300 border-emerald-700"
-                                : "bg-slate-800 text-slate-300 border-slate-700"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
                             }`}
                           >
                             {r.model_version}
@@ -808,7 +808,7 @@ export default function AnalyticsPage() {
                             minute: "2-digit"
                           })}
                         </td>
-                        <td className="py-2.5 px-3 text-right text-slate-200">
+                        <td className="py-2.5 px-3 text-right text-slate-800 dark:text-slate-200">
                           {formatNumber(r.dataset_size)} pts
                         </td>
                         <td className="py-2.5 px-3 text-right text-emerald-400 font-bold">
@@ -817,7 +817,7 @@ export default function AnalyticsPage() {
                         <td className="py-2.5 px-3 text-right text-amber-400 font-bold">
                           {r.roc_auc.toFixed(4)}
                         </td>
-                        <td className="py-2.5 px-3 text-right text-slate-200">
+                        <td className="py-2.5 px-3 text-right text-slate-800 dark:text-slate-200">
                           {r.f1.toFixed(3)}
                         </td>
                         <td className="py-2.5 px-3 font-sans text-slate-300 text-[11px]">
@@ -836,7 +836,7 @@ export default function AnalyticsPage() {
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Layers className="w-4 h-4 text-rose-400" />
                 <span>3. {t("analytics_sec3_title")}</span>
               </h2>
@@ -846,7 +846,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Timeline Selector Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
               <span className="text-[11px] text-slate-400 px-2 font-medium">{t("period_label")}</span>
               {[
                 { id: "today", label: t("period_today") },
@@ -860,7 +860,7 @@ export default function AnalyticsPage() {
                   className={`px-3 py-1 rounded-lg font-medium transition-all ${
                     burnTimeline === btn.id
                       ? "bg-ember-600 text-white shadow-sm"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white dark:hover:bg-slate-800"
                   }`}
                 >
                   {btn.label}
@@ -869,18 +869,18 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 p-4 space-y-3 shadow-sm">
             <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-slate-300">
+              <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
                 <span>{t("visualization_mode")} <strong>{burnTimeline.replace("_", " ").toUpperCase()}</strong></span>
                 <span className="text-slate-400 font-mono">({activeBurnMapUrl})</span>
               </div>
-              <div className="inline-flex rounded-lg border border-slate-800 bg-slate-950 p-0.5 text-xs">
+              <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 p-0.5 text-xs">
                 <button
                   onClick={() => setActiveMapTab("interactive")}
                   className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                    activeMapTab === "interactive" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
+                    activeMapTab === "interactive" ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
                   {t("map_interactive_folium")}
@@ -888,7 +888,7 @@ export default function AnalyticsPage() {
                 <button
                   onClick={() => setActiveMapTab("static")}
                   className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                    activeMapTab === "static" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
+                    activeMapTab === "static" ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
                   {t("map_image_png")}
@@ -897,7 +897,7 @@ export default function AnalyticsPage() {
             </div>
 
             {activeMapTab === "interactive" ? (
-              <div className="w-full h-[580px] rounded-lg border border-slate-800 overflow-hidden relative bg-slate-950">
+              <div className="w-full h-[580px] rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden relative bg-slate-50 dark:bg-slate-950">
                 <iframe
                   src={activeBurnMapUrl}
                   title="Interactive Algeria Burn Map"
@@ -905,7 +905,7 @@ export default function AnalyticsPage() {
                 />
               </div>
             ) : (
-              <div className="rounded-lg border border-slate-800 bg-slate-950 p-3 overflow-hidden">
+              <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-3 overflow-hidden">
                 <img
                   src={`${apiBase}/outputs/algeria_burn_map.png?t=${lastUpdated.getTime()}`}
                   alt="NASA FIRMS Burned Areas Map"
@@ -921,21 +921,21 @@ export default function AnalyticsPage() {
         </section>
 
         {/* SECTION 4: Link Analytics + Alerts (Requirement 19) */}
-        <section className="p-5 rounded-2xl border border-red-800/80 bg-gradient-to-r from-red-950/40 via-slate-900 to-slate-900 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <section className="p-5 rounded-2xl border border-red-200 dark:border-red-800/80 bg-gradient-to-r from-red-50 via-white to-white dark:from-red-950/40 dark:via-slate-900 dark:to-slate-900 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
             <div className="p-3 rounded-xl bg-red-950/80 border border-red-700/80 text-red-400 shrink-0">
               <ShieldAlert className="w-6 h-6 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm sm:text-base font-bold text-white">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                   {t("active_predictive_alerts")}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-red-950 text-red-300 border border-red-800 text-[11px] font-mono font-bold">
                   {language === "ar" ? "5 إنذارات" : language === "en" ? "5 ALERTS" : "5 ALERTES"}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
                 {t("alerts_banner_description")}
               </p>
             </div>
@@ -954,10 +954,10 @@ export default function AnalyticsPage() {
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 className="text-base font-bold text-white">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
                 4. {t("section_wilaya_impact")}
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 {t("analytics_sec4_desc")}
               </p>
             </div>
@@ -968,10 +968,10 @@ export default function AnalyticsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Table Column (2 cols) */}
-            <div className="lg:col-span-2 rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden ">
+            <div className="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 overflow-hidden shadow-sm ">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-800/80 border-b border-slate-700/80 text-slate-300 font-medium">
+                  <thead className="bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 font-medium">
                     <tr>
                       <th className="py-2.5 px-3">{t("col_wilaya")}</th>
                       <th className="py-2.5 px-3">{t("col_region")}</th>
@@ -980,7 +980,7 @@ export default function AnalyticsPage() {
                       <th className="py-2.5 px-3">{t("col_risk_class")}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 font-mono">
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono">
                     {wilayaStats.map((w) => {
                       const isSelected = selectedWilaya?.wilaya_code === w.wilaya_code;
                       return (
@@ -989,19 +989,19 @@ export default function AnalyticsPage() {
                           onClick={() => setSelectedWilaya(w)}
                           className={`cursor-pointer transition-colors ${
                             isSelected
-                              ? "bg-slate-800/90 text-white font-semibold"
-                              : "hover:bg-slate-800/40 text-slate-300"
+                              ? "bg-slate-100 dark:bg-slate-800/90 text-slate-900 dark:text-white font-semibold"
+                              : "hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-700 dark:text-slate-300"
                           }`}
                         >
                           <td className="py-2.5 px-3 flex items-center gap-2">
                             <span className="w-6 text-slate-400">{w.wilaya_code}</span>
-                            <span className="font-sans font-medium text-slate-100">{w.wilaya_name}</span>
+                            <span className="font-sans font-medium text-slate-900 dark:text-slate-100">{w.wilaya_name}</span>
                           </td>
                           <td className="py-2.5 px-3 font-sans text-slate-400">{w.region}</td>
                           <td className="py-2.5 px-3 text-right text-rose-400 font-bold">
                             {w.total_burned_points}
                           </td>
-                          <td className="py-2.5 px-3 text-right text-slate-200">
+                          <td className="py-2.5 px-3 text-right text-slate-800 dark:text-slate-200">
                             {formatNumber(w.estimated_burned_area_ha)} ha
                           </td>
                           <td className="py-2.5 px-3 font-sans">
@@ -1026,44 +1026,44 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Selected Wilaya Detail Card (1 col) */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 space-y-3 ">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-4 space-y-3 shadow-sm transition-colors duration-150 ">
               {selectedWilaya ? (
                 <>
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
                     <div>
                       <div className="text-xs text-slate-400">{t("selected_wilaya_details")}</div>
-                      <h3 className="text-base font-bold text-white flex items-center gap-1.5 mt-0.5">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mt-0.5">
                         <MapPin className="w-4 h-4 text-ember-400" />
                         <span>{selectedWilaya.wilaya_name}</span>
                         <span className="text-xs text-slate-400 font-mono">({selectedWilaya.wilaya_code})</span>
                       </h3>
                     </div>
-                    <span className="text-xs px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">
+                    <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono">
                       {selectedWilaya.region}
                     </span>
                   </div>
 
                   <div className="space-y-2 text-xs">
-                    <div className="flex justify-between py-1 border-b border-slate-800/60">
+                    <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800/60">
                       <span className="text-slate-400">{t("thermal_anomalies_count")}</span>
                       <span className="font-mono font-bold text-rose-400">{selectedWilaya.total_burned_points} pts</span>
                     </div>
 
-                    <div className="flex justify-between py-1 border-b border-slate-800/60">
+                    <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800/60">
                       <span className="text-slate-400">{t("estimated_burned_area")} :</span>
-                      <span className="font-mono font-bold text-white">
+                      <span className="font-mono font-bold text-slate-900 dark:text-white">
                         <span suppressHydrationWarning>{formatNumber(selectedWilaya.estimated_burned_area_ha)} ha</span>
                       </span>
                     </div>
 
-                    <div className="flex justify-between py-1 border-b border-slate-800/60">
+                    <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800/60">
                       <span className="text-slate-400">{t("col_risk_class")} :</span>
                       <span className="font-semibold text-rose-300">{selectedWilaya.risk_category}</span>
                     </div>
 
                     <div className="py-1">
                       <span className="text-slate-400 block mb-1">{t("dominant_forest_cover")}</span>
-                      <span className="text-slate-200 font-medium block bg-slate-800/60 p-2 rounded border border-slate-800">
+                      <span className="text-slate-800 dark:text-slate-200 font-medium block bg-slate-50 dark:bg-slate-800/60 p-2 rounded border border-slate-200 dark:border-slate-800">
                         {selectedWilaya.top_vegetation_type}
                       </span>
                     </div>

@@ -252,15 +252,15 @@ function DashboardMapInner() {
         role="status"
         data-tour="status-bar" 
         aria-label={t("operational_watch_active")}
-        className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/80 text-xs"
+        className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/80 text-xs text-slate-800 dark:text-slate-200 shadow-sm transition-colors duration-150"
       >
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" aria-hidden="true" />
-            <span className="font-semibold text-slate-200">{t("operational_watch_active")}</span>
+            <span className="font-semibold text-slate-900 dark:text-slate-200">{t("operational_watch_active")}</span>
           </div>
-          <span className="text-slate-700" aria-hidden="true">|</span>
-          <span className="text-slate-400">
+          <span className="text-slate-300 dark:text-slate-700" aria-hidden="true">|</span>
+          <span className="text-slate-600 dark:text-slate-400">
             {t("coverage_corridor")}
           </span>
 
@@ -279,10 +279,10 @@ function DashboardMapInner() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-4 text-slate-400 font-mono text-[11px] tabular-nums">
-          <span>NASA FIRMS: <strong className="text-slate-200">{firmsHotspots.length}</strong> {t("hotspots_count_label")}</span>
+        <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400 font-mono text-[11px] tabular-nums">
+          <span>NASA FIRMS: <strong className="text-slate-900 dark:text-slate-200">{firmsHotspots.length}</strong> {t("hotspots_count_label")}</span>
           <span>Open-Meteo: <strong className="text-emerald-400">{t("connected")}</strong></span>
-          <span>{t("model_ai_label")}: <strong className="text-slate-200">95.4%</strong> {t("accuracy")}</span>
+          <span>{t("model_ai_label")}: <strong className="text-slate-900 dark:text-slate-200">95.4%</strong> {t("accuracy")}</span>
         </div>
       </div>
 
@@ -298,7 +298,7 @@ function DashboardMapInner() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[640px]">
         {/* Tactical Map (7 cols) */}
         <div data-tour="map" className="lg:col-span-7 flex flex-col gap-3 min-h-[500px]">
-          <div className="flex-1 relative min-h-[460px] rounded-lg border border-slate-800 overflow-hidden">
+          <div className="flex-1 relative min-h-[460px] rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
             <DynamicMap
               prediction={prediction}
               activeHorizonIndex={activeHorizonIndex}
