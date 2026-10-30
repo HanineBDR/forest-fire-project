@@ -494,6 +494,8 @@ export const fr = {
   notif_empty_label: "Aucune alerte opérationnelle récente.",
   notif_sender_label: "Émetteur :",
   notif_mark_read: "Marquer comme lu",
+  notif_delete: "Supprimer la notification",
+  notif_clear_all: "Tout effacer",
 
   // Intercom Modal
   intercom_modal_title: "Intercom Opérationnel National",

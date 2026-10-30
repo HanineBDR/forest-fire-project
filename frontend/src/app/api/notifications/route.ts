@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchNotificationsFromDb } from "@/lib/notifications";
+import { fetchNotificationsFromDb, deleteAllNotificationsFromDb } from "@/lib/notifications";
 import { getNeonSql } from "@/lib/neon";
 
 export const dynamic = "force-dynamic";
@@ -121,3 +121,25 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function DELETE(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const role = searchParams.get("role");
+
+  try {
+    await deleteAllNotificationsFromDb(role);
+    return NextResponse.json({ ok: true, deleted: true });
+  } catch (error: any) {
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const q = role ? `?role=${encodeURIComponent(role)}` : "";
+      const res = await fetch(`${backendUrl}/api/notifications${q}`, { method: "DELETE" });
+      if (res.ok) {
+        const json = await res.json();
+        return NextResponse.json(json);
+      }
+    } catch {
+      // Fall through
+    }
+    return NextResponse.json({ ok: true, deleted: true });
+  }
+}

@@ -494,6 +494,8 @@ export const en = {
   notif_empty_label: "No recent operational alerts.",
   notif_sender_label: "Sender:",
   notif_mark_read: "Mark as read",
+  notif_delete: "Delete notification",
+  notif_clear_all: "Clear all",
 
   // Intercom Modal
   intercom_modal_title: "National Operational Intercom",

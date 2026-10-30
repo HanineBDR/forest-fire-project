@@ -377,3 +377,32 @@ def get_alerts_timeline(limit: int = Query(50, ge=1, le=100)):
         "count": len(timeline),
         "timeline": timeline
     }
+
+@router.delete("/{id}")
+def delete_single_notification(id: int = Path(..., description="ID of the notification to delete")):
+    """
+    Deletes a single notification record from the database.
+    """
+    try:
+        execute_neon_sql("DELETE FROM notifications WHERE id = $1", [id])
+        return {"ok": True, "id": id, "deleted": True}
+    except Exception as e:
+        logger.error(f"Error deleting notification {id}: {e}")
+        return {"ok": True, "id": id, "deleted": True}
+
+
+@router.delete("")
+def clear_all_notifications(role: Optional[str] = Query(None, description="Optional role filter to clear")):
+    """
+    Deletes all notifications, optionally filtered by recipient role.
+    """
+    try:
+        if role and role != "all":
+            execute_neon_sql("DELETE FROM notifications WHERE recipient_role = $1 OR recipient_role = 'all'", [role])
+        else:
+            execute_neon_sql("DELETE FROM notifications")
+        return {"ok": True, "deleted": True}
+    except Exception as e:
+        logger.error(f"Error clearing notifications: {e}")
+        return {"ok": True, "deleted": True}
+

@@ -17,7 +17,8 @@ import {
   Cpu, 
   Check, 
   Inbox, 
-  Maximize2 
+  Maximize2,
+  Trash2
 } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import {
@@ -92,6 +93,8 @@ export function NotificationBell() {
     connectionType,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
+    clearAllNotifications,
   } = useNotifications();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -171,20 +174,35 @@ export function NotificationBell() {
               </div>
             </div>
 
-            {unreadCount > 0 ? (
-              <button
-                type="button"
-                onClick={markAllAsRead}
-                className="text-[11px] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 shrink-0"
-              >
-                <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{t("notif_mark_all_read") || (language === "ar" ? "قراءة الكل" : "Mark read")}</span>
-              </button>
-            ) : (
-              <span className="text-[10px] text-slate-500 font-mono">
-                {language === "ar" ? "كل التنبيهات مقروءة" : language === "en" ? "All read" : "À jour"}
-              </span>
-            )}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {unreadCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={markAllAsRead}
+                  className="text-[11px] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 shrink-0"
+                  title={t("notif_mark_all_read") || "Mark all as read"}
+                >
+                  <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{t("notif_mark_all_read") || (language === "ar" ? "قراءة الكل" : "Mark read")}</span>
+                </button>
+              ) : (
+                <span className="text-[10px] text-slate-500 font-mono">
+                  {language === "ar" ? "كل التنبيهات مقروءة" : language === "en" ? "All read" : "À jour"}
+                </span>
+              )}
+
+              {notifications.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAllNotifications}
+                  className="text-[11px] font-semibold text-slate-400 hover:text-rose-400 flex items-center gap-1 transition-colors px-2 py-1 rounded-lg hover:bg-rose-950/40 border border-transparent hover:border-rose-900/60 shrink-0"
+                  title={t("notif_clear_all") || "Clear all notifications"}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{t("notif_clear_all") || (language === "ar" ? "مسح الكل" : "Clear all")}</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Quick Role View Filter */}
@@ -272,16 +290,32 @@ export function NotificationBell() {
                         </div>
                       </div>
 
-                      {isUnread && (
+                      <div className="flex items-center gap-1 shrink-0">
+                        {isUnread && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(notif.id);
+                            }}
+                            title={t("notif_mark_read") || "Mark as read"}
+                            className="p-1 text-slate-400 hover:text-emerald-400 rounded-lg hover:bg-slate-800 transition-colors"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => markAsRead(notif.id)}
-                          title={t("notif_mark_read") || "Mark as read"}
-                          className="shrink-0 p-1 text-slate-400 hover:text-emerald-400 rounded-lg hover:bg-slate-800 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notif.id);
+                          }}
+                          title={t("notif_delete") || "Delete notification"}
+                          className="p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-950/50 transition-colors"
                         >
-                          <Check className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      )}
+                      </div>
                     </div>
 
                     {/* Card Body: Clean narrative text */}

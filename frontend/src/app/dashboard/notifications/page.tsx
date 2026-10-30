@@ -23,6 +23,7 @@ import {
   UserCheck,
   Download,
   FileText,
+  Trash2,
 } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import {
@@ -70,6 +71,8 @@ export default function NotificationsPage() {
     setIsSoundEnabled,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
+    clearAllNotifications,
     acknowledgeAlert,
     refreshNotifications,
     isSirocco,
@@ -580,15 +583,26 @@ export default function NotificationsPage() {
                           <time dateTime={n.created_at}>
                             {new Date(n.created_at).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
                           </time>
-                          {isUnread && (
+                          <div className="flex items-center gap-1.5">
+                            {isUnread && (
+                              <button
+                                type="button"
+                                onClick={() => markAsRead(n.id)}
+                                className="text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700 bg-slate-800 transition-colors"
+                              >
+                                {t("notifications_mark_read")}
+                              </button>
+                            )}
                             <button
                               type="button"
-                              onClick={() => markAsRead(n.id)}
-                              className="text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700 bg-slate-800 transition-colors"
+                              onClick={() => deleteNotification(n.id)}
+                              title={t("notif_delete") || "Delete notification"}
+                              className="text-slate-400 hover:text-rose-400 px-2 py-1 rounded border border-slate-700 bg-slate-800 hover:bg-rose-950/40 transition-colors flex items-center gap-1"
                             >
-                              {t("notifications_mark_read")}
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">{t("notif_delete") || "Delete"}</span>
                             </button>
-                          )}
+                          </div>
                         </div>
                       </div>
 

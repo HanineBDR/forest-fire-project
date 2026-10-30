@@ -494,6 +494,8 @@ export const ar = {
   notif_empty_label: "لا توجد تنبيهات عملياتية حديثة.",
   notif_sender_label: "الجهة المرسلة:",
   notif_mark_read: "تحديد كمقروء",
+  notif_delete: "حذف التنبيه",
+  notif_clear_all: "مسح الكل",
 
   // Intercom Modal
   intercom_modal_title: "الاتصال العملياتي الوطني المباشر",

@@ -34,6 +34,8 @@ interface NotificationContextType {
   dismissToast: () => void;
   markAsRead: (id: number) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  deleteNotification: (id: number) => Promise<void>;
+  clearAllNotifications: () => Promise<void>;
   alertPanel: (payload: {
     from_role: string;
     to_role: string;
@@ -340,6 +342,26 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     );
   };
 
+  // Delete single notification
+  const deleteNotification = async (id: number) => {
+    try {
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      await fetch(`/api/notifications/${id}`, { method: "DELETE" });
+    } catch {
+      // optimistic update retained
+    }
+  };
+
+  // Clear all notifications
+  const clearAllNotifications = async () => {
+    try {
+      setNotifications([]);
+      await fetch(`/api/notifications?role=${encodeURIComponent(activeRole)}`, { method: "DELETE" });
+    } catch {
+      // optimistic update retained
+    }
+  };
+
   // Panel to panel intercom alert
   const alertPanel = async (payload: {
     from_role: string;
@@ -453,6 +475,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         dismissToast,
         markAsRead,
         markAllAsRead,
+        deleteNotification,
+        clearAllNotifications,
         alertPanel,
         acknowledgeAlert,
         refreshNotifications,

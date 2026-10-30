@@ -186,6 +186,36 @@ export async function markNotificationReadInDb(id: number): Promise<boolean> {
 }
 
 /**
+ * Deletes a single notification from DB by ID.
+ */
+export async function deleteNotificationFromDb(id: number): Promise<boolean> {
+  const sql = getNeonSql();
+  const rows = await sql`
+    DELETE FROM notifications
+    WHERE id = ${id}
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
+/**
+ * Deletes all notifications (optionally filtered by role).
+ */
+export async function deleteAllNotificationsFromDb(role?: string | null): Promise<boolean> {
+  const sql = getNeonSql();
+  if (role && role !== 'all') {
+    await sql`
+      DELETE FROM notifications
+      WHERE recipient_role = ${role} OR recipient_role = 'all'
+    `;
+  } else {
+    await sql`DELETE FROM notifications`;
+  }
+  return true;
+}
+
+
+/**
  * Dispatches an intercom alert from one operational panel to another.
  */
 export async function createPanelIntercomAlert(params: {
