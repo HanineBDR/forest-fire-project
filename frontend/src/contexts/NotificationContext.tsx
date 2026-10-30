@@ -32,6 +32,7 @@ interface NotificationContextType {
   setIsSoundEnabled: (enabled: boolean) => void;
   activeToast: ToastNotification | null;
   dismissToast: () => void;
+  showToast: (toast: { title: string; message: string; risk_level?: string; sender_role?: string }) => void;
   markAsRead: (id: number) => Promise<void>;
   markAllAsRead: () => Promise<void>;
   deleteNotification: (id: number) => Promise<void>;
@@ -444,6 +445,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const dismissToast = () => setActiveToast(null);
 
+  const showToast = useCallback((toast: { title: string; message: string; risk_level?: string; sender_role?: string }) => {
+    triggerToastAndSound({
+      title: toast.title,
+      message: toast.message,
+      risk_level: toast.risk_level || "low",
+      sender_role: toast.sender_role || "SYSTEM",
+    });
+  }, [triggerToastAndSound]);
+
   const setEnvironmentSignals = (signals: {
     isSirocco?: boolean;
     isDronePatrolActive?: boolean;
@@ -473,6 +483,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         setIsSoundEnabled,
         activeToast,
         dismissToast,
+        showToast,
         markAsRead,
         markAllAsRead,
         deleteNotification,

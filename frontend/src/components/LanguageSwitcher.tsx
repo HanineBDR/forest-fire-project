@@ -44,7 +44,7 @@ export const LanguageSwitcher: React.FC = () => {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative inline-block text-left">
+    <div ref={containerRef} data-tour="lang-switcher" className="relative inline-block text-left">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}

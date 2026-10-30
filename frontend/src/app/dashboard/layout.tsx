@@ -215,20 +215,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // PRIMARY OPERATIONAL FUNCTIONS (directly visible on the navigation bar)
   const primaryNavItems: HeaderNavItem[] = [
-    { href: "/dashboard", label: t("nav_tactical_map") || "Tactical Map", icon: Map, show: true },
-    { href: "/dashboard/alerts", label: t("nav_alerts") || "Active Alerts", icon: AlertTriangle, show: true },
-    { href: "/analytics", label: t("nav_analytics") || "ML Analytics", icon: BarChart3, show: permissions?.canViewAnalytics ?? false },
-    { href: "/dashboard/notifications", label: t("nav_intercom_alerts") || "Intercom", icon: Radio, show: true },
+    { href: "/dashboard", label: t("nav_tactical_map") || "Tactical Map", icon: Map, dataTour: "nav-map", show: true },
+    { href: "/dashboard/alerts", label: t("nav_alerts") || "Active Alerts", icon: AlertTriangle, dataTour: "nav-alerts", show: true },
+    { href: "/analytics", label: t("nav_analytics") || "ML Analytics", icon: BarChart3, dataTour: "nav-analytics", show: permissions?.canViewAnalytics ?? false },
+    { href: "/dashboard/notifications", label: t("nav_intercom_alerts") || "Intercom", icon: Radio, dataTour: "nav-intercom", show: true },
   ].filter((item) => item.show);
 
   // SECONDARY / EXTENDED OPERATIONAL FUNCTIONS (accessible via the "More" dropdown menu)
   const moreNavItems: HeaderNavItem[] = [
     { href: "/dashboard/drones", label: t("nav_drones_flir") || "FLIR Drones", icon: Plane, dataTour: "drones", show: permissions?.canAccessDrones ?? false },
     { href: "/dashboard/iot", label: t("nav_iot_sensors") || "IoT Vigies", icon: Cpu, dataTour: "iot", show: permissions?.canAccessIoT ?? false },
-    { href: "/dashboard/historique", label: t("nav_history") || "History & Audit", icon: History, show: permissions?.canAccessHistory ?? true },
-    { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera, show: permissions?.canVerifyCitizenReports ?? false },
-    { href: "/dashboard/admin/users", label: t("nav_users") || "User Management", icon: Users, show: permissions?.canManageUsers ?? false },
-    { href: "/dashboard/admin/model-health", label: t("nav_model_health") || "Model Health", icon: Activity, show: permissions?.canViewModelHealth ?? false },
+    { href: "/dashboard/historique", label: t("nav_history") || "History & Audit", icon: History, dataTour: "nav-history", show: permissions?.canAccessHistory ?? true },
+    { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera, dataTour: "nav-citizen", show: permissions?.canVerifyCitizenReports ?? false },
+    { href: "/dashboard/admin/users", label: t("nav_users") || "User Management", icon: Users, dataTour: "nav-users", show: permissions?.canManageUsers ?? false },
+    { href: "/dashboard/admin/model-health", label: t("nav_model_health") || "Model Health", icon: Activity, dataTour: "nav-model-health", show: permissions?.canViewModelHealth ?? false },
   ].filter((item) => item.show);
 
   const isMoreActive = moreNavItems.some(
@@ -369,7 +369,7 @@ alt="INKAD Logo"
                   onClick={() => setIsMoreOpen(!isMoreOpen)}
                   aria-haspopup="menu"
                   aria-expanded={isMoreOpen}
-                  aria-label={t("nav_operational_tools")}
+                  data-tour="nav-more" aria-label={t("nav_operational_tools")}
                   className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
                     isMoreOpen || isMoreActive
                       ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
