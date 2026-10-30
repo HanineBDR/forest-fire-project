@@ -111,6 +111,24 @@ export default function ModelHealthPage() {
     nasa_quota: { cached: true, next_allowed_in_sec: 3000, message: "Cache actif (limite 1 req/h)" }
   });
 
+  // Hourly statistics distribution dataset
+  const [hourlyData, setHourlyData] = useState([
+    { hour: "10:00", count: 18, errors: 0 },
+    { hour: "11:00", count: 24, errors: 0 },
+    { hour: "12:00", count: 38, errors: 0 },
+    { hour: "13:00", count: 52, errors: 0 },
+    { hour: "14:00", count: 76, errors: 0 },
+    { hour: "15:00", count: 89, errors: 0 },
+    { hour: "16:00", count: 104, errors: 0 },
+    { hour: "17:00", count: 91, errors: 0 },
+    { hour: "18:00", count: 72, errors: 0 },
+    { hour: "19:00", count: 58, errors: 0 },
+    { hour: "20:00", count: 42, errors: 0 },
+    { hour: "21:00", count: 30, errors: 0 }
+  ]);
+  const [totalToday, setTotalToday] = useState(685);
+  const [errorRate, setErrorRate] = useState(0.0);
+
   const user = getStoredUser();
   const isAdmin = user?.role === "ADMIN";
 
@@ -120,13 +138,16 @@ export default function ModelHealthPage() {
     const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
     try {
-      const [resHealth, resRefresh] = await Promise.all([
+      const [resHealth, resRefresh, resMetrics] = await Promise.all([
         fetch(`${apiBase}/monitoring/health`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         }),
         fetch(`${apiBase}/monitoring/refresh-logs`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }).catch(() => null)
+        }).catch(() => null),
+        fetch(`${apiBase}/monitoring/metrics`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }).catch(() => null),
       ]);
 
       if (resHealth.ok) {
@@ -137,6 +158,19 @@ export default function ModelHealthPage() {
       if (resRefresh && resRefresh.ok) {
         const rData = await resRefresh.json();
         setRefreshData(rData);
+      }
+
+      if (resMetrics && resMetrics.ok) {
+        const mData = await resMetrics.json();
+        if (mData.hourly_distribution && Array.isArray(mData.hourly_distribution) && mData.hourly_distribution.length > 0) {
+          setHourlyData(mData.hourly_distribution.map((h: any) => ({
+            hour: h.hour || "00:00",
+            count: h.predictions ?? h.count ?? 0,
+            errors: h.errors ?? 0
+          })));
+        }
+        if (mData.total_today) setTotalToday(mData.total_today);
+        if (mData.error_rate !== undefined) setErrorRate(mData.error_rate);
       }
     } catch (err) {
       console.warn("Could not fetch remote health status, using local telemetry:", err);
@@ -201,23 +235,7 @@ export default function ModelHealthPage() {
     }
   };
 
-  // Hourly distribution dataset
-  const hourlyData = [
-    { hour: "10:00", count: 18 },
-    { hour: "11:00", count: 24 },
-    { hour: "12:00", count: 38 },
-    { hour: "13:00", count: 52 },
-    { hour: "14:00", count: 76 },
-    { hour: "15:00", count: 89 },
-    { hour: "16:00", count: 104 },
-    { hour: "17:00", count: 91 },
-    { hour: "18:00", count: 72 },
-    { hour: "19:00", count: 58 },
-    { hour: "20:00", count: 42 },
-    { hour: "21:00", count: 30 }
-  ];
-
-  const maxHourly = Math.max(...hourlyData.map(d => d.count));
+  const maxHourly = Math.max(...hourlyData.map(d => d.count), 1);
 
   // Determine effective status considering simulation toggle
   const currentStatus = simulatedIssue ? "degraded" : health.status;
@@ -528,7 +546,7 @@ export default function ModelHealthPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-blue-400" />
+                <BarChart2 className="w-4 h-4 text-cyan-400" />
                 <span>{t("mh_hourly_volume_title")}</span>
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -538,36 +556,77 @@ export default function ModelHealthPage() {
 
             <div className="text-right">
               <span className="text-xs text-slate-400">{t("mh_error_rate")}</span>
-              <span className="text-xs font-mono font-bold text-emerald-400 ml-1.5">0.0%</span>
+              <span className="text-xs font-mono font-bold text-emerald-400 ml-1.5">{errorRate.toFixed(1)}%</span>
             </div>
           </div>
 
-          {/* Bar Chart Visualization */}
-          <div className="pt-4 pb-2">
-            <div className="h-44 flex items-end justify-between gap-1 sm:gap-2 px-2 border-b border-slate-800">
-              {hourlyData.map((d) => {
-                const heightPercent = Math.round((d.count / maxHourly) * 100);
-                return (
-                  <div key={d.hour} className="flex-1 flex flex-col items-center gap-1 group">
-                    <span className="text-[10px] font-mono text-slate-400 opacity-0 group-hover:opacity-100 transition">
-                      {d.count}
-                    </span>
-                    <div
-                      style={{ height: `${heightPercent}%` }}
-                      className="w-full max-w-[28px] rounded-t bg-slate-700 group-hover:bg-red-500 transition-all"
-                    ></div>
-                    <span className="text-[10px] text-slate-500 font-mono mt-1">
-                      {d.hour.slice(0, 2)}h
-                    </span>
-                  </div>
-                );
-              })}
+          {/* Bar Chart Visualization with Guaranteed Rendering & Gridlines */}
+          <div className="pt-2 pb-2">
+            <div className="relative h-48 w-full flex flex-col justify-between border-b border-slate-800 pt-6">
+              {/* Background Reference Gridlines */}
+              <div className="absolute inset-x-0 top-6 bottom-7 flex flex-col justify-between pointer-events-none opacity-20">
+                <div className="border-b border-dashed border-slate-500 w-full" />
+                <div className="border-b border-dashed border-slate-500 w-full" />
+                <div className="border-b border-dashed border-slate-500 w-full" />
+                <div className="border-b border-dashed border-slate-500 w-full" />
+              </div>
+
+              {/* Bars Container with Fixed Explicit Dimensions */}
+              <div className="relative z-10 h-36 flex items-end justify-between gap-1 sm:gap-2 px-2">
+                {hourlyData.map((d) => {
+                  const isPeak = d.count === maxHourly;
+                  // Guaranteed visible height percentage between 14% and 100%
+                  const heightPercent = Math.max(14, Math.round((d.count / (maxHourly || 1)) * 100));
+
+                  return (
+                    <div key={d.hour} className="flex-1 h-full flex flex-col items-center justify-end group relative">
+                      {/* Hover Tooltip */}
+                      <div className="absolute -top-8 z-30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-slate-950 border border-slate-700 px-2 py-0.5 rounded shadow-xl text-[10px] font-mono text-white whitespace-nowrap flex items-center gap-1.5">
+                        <span className={`w-1.5 h-1.5 rounded-full ${isPeak ? "bg-amber-400" : "bg-cyan-400"}`} />
+                        <span className="font-bold">{d.count} reqs</span>
+                        <span className="text-slate-400">({d.hour})</span>
+                      </div>
+
+                      {/* Visible Metric Count Above Bar */}
+                      <span className={`text-[10px] font-mono mb-1 transition-all ${
+                        isPeak 
+                          ? "text-amber-400 font-bold scale-110" 
+                          : "text-slate-400 group-hover:text-white"
+                      }`}>
+                        {d.count}
+                      </span>
+
+                      {/* Bar Column with explicit height & glowing gradient */}
+                      <div className="w-full max-w-[28px] h-28 flex items-end">
+                        <div
+                          style={{ height: `${heightPercent}%` }}
+                          className={`w-full rounded-t-md transition-all duration-300 relative shadow-md ${
+                            isPeak
+                              ? "bg-gradient-to-t from-red-600 via-amber-500 to-yellow-400 shadow-amber-500/30 ring-1 ring-amber-400/50"
+                              : "bg-gradient-to-t from-blue-700 via-indigo-600 to-cyan-400 group-hover:from-blue-600 group-hover:to-cyan-300 shadow-cyan-500/20"
+                          }`}
+                        >
+                          {/* Highlight Cap */}
+                          <div className="w-full h-1 bg-white/40 rounded-t-md" />
+                        </div>
+                      </div>
+
+                      {/* Hour Label */}
+                      <span className={`text-[10px] font-mono mt-1.5 transition-colors ${
+                        isPeak ? "text-amber-400 font-bold" : "text-slate-400 group-hover:text-slate-200"
+                      }`}>
+                        {d.hour.slice(0, 2)}h
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
           <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-            <span>{t("mh_total_today")} <strong>685 {t("mh_predictions_count")}</strong></span>
-            <span>{t("mh_rate_limit")}</span>
+            <span>{t("mh_total_today")} <strong className="text-white font-mono">{totalToday} {t("mh_predictions_count")}</strong></span>
+            <span className="font-mono text-[11px] text-slate-500">{t("mh_rate_limit")}</span>
           </div>
         </div>
 

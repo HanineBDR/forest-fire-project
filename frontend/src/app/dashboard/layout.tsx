@@ -21,7 +21,6 @@ import {
   Radio,
   Plane,
   Cpu,
-  MoreHorizontal,
   Menu,
   X,
   Camera,
@@ -52,10 +51,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [unauthToast, setUnauthToast] = useState<{ title: string; desc: string } | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
-  const moreDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { setActiveRole } = useNotifications();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -102,7 +99,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [pathname]);
 
-  // Click outside to close profile, role switcher, more menu, and mobile drawer
+  // Click outside to close profile, role switcher, and mobile drawer
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       const target = e.target as HTMLElement;
@@ -111,9 +108,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
       if (roleDropdownRef.current && !roleDropdownRef.current.contains(target)) {
         setIsRoleSwitcherOpen(false);
-      }
-      if (moreDropdownRef.current && !moreDropdownRef.current.contains(target)) {
-        setIsMoreOpen(false);
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
         if (!target.closest('[data-mobile-menu-toggle="true"]')) {
@@ -125,7 +119,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (e.key === "Escape") {
         setIsProfileOpen(false);
         setIsRoleSwitcherOpen(false);
-        setIsMoreOpen(false);
         setIsMobileMenuOpen(false);
       }
     }
@@ -141,7 +134,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     setIsProfileOpen(false);
     setIsRoleSwitcherOpen(false);
-    setIsMoreOpen(false);
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
@@ -160,7 +152,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setActiveRole(mapped);
     setIsProfileOpen(false);
     setIsRoleSwitcherOpen(false);
-    setIsMoreOpen(false);
     setIsMobileMenuOpen(false);
 
     if (pathname === "/analytics" && acc.role !== "ADMIN") {
@@ -199,40 +190,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isAdmin = user.role === "ADMIN";
   const permissions = user ? ROLE_PERMISSIONS[user.role] : null;
 
-  // PRIMARY OPERATIONAL ITEMS (always visible on desktop nav, filtered by role)
-  const primaryNavItems = [
-    { href: "/dashboard", label: t("nav_tactical_map") || "Carte Tactique", icon: Map, show: true },
-    { href: "/dashboard/alerts", label: t("nav_alerts") || "Alertes Actives", icon: AlertTriangle, show: true },
-    { href: "/analytics", label: t("nav_analytics") || "Analytics ML", icon: BarChart3, show: permissions?.canViewAnalytics ?? false },
+  // ALL OPERATIONAL & ACCREDITED FUNCTIONS (directly visible on the navigation bar)
+  const navItems = [
+    { href: "/dashboard", label: t("nav_tactical_map") || "Tactical Map", icon: Map, show: true },
+    { href: "/dashboard/alerts", label: t("nav_alerts") || "Active Alerts", icon: AlertTriangle, show: true },
+    { href: "/analytics", label: t("nav_analytics") || "ML Analytics", icon: BarChart3, show: permissions?.canViewAnalytics ?? false },
+    { href: "/dashboard/drones", label: t("nav_drones_flir") || "Drones FLIR", icon: Plane, dataTour: "drones", show: permissions?.canAccessDrones ?? false },
+    { href: "/dashboard/iot", label: t("nav_iot_sensors") || "IoT Vigies", icon: Cpu, dataTour: "iot", show: permissions?.canAccessIoT ?? false },
+    { href: "/dashboard/notifications", label: t("nav_intercom_alerts") || "Intercom", icon: Radio, show: true },
+    { href: "/dashboard/historique", label: t("nav_history") || "History", icon: History, show: permissions?.canAccessHistory ?? true },
+    { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera, show: permissions?.canVerifyCitizenReports ?? false },
+    { href: "/dashboard/admin/users", label: t("nav_users") || "Users", icon: Users, show: permissions?.canManageUsers ?? false },
+    { href: "/dashboard/admin/model-health", label: t("nav_model_health") || "Model Health", icon: Activity, show: permissions?.canViewModelHealth ?? false },
   ].filter((item) => item.show);
-
-  // SECONDARY ITEMS (collapsed into the "Plus" dropdown, filtered by role)
-  const secondaryMoreItems = [
-    { href: "/dashboard/notifications", label: t("nav_intercom_alerts"), icon: Radio, show: true },
-    { href: "/dashboard/drones", label: t("nav_drones_flir"), icon: Plane, dataTour: "drones", show: permissions?.canAccessDrones ?? false },
-    { href: "/dashboard/iot", label: t("nav_iot_sensors"), icon: Cpu, dataTour: "iot", show: permissions?.canAccessIoT ?? false },
-    { href: "/dashboard/historique", label: t("nav_history") || "History & Audit", icon: History, show: permissions?.canAccessHistory ?? true },
-  ].filter((item) => item.show);
-
-  const isMoreActive = secondaryMoreItems.some(
-    (item) => pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history")
-  );
-  const moreLabel = t("nav_more");
-
-  // SECONDARY / ADMINISTRATION ITEMS (in profile & settings menu)
-  const secondaryNavItems = isAdmin
-    ? [
-        { href: "/dashboard/admin/model-health", label: t("nav_model_health") || "Model Health & API", icon: Activity },
-        { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera },
-        { href: "/dashboard/admin/users", label: t("nav_users") || "User Management", icon: Users },
-      ]
-    : user?.role === "CIVIL_PROTECTION"
-    ? [
-        { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera },
-      ]
-    : [];
-
-  const isSecondaryActive = secondaryNavItems.some(item => pathname === item.href);
 
   return (
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${isRTL ? "font-arabic" : ""}`}>
@@ -248,10 +218,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
         )}
-        <div className="w-full px-3 sm:px-4 lg:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 flex-nowrap">
+        <div className="w-full px-3 sm:px-4 lg:px-6 h-16 flex items-center justify-between gap-2 lg:gap-3 flex-nowrap">
           
           {/* Left: Brand Logo & Role Badge */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             <Link 
               href="/dashboard" 
               data-tour="brand"
@@ -259,22 +229,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <Image
                 src="/logo.png"
-                alt="INKAD Logo"
-                width={36}
-                height={36}
-                className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 select-none object-contain"
+alt="INKAD Logo"
+                width={32}
+                height={32}
+                className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 select-none object-contain"
                 priority
               />
-              <div>
-                <div className="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-1.5 leading-none">
-                  <span>INKAD</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono font-medium">
-                    v3.0
-                  </span>
-                </div>
-                <div className="hidden xl:block text-[10px] text-slate-400 uppercase tracking-wider font-medium mt-0.5">
-                  {t("platform_sub") || "Système Opérationnel"}
-                </div>
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="text-sm font-bold tracking-tight text-white">INKAD</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono font-medium">
+                  v3.0
+                </span>
               </div>
             </Link>
 
@@ -289,7 +254,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 title={t("switch_command_title")}
               >
                 <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
-                <span className="max-w-[100px] sm:max-w-[130px] xl:max-w-[170px] truncate">{cleanRoleText}</span>
+                <span className="max-w-[90px] sm:max-w-[130px] xl:max-w-[160px] truncate">{cleanRoleText}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isRoleSwitcherOpen ? "rotate-180" : ""}`} />
               </button>
 
@@ -338,17 +303,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          {/* Center: Primary Operational Navigation + Plus (More) Dropdown */}
-          <nav aria-label={t("nav_main_heading")} data-tour="nav" className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0 flex-nowrap">
-            {primaryNavItems.map((item) => {
+          {/* Center: ALL Operational Functions Rendered Directly on Navigation Bar */}
+          <nav 
+            aria-label={t("nav_main_heading")} 
+            data-tour="nav" 
+            className="hidden lg:flex items-center gap-1 xl:gap-1.5 flex-nowrap overflow-x-auto no-scrollbar py-1"
+          >
+            {navItems.map((item) => {
               const Icon = item.icon;
-              const active = pathname === item.href;
+              const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  data-tour={item.dataTour}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                  className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
                     active
                       ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
@@ -359,66 +329,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </Link>
               );
             })}
-
-            {/* "Plus" (More) Dropdown Menu */}
-            <div ref={moreDropdownRef} className="relative">
-              <button
-                type="button"
-                onClick={() => setIsMoreOpen(!isMoreOpen)}
-                aria-haspopup="menu"
-                aria-expanded={isMoreOpen}
-                aria-label={t("nav_operational_tools")}
-                className={`flex items-center gap-1 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-                  isMoreOpen || isMoreActive
-                    ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
-                }`}
-                title={moreLabel}
-              >
-                <MoreHorizontal className={`w-3.5 h-3.5 shrink-0 ${isMoreActive ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
-                <span>{moreLabel}</span>
-                <ChevronDown className={`w-3 h-3 text-slate-400 shrink-0 transition-transform duration-150 ${isMoreOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-              </button>
-
-              {isMoreOpen && (
-                <div
-                  role="menu"
-                  aria-orientation="vertical"
-                  className="absolute start-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none animate-in fade-in slide-in-from-top-2 duration-150"
-                >
-                  <div className="px-3 py-1.5 border-b border-slate-800 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>{moreLabel} & {t("nav_operational_tools")}</span>
-                    <span className="text-[10px] text-slate-500 font-mono">4</span>
-                  </div>
-                  <div className="p-1 space-y-0.5">
-                    {secondaryMoreItems.map((item) => {
-                      const Icon = item.icon;
-                      const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          data-tour={item.dataTour}
-                          role="menuitem"
-                          onClick={() => setIsMoreOpen(false)}
-                          className={`flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors ${
-                            active
-                              ? "bg-slate-800 text-white font-semibold border border-slate-700"
-                              : "text-slate-300 hover:text-white hover:bg-slate-800/60"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
-                            <span>{item.label}</span>
-                          </div>
-                          {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
           </nav>
 
           {/* Right: Notification Bell + Language Selector + User Profile + Mobile Hamburger */}
@@ -438,7 +348,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 aria-expanded={isProfileOpen}
                 aria-label={t("nav_system_supervision")}
                 className={`flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-                  isProfileOpen || isSecondaryActive || pathname === "/dashboard/profile"
+                  isProfileOpen || pathname === "/dashboard/profile"
                     ? "bg-slate-800 border-slate-700 text-white"
                     : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/70"
                 }`}
@@ -533,35 +443,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     })}
                   </div>
 
-                  {/* Secondary Admin Routes */}
-                  {secondaryNavItems.length > 0 && (
-                    <div className="py-1 border-b border-slate-800">
-                      <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                        {t("nav_system_supervision")}
-                      </div>
-                      {secondaryNavItems.map((item) => {
-                        const Icon = item.icon;
-                        const active = pathname === item.href;
-                        return (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            role="menuitem"
-                            onClick={() => setIsProfileOpen(false)}
-                            className={`flex items-center gap-2.5 px-3.5 py-2 text-xs transition-colors ${
-                              active
-                                ? "bg-slate-800 text-white font-semibold"
-                                : "text-slate-300 hover:text-white hover:bg-slate-800/60"
-                            }`}
-                          >
-                            <Icon className={`w-3.5 h-3.5 ${active ? "text-red-400" : "text-slate-400"}`} />
-                            <span>{item.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-
                   {/* Intercom Link */}
                   <div className="py-1 border-b border-slate-800">
                     <Link
@@ -639,42 +520,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             </div>
 
+            {/* All functions in mobile drawer */}
             <div>
               <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
                 {t("nav_main_heading")}
               </div>
               <div className="space-y-1">
-                {primaryNavItems.map((item) => {
-                  const Icon = item.icon;
-                  const active = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
-                        active
-                          ? "bg-slate-800 text-white border border-slate-700"
-                          : "text-slate-300 hover:text-white hover:bg-slate-800/60"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} />
-                        <span>{item.label}</span>
-                      </div>
-                      {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="border-t border-slate-800/80 pt-2.5">
-              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
-                {moreLabel} & {t("nav_operational_tools")}
-              </div>
-              <div className="space-y-1">
-                {secondaryMoreItems.map((item) => {
+                {navItems.map((item) => {
                   const Icon = item.icon;
                   const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
                   return (
@@ -698,38 +550,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 })}
               </div>
             </div>
-
-            {secondaryNavItems.length > 0 && (
-              <div className="border-t border-slate-800/80 pt-2.5">
-                <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
-                  {t("nav_system_supervision")}
-                </div>
-                <div className="space-y-1">
-                  {secondaryNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const active = pathname === item.href;
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
-                          active
-                            ? "bg-slate-800 text-white border border-slate-700"
-                            : "text-slate-300 hover:text-white hover:bg-slate-800/60"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} />
-                          <span>{item.label}</span>
-                        </div>
-                        {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             <div className="border-t border-slate-800/80 pt-2.5">
               <button
