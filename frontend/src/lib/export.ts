@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * IN9AD Platform - Client-Side & Backend Export Utilities
- * Supporting CSV, JSON, PDF (jsPDF + autoTable with IN9AD Editorial theme), and Excel (XLSX).
+ * INKAD Platform - Client-Side & Backend Export Utilities
+ * Supporting CSV, JSON, PDF (jsPDF + autoTable with INKAD Editorial theme), and Excel (XLSX).
  */
 
 function downloadBlob(blob: Blob, filename: string): void {
@@ -22,7 +22,7 @@ function downloadBlob(blob: Blob, filename: string): void {
 /**
  * 1. Export rows to CSV
  */
-export function exportToCSV(rows: Record<string, any>[], filename = "in9ad_report.csv"): void {
+export function exportToCSV(rows: Record<string, any>[], filename = "inkad_report.csv"): void {
   if (!rows || rows.length === 0) {
     const emptyBlob = new Blob(["No data available\n"], { type: "text/csv;charset=utf-8;" });
     downloadBlob(emptyBlob, filename.endsWith(".csv") ? filename : `${filename}.csv`);
@@ -55,7 +55,7 @@ export function exportToCSV(rows: Record<string, any>[], filename = "in9ad_repor
 /**
  * 2. Export rows to JSON
  */
-export function exportToJSON(rows: Record<string, any>[], filename = "in9ad_report.json"): void {
+export function exportToJSON(rows: Record<string, any>[], filename = "inkad_report.json"): void {
   const jsonString = JSON.stringify(rows || [], null, 2);
   const blob = new Blob([jsonString], { type: "application/json;charset=utf-8;" });
   downloadBlob(blob, filename.endsWith(".json") ? filename : `${filename}.json`);
@@ -66,8 +66,8 @@ export function exportToJSON(rows: Record<string, any>[], filename = "in9ad_repo
  */
 export async function exportToPDF(
   rows: Record<string, any>[],
-  title = "IN9AD Operational Wildfire Report",
-  filename = "in9ad_report.pdf"
+  title = "INKAD Operational Wildfire Report",
+  filename = "inkad_report.pdf"
 ): Promise<void> {
   try {
     const { default: jsPDF } = await import("jspdf");
@@ -90,7 +90,7 @@ export async function exportToPDF(
     doc.setTextColor(245, 241, 232);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
-    doc.text("IN9AD (EN: Saving) - Wildfire Intelligence Platform", 30, 28);
+    doc.text("INKAD (EN: Saving) - Wildfire Intelligence Platform", 30, 28);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
@@ -147,7 +147,7 @@ export async function exportToPDF(
         doc.setFontSize(8);
         doc.setTextColor(120, 120, 120);
         doc.text(
-          `Page ${data.pageNumber} · IN9AD PFE Research Project · République Algérienne Démocratique et Populaire`,
+          `Page ${data.pageNumber} · INKAD PFE Research Project · République Algérienne Démocratique et Populaire`,
           30,
           doc.internal.pageSize.getHeight() - 15
         );
@@ -167,13 +167,13 @@ export async function exportToPDF(
  */
 export async function exportToExcel(
   rows: Record<string, any>[],
-  filename = "in9ad_report.xlsx"
+  filename = "inkad_report.xlsx"
 ): Promise<void> {
   try {
     const XLSX = await import("xlsx");
     const worksheet = XLSX.utils.json_to_sheet(rows || []);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "IN9AD Report");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "INKAD Report");
 
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const blob = new Blob([excelBuffer], {
@@ -195,7 +195,7 @@ export async function exportFromBackend(
   fallbackRows: Record<string, any>[] = []
 ): Promise<void> {
   const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
-  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const token = typeof window !== "undefined" ? localStorage.getItem("inkad_auth_token") : null;
 
   try {
     const res = await fetch(`${apiBase}/api/reports/export?type=${type}`, {
@@ -209,7 +209,7 @@ export async function exportFromBackend(
 
     if (res.ok) {
       const blob = await res.blob();
-      const filename = `in9ad_report_${new Date().toISOString().slice(0, 10)}.${type}`;
+      const filename = `inkad_report_${new Date().toISOString().slice(0, 10)}.${type}`;
       downloadBlob(blob, filename);
       return;
     }
@@ -218,13 +218,13 @@ export async function exportFromBackend(
   }
 
   // Graceful client-side fallback if backend API is unreachable or returned error
-  const filename = `in9ad_report_${new Date().toISOString().slice(0, 10)}`;
+  const filename = `inkad_report_${new Date().toISOString().slice(0, 10)}`;
   if (type === "csv") {
     exportToCSV(fallbackRows, `${filename}.csv`);
   } else if (type === "json") {
     exportToJSON(fallbackRows, `${filename}.json`);
   } else if (type === "pdf") {
-    await exportToPDF(fallbackRows, "IN9AD Wildfire Report", `${filename}.pdf`);
+    await exportToPDF(fallbackRows, "INKAD Wildfire Report", `${filename}.pdf`);
   } else if (type === "xlsx") {
     await exportToExcel(fallbackRows, `${filename}.xlsx`);
   }

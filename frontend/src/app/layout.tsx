@@ -8,7 +8,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "IN9AD (إنقاذ) | AI Wildfire Risk & Propagation Simulator - Northern Algeria",
+  title: "INKAD (إنقاذ) | AI Wildfire Risk & Propagation Simulator - Northern Algeria",
   description:
     "AI-powered wildfire risk prediction and real-time fire spread simulation for Northern Algeria (Tizi Ouzou, Bejaia, Bouira). Powered by XGBoost, Canadian FWI, Open-Meteo, and NASA FIRMS.",
   keywords: [
@@ -22,10 +22,10 @@ export const metadata: Metadata = {
     "XGBoost",
     "NASA FIRMS",
     "Open-Meteo",
-    "IN9AD",
+    "INKAD",
     "Protection Civile",
   ],
-  authors: [{ name: "IN9AD PFE Research Team" }],
+  authors: [{ name: "INKAD PFE Research Team" }],
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",

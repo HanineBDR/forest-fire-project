@@ -1,4 +1,4 @@
-# IN9AD (إنقاذ) - AI-Based Forest Fire Risk Prediction for Northern Algeria
+# INKAD (إنقاذ) - AI-Based Forest Fire Risk Prediction for Northern Algeria
 
 > **National Wildfire Early Warning & Elliptical Spread Simulation System**  
 > *Targeted on the Northern Algerian Fire Belt: Tizi Ouzou (15), Bejaia (06), Bouira (10), Blida (09), El Tarf (36), Batna (05)*  
@@ -14,9 +14,9 @@
 
 ---
 
-## 1. What is IN9AD?
+## 1. What is INKAD?
 
-**IN9AD** (*إنقاذ* — Arabic for *Rescue / Salvation*) is an AI-powered wildfire risk prediction and spatial fire spread simulation system designed for the vulnerable Mediterranean mountain massifs of **Northern Algeria (spanning Kabylie, Tell Atlas, Blidean Atlas, and the Aurès)**.
+**INKAD** (*إنقاذ* — Arabic for *Rescue / Salvation*) is an AI-powered wildfire risk prediction and spatial fire spread simulation system designed for the vulnerable Mediterranean mountain massifs of **Northern Algeria (spanning Kabylie, Tell Atlas, Blidean Atlas, and the Aurès)**.
 
 In recent summers, Northern Algeria has experienced devastating mega-fires driven by the **Sirocco (*Chergui*)**—a hyper-dry, gale-force desert wind blowing from the Sahara across the Tell Atlas that drives temperatures above 45°C and relative humidity below 15%.
 
@@ -26,7 +26,7 @@ Physical IoT sensors deployed in remote mountain forests suffer from:
 - High maintenance, vandalism, and battery decay across rugged topography
 - Limited spatial coverage across tens of thousands of hectares
 
-**IN9AD eliminates physical sensors entirely.** Instead, it combines:
+**INKAD eliminates physical sensors entirely.** Instead, it combines:
 1. **NASA FIRMS (VIIRS 375m & MODIS)** open satellite thermal anomaly detection feeds
 2. **Open-Meteo** free real-time numerical weather prediction (temperature, wind speed, wind direction, humidity, precipitation)
 3. **Calibrated Machine Learning (XGBoost)** coupled with the **Canadian Forest Fire Weather Index (FWI)**
@@ -63,7 +63,7 @@ One finished, rock-solid feature built to perfection:
                                        |
                                        v
                +-------------------------------------------------+
-               |              IN9AD FastAPI Backend              |
+               |              INKAD FastAPI Backend              |
                |                    (Python)                     |
                +-------+-----------------------+---------------+--+
                        |                       |               |
@@ -111,7 +111,7 @@ forest-fire-project/
 │   └── Procfile                 # Production web server process definition
 ├── frontend/
 │   ├── public/
-│   │   └── icon.png             # Official IN9AD high-res favicon asset
+│   │   └── icon.png             # Official INKAD high-res favicon asset
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── globals.css      # Dark command-center theme + radar pulse animations
@@ -147,7 +147,7 @@ forest-fire-project/
 
 ---
 
-## 5. IN9AD v3.0 — Guide d'Évaluation & Démonstration (Thirduni Top 3)
+## 5. INKAD v3.0 — Guide d'Évaluation & Démonstration (Thirduni Top 3)
 
 ### Accréditations Démo (Rôles & Accès Sécurisés)
 
@@ -155,9 +155,9 @@ La plateforme est sécurisée par tokens JWT avec contrôle d'accès strict par 
 
 | Rôle Institutionnel | Email Démo | Mot de Passe | Permissions Opérationnelles |
 | :--- | :--- | :--- | :--- |
-| **Protection Civile (الحماية المدنية)** | `protection@in9ad.dz` | `Protect123!` | Changement de statut des alertes (DETECTED ➔ UNITES_DEPLOYEES ➔ MAITRISE), validation des interventions terrain, génération de PV d'alerte. |
-| **Conservation des Forêts (محافظة الغابات)** | `foret@in9ad.dz` | `Foret123!` | Consultation en lecture seule des alertes et massifs forestiers, calcul d'indices de risque, export de rapports de secteur. |
-| **Administrateur MLOps (CODIS Central)** | `admin@in9ad.dz` | `Admin123!` | Accès complet : gestion des comptes, santé modèle, file des signalements citoyens, feuille de route 2026. |
+| **Protection Civile (الحماية المدنية)** | `protection@inkad.dz` | `Protect123!` | Changement de statut des alertes (DETECTED ➔ UNITES_DEPLOYEES ➔ MAITRISE), validation des interventions terrain, génération de PV d'alerte. |
+| **Conservation des Forêts (محافظة الغابات)** | `foret@inkad.dz` | `Foret123!` | Consultation en lecture seule des alertes et massifs forestiers, calcul d'indices de risque, export de rapports de secteur. |
+| **Administrateur MLOps (CODIS Central)** | `admin@inkad.dz` | `Admin123!` | Accès complet : gestion des comptes, santé modèle, file des signalements citoyens, feuille de route 2026. |
 
 ---
 
@@ -242,10 +242,10 @@ La plateforme est sécurisée par tokens JWT avec contrôle d'accès strict par 
   - Dynamique du front et vitesse d'expansion en m/min et km/h.
   - Enjeux humains, dénombrement et plan d'évacuation préconisé.
   - Végétation, combustible et biodiversité protégée.
-  - Destinataires officiels (DGPC, DGF, Ministère de l'Intérieur) et cachet électronique IN9AD.
+  - Destinataires officiels (DGPC, DGF, Ministère de l'Intérieur) et cachet électronique INKAD.
 
 #### 14. Système de Persistance des Rapports de Crise (Feature 14)
-- Résolution du caractère éphémère des rapports : chaque analyse ou alerte est automatiquement enregistrée dans `localStorage` (`in9ad_saved_tactical_report`).
+- Résolution du caractère éphémère des rapports : chaque analyse ou alerte est automatiquement enregistrée dans `localStorage` (`inkad_saved_tactical_report`).
 - À chaque visite sur `/dashboard/iot`, une bannière persistante signale le dernier rapport disponible avec boutons d'ouverture et de téléchargement immédiat.
 - Sur la salle des notifications (`/dashboard/notifications`), chaque carte d'alerte IoT intègre un bouton **[Télécharger PV (PDF)]** et un accès direct **[Voir Vigie IoT]**.
 
@@ -255,9 +255,9 @@ La plateforme est sécurisée par tokens JWT avec contrôle d'accès strict par 
 - Tracé cartographique de trajectoire de vol planifiée (couloir Yakouren -> Akfadou), télémétrie en direct (altitude, autonomie batterie, capteur thermique FLIR, liaison radio), flux vidéo infrarouge simulé et statut de préparation opérationnelle Phase 2.
 
 #### 16. Guide Interactif d'Onboarding Visuel (Spotlight 8 Étapes) (Feature 16)
-- Visite guidée contextuelle automatique dès la première visite sur la plateforme (persistée via `in9ad_onboarding_seen`).
+- Visite guidée contextuelle automatique dès la première visite sur la plateforme (persistée via `inkad_onboarding_seen`).
 - Masque semi-transparent sombre avec projecteur visuel entourant tour à tour :
-  1. En-tête officiel et identité IN9AD.
+  1. En-tête officiel et identité INKAD.
   2. Grille des 11 massifs stratégiques surveillés.
   3. Carte tactique Leaflet et couches cartographiques.
   4. Calculateur d'indice de risque IA (XGBoost + FWI).
@@ -347,7 +347,7 @@ La plateforme est sécurisée par tokens JWT avec contrôle d'accès strict par 
 3. Select your repository. Render automatically reads `backend/render.yaml`:
    - **Build Command**: `pip install -r requirements.txt && python data/train_model.py`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Once deployed, copy your Render service URL (e.g. `https://in9ad-backend.onrender.com`).
+4. Once deployed, copy your Render service URL (e.g. `https://inkad-backend.onrender.com`).
 
 ### Deploy Frontend on Vercel (Free)
 1. In [Vercel Dashboard](https://vercel.com/new), import your GitHub repository.
@@ -355,7 +355,7 @@ La plateforme est sécurisée par tokens JWT avec contrôle d'accès strict par 
    - **Root Directory**: `frontend`
    - **Framework Preset**: `Next.js`
 3. Add Environment Variable:
-   - `NEXT_PUBLIC_API_URL` = `https://in9ad-backend.onrender.com` (your Render backend URL)
+   - `NEXT_PUBLIC_API_URL` = `https://inkad-backend.onrender.com` (your Render backend URL)
 4. Click **Deploy**. Your app is live with SSL!
 
 ---
@@ -419,7 +419,7 @@ Takes latitude, longitude, and weather observations, returning the AI risk score
 ## 8. Institutional Security & Authentication (RBAC)
 
 > [!IMPORTANT]
-> **Context:** IN9AD is not a public toy. Its end-users are **الحماية المدنية (Protection Civile)**, **محافظة الغابات (Conservation des Forêts)**, and central operational command. Because false wildfire alerts can trigger public panic and unnecessary mobilization of aerial firefighting resources (Beriev Be-200, Air Tractor AT-802), public self-registration is disabled and all prediction endpoints require authenticated, rate-limited tokens.
+> **Context:** INKAD is not a public toy. Its end-users are **الحماية المدنية (Protection Civile)**, **محافظة الغابات (Conservation des Forêts)**, and central operational command. Because false wildfire alerts can trigger public panic and unnecessary mobilization of aerial firefighting resources (Beriev Be-200, Air Tractor AT-802), public self-registration is disabled and all prediction endpoints require authenticated, rate-limited tokens.
 
 ### Security Highlights
 - **Role-Based Access Control (RBAC):**
@@ -453,9 +453,9 @@ For live evaluation and grading, three pre-seeded institutional accounts are ava
 
 | Email | Password | Role | Entity (Arabic / French) | Access Scope |
 | :--- | :--- | :--- | :--- | :--- |
-| `protection@in9ad.dz` | `Protect123!` | `CIVIL_PROTECTION` | **الحماية المدنية** (Protection Civile) | Tactical Map, Alerts, History |
-| `foret@in9ad.dz` | `Foret123!` | `FOREST_GUARD` | **محافظة الغابات** (Conservation des Forêts) | Tactical Map, Alerts, History |
-| `admin@in9ad.dz` | `Admin123!` | `ADMIN` | **الإدارة المركزية** (Super Admin) | Full Access + Health Portal + Users |
+| `protection@inkad.dz` | `Protect123!` | `CIVIL_PROTECTION` | **الحماية المدنية** (Protection Civile) | Tactical Map, Alerts, History |
+| `foret@inkad.dz` | `Foret123!` | `FOREST_GUARD` | **محافظة الغابات** (Conservation des Forêts) | Tactical Map, Alerts, History |
+| `admin@inkad.dz` | `Admin123!` | `ADMIN` | **الإدارة المركزية** (Super Admin) | Full Access + Health Portal + Users |
 
 > [!TIP]
 > **One-Click Login:** On the `/login` page, click any of the 3 pre-seeded buttons to instantly authenticate without manual typing.
@@ -465,7 +465,7 @@ For live evaluation and grading, three pre-seeded institutional accounts are ava
 ## 11. Live Data Refresh & Persistent History System
 
 > [!NOTE]
-> **Data Authenticity:** IN9AD is not a static mockup. All metrics, fire points, and diagrams are renewable, refreshable, and stored in SQLite (`/backend/in9ad_history.db`).
+> **Data Authenticity:** INKAD is not a static mockup. All metrics, fire points, and diagrams are renewable, refreshable, and stored in SQLite (`/backend/inkad_history.db`).
 > Evaluators and judges can trigger on-demand live refreshes to confirm dynamic data pipelines.
 
 ### How to Refresh Live Data
@@ -495,7 +495,7 @@ curl -X GET http://localhost:8000/api/history/model-drift
 
 ```text
 +--------------------------------------------------------------------------------------------------+
-|                     IN9AD Institutional Alert Lifecycle & Audit Workflow                         |
+|                     INKAD Institutional Alert Lifecycle & Audit Workflow                         |
 +--------------------------------------------------------------------------------------------------+
 |                                                                                                  |
 |   1. DETECTED (11:00)           2. PRISE_EN_COMPTE (11:14)        3. UNITES_DEPLOYEES (11:28)     |
@@ -547,9 +547,9 @@ To showcase the platform's technical execution for jury evaluation:
      - `14:30 MAITRISE by Commandant Protection Civile`
 
 3. **Check Model Health & Telemetry (`/dashboard/admin/model-health`):**
-   - Log in as `admin@in9ad.dz`
+   - Log in as `admin@inkad.dz`
    - Review **Last Refresh** and **Next auto-refresh** telemetry
-   - Inspect recent refresh logs from `in9ad_history.db`
+   - Inspect recent refresh logs from `inkad_history.db`
    - Click **"Tester le Modèle"** to execute a live micro-benchmark (<15ms latency)
 
 ---

@@ -9,10 +9,10 @@ export function ServiceWorkerRegister() {
         navigator.serviceWorker
           .register("/sw.js")
           .then((registration) => {
-            console.log("[IN9AD] PWA Service Worker enregistré avec succès:", registration.scope);
+            console.log("[INKAD] PWA Service Worker enregistré avec succès:", registration.scope);
           })
           .catch((error) => {
-            console.warn("[IN9AD] Échec de l'enregistrement du Service Worker:", error);
+            console.warn("[INKAD] Échec de l'enregistrement du Service Worker:", error);
           });
       });
     }

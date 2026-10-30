@@ -246,7 +246,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center gap-2.5">
               <Image
                 src="/logo.png"
-                alt="IN9AD Logo"
+                alt="INKAD Logo"
                 width={36}
                 height={36}
                 className="w-9 h-9 shrink-0 select-none object-contain"
@@ -488,7 +488,7 @@ export default function AnalyticsPage() {
               {activeKpiModal === "burn_points" && (
                 <div className="text-xs space-y-1.5 font-mono">
                   <div className="text-slate-300">
-                    {language === "ar" ? "لقطات تاريخية مسجلة في قاعدة بيانات in9ad_history.db:" : language === "en" ? "Historical snapshots persisted in in9ad_history.db:" : "Snapshots historiques enregistrés dans in9ad_history.db:"}
+                    {language === "ar" ? "لقطات تاريخية مسجلة في قاعدة بيانات inkad_history.db:" : language === "en" ? "Historical snapshots persisted in inkad_history.db:" : "Snapshots historiques enregistrés dans inkad_history.db:"}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1">
                     {burnSnapshots.map((s) => (
@@ -566,7 +566,7 @@ export default function AnalyticsPage() {
             <div className="overflow-hidden rounded-lg border border-slate-800/80 bg-slate-950">
               <img
                 src={`${apiBase}/outputs/model_performance.png?t=${lastUpdated.getTime()}`}
-                alt="Performance du Modèle IN9AD - Matrice de Confusion et Courbe ROC"
+                alt="Performance du Modèle INKAD - Matrice de Confusion et Courbe ROC"
                 className="w-full h-auto object-contain max-h-[560px] mx-auto"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -670,7 +670,7 @@ export default function AnalyticsPage() {
               <div className="overflow-hidden rounded-lg border border-slate-800/80 bg-slate-900/60 p-2">
                 <img
                   src={`${apiBase}/outputs/feature_importance.png?t=${lastUpdated.getTime()}`}
-                  alt="Importance des Variables IN9AD - Poids XGBoost"
+                  alt="Importance des Variables INKAD - Poids XGBoost"
                   className="w-full h-auto object-contain max-h-[460px] mx-auto rounded"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;

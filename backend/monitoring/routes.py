@@ -1,5 +1,5 @@
 """
-IN9AD - Health & Operational Monitoring Endpoints
+INKAD - Health & Operational Monitoring Endpoints
 Exposes platform telemetry, external API health, prediction auditing,
 and model diagnostics.
 """

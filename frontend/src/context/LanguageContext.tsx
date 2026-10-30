@@ -34,7 +34,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     try {
-      const savedLang = localStorage.getItem("in9ad_lang") as Language;
+      const savedLang = localStorage.getItem("inkad_lang") as Language;
       if (savedLang && (savedLang === "fr" || savedLang === "en" || savedLang === "ar")) {
         setLanguageState(savedLang);
         applyDocumentDirection(savedLang);
@@ -64,7 +64,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     try {
-      localStorage.setItem("in9ad_lang", lang);
+      localStorage.setItem("inkad_lang", lang);
     } catch {
       // storage unavailable
     }

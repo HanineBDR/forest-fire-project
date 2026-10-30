@@ -1,5 +1,5 @@
 """
-IN9AD Neon Database Helper (Python)
+INKAD Neon Database Helper (Python)
 Executes SQL on Neon Lakebase Postgres using Neon Serverless HTTP API,
 with automatic fallback to local SQLite for offline/sandboxed execution.
 """
@@ -66,6 +66,8 @@ def execute_neon_sql(query: str, params: Optional[List[Any]] = None) -> List[Dic
     Executes a SQL query on Neon Postgres via HTTPS.
     Returns list of dicts. Falls back to local SQLite if unreachable.
     """
+    if os.environ.get("TESTING") == "1":
+        return _execute_sqlite_fallback(query, params)
     info = get_neon_connection_info()
     if info and info.get("url") and info.get("password"):
         try:
@@ -102,7 +104,9 @@ def execute_neon_sql(query: str, params: Optional[List[Any]] = None) -> List[Dic
 
 def _execute_sqlite_fallback(query: str, params: Optional[List[Any]] = None) -> List[Dict[str, Any]]:
     """Local SQLite fallback for sandboxed tests or offline operations."""
-    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "in9ad_history.db")
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "inkad_history.db")
+
+
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()

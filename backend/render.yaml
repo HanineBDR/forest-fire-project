@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: in9ad-backend
+    name: inkad-backend
     env: python
     region: frankfurt
     plan: free

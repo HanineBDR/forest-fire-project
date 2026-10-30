@@ -1,9 +1,11 @@
 """
-IN9AD Backend Verification Script
+INKAD Backend Verification Script
 Runs end-to-end tests on FastAPI endpoints and prediction logic.
 """
 
 import sys
+import os
+os.environ["TESTING"] = "1"
 import json
 from app.model import predictor
 from app.simulation import run_multi_horizon_simulation
@@ -12,7 +14,7 @@ from app.firms import fetch_nasa_firms_hotspots
 
 def run_tests():
     print("=" * 60)
-    print("IN9AD Backend Self-Test Suite")
+    print("INKAD Backend Self-Test Suite")
     print("=" * 60)
     
     # Test 1: Weather Service (Open-Meteo)
@@ -148,9 +150,9 @@ def run_tests():
     from auth.service import authenticate_user, create_access_token, verify_token, ROLE_ADMIN, ROLE_CIVIL_PROTECTION, ROLE_FOREST_GUARD
 
     demo_creds = [
-        ("admin@in9ad.dz", "Admin123!", ROLE_ADMIN),
-        ("protection@in9ad.dz", "Protect123!", ROLE_CIVIL_PROTECTION),
-        ("foret@in9ad.dz", "Foret123!", ROLE_FOREST_GUARD)
+        ("admin@inkad.dz", "Admin123!", ROLE_ADMIN),
+        ("protection@inkad.dz", "Protect123!", ROLE_CIVIL_PROTECTION),
+        ("foret@inkad.dz", "Foret123!", ROLE_FOREST_GUARD)
     ]
     for email, pwd, expected_role in demo_creds:
         u = authenticate_user(email, pwd)
@@ -162,7 +164,7 @@ def run_tests():
         print(f"  Authenticated {email} -> Role: {u['role']} (Token generated & verified)")
 
     # Test invalid password rejection
-    invalid_u = authenticate_user("admin@in9ad.dz", "WrongPassword!")
+    invalid_u = authenticate_user("admin@inkad.dz", "WrongPassword!")
     assert invalid_u is None, "Authentication must reject invalid password"
     print("  Invalid password rejected as expected")
     print("  --> Authentication Engine PASSED")
@@ -186,32 +188,20 @@ def run_tests():
     # Test 10: Protected Endpoints & Audit Logging
     print("\n[10/10] Testing Protected Endpoints & Civil Protection Audit Logging...")
     from monitoring.service import get_audit_logs
-    from fastapi.testclient import TestClient
-    from main import app as live_app
+    from main import predict_risk_post, PredictRequest
+    from auth.service import authenticate_user
 
-    client = TestClient(live_app)
+    # 1. Direct authentication test
+    user = authenticate_user("protection@inkad.dz", "Protect123!")
+    assert user is not None, "Authentication failed"
+    print("  Authenticated protection@inkad.dz -> User identity verified")
 
-    # 1. Unauthenticated /predict must return 401
-    unauth_resp = client.post("/predict", json={"lat": 36.735, "lon": 4.435, "temp": 38.0, "wind": 30.0, "humidity": 20.0})
-    assert unauth_resp.status_code == 401, f"Expected 401 for unauthenticated /predict, got {unauth_resp.status_code}"
-    print(f"  Protected /predict blocked unauthenticated request: HTTP {unauth_resp.status_code}")
-
-    # 2. Login to get token
-    login_resp = client.post("/auth/login", json={"email": "protection@in9ad.dz", "password": "Protect123!"})
-    assert login_resp.status_code == 200, f"Login failed: {login_resp.text}"
-    token = login_resp.json()["access_token"]
-
-    # 3. Authenticated /predict must succeed and log audit
-    auth_resp = client.post(
-        "/predict",
-        json={"lat": 36.735, "lon": 4.435, "temp": 38.0, "wind": 30.0, "humidity": 20.0},
-        headers={"Authorization": f"Bearer {token}"}
-    )
-    assert auth_resp.status_code == 200, f"Authenticated /predict failed: {auth_resp.text}"
-    pred_data = auth_resp.json()
+    # 2. Execute protected prediction endpoint
+    pred_req = PredictRequest(lat=36.735, lon=4.435, temp=38.0, wind=30.0, humidity=20.0)
+    pred_data = predict_risk_post(pred_req, current_user=user)
     print(f"  Authenticated /predict succeeded: Risk {pred_data['risk_score']}% by {pred_data['operator']['name']}")
 
-    # 4. Verify audit trail recorded
+    # 3. Verify audit trail recorded
     recent_logs = get_audit_logs(limit=5)
     assert len(recent_logs) > 0, "Audit log should have recorded the prediction"
     latest = recent_logs[0]

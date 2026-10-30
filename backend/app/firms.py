@@ -1,5 +1,5 @@
 """
-IN9AD - NASA FIRMS Satellite Thermal Anomaly Integration
+INKAD - NASA FIRMS Satellite Thermal Anomaly Integration
 Fetches active fire detection data from NASA FIRMS (Fire Information for Resource Management System)
 for Northern Algeria (Tizi Ouzou, Bejaia, Bouira, Babors, Djurdjura)
 """

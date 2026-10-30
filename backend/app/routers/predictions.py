@@ -1,5 +1,5 @@
 """
-IN9AD Predictions Router & AI Risk Early Warning Dispatcher
+INKAD Predictions Router & AI Risk Early Warning Dispatcher
 Runs XGBoost + FWI models and automatically broadcasts real-time alerts
 and notifications to Protection Civile, Admin Centrale, and Mohafadat El Ghabat.
 """

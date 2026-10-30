@@ -1,6 +1,6 @@
 export const en = {
   // Common & Branding
-  platform_name: "IN9AD (إنقاذ)",
+  platform_name: "INKAD (إنقاذ)",
   platform_sub: "National Wildfire Early Warning & Predictive Simulation System",
   version: "v3.0 TOP 3",
   loading: "Loading in progress...",
@@ -127,7 +127,7 @@ export const en = {
   offline_ready: "Map for {zone} downloaded ({size}) - Ready for offline tactical use!",
 
   // Feature 10: Roadmap
-  roadmap_title: "IN9AD Strategic Roadmap (What Happens Next)",
+  roadmap_title: "INKAD Strategic Roadmap (What Happens Next)",
   roadmap_subtitle: "National rollout strategy for Civil Protection and General Directorate of Forests.",
   phase1_title: "Months 1 - 2: DGF Integration & Tizi Ouzou Pilot",
   phase1_desc: "Direct link to forest fire watchtowers. Live dispatch in Tizi Ouzou emergency command room.",
@@ -260,13 +260,13 @@ export const en = {
   submitting: "Sending...",
 
   // Analytics & Evaluation Page
-  analytics_title: "IN9AD Analytics & Model Evaluation",
+  analytics_title: "INKAD Analytics & Model Evaluation",
   analytics_subtitle: "Continuous NASA FIRMS satellite telemetry, XGBoost calibration and persistent SQLite history.",
   dynamic_system_live: "Live Dynamic System",
   refresh_all_data: "Refresh All Data",
   syncing_nasa: "Syncing NASA...",
   kpi_section_title: "Key Performance Indicators (Click to view history)",
-  source_sqlite: "Source: SQLite in9ad_history.db",
+  source_sqlite: "Source: SQLite inkad_history.db",
   model_roc_auc: "Model ROC-AUC",
   calibrated_runs: "Calibrated on 7 runs",
   click_for_history_curve: "Click for historical curve",
@@ -280,7 +280,7 @@ export const en = {
   estimated_burned_area: "Estimated Burned Area",
   arc_tellien_kabylie: "88% in Tell Atlas & Kabylia",
   click_for_monthly_detail: "Click for monthly breakdown",
-  section_model_perf_title: "Model Performance: IN9AD Model Mechanics",
+  section_model_perf_title: "Model Performance: INKAD Model Mechanics",
   section_model_perf_desc: "Confusion matrix, ROC curve and classification report validated on Northern Algeria wildfire regimes.",
   regenerate_latest_data: "Regenerate with latest data",
   retraining: "Retraining...",
@@ -301,7 +301,7 @@ export const en = {
   generating_pdf_status: "Generating PDF...",
 
   // Analytics Extended Sections
-  analytics_sec2_subtitle: "Historical record of model training runs persisted in /backend/in9ad_history.db.",
+  analytics_sec2_subtitle: "Historical record of model training runs persisted in /backend/inkad_history.db.",
   analytics_traceability_title: "Operational Traceability & Calibration:",
   analytics_traceability_desc: "Every retraining run is automatically logged with holdout metrics, dataset volume, and release notes.",
   col_version: "Version",
@@ -327,7 +327,7 @@ export const en = {
   dominant_forest_cover: "Dominant Forest Cover:",
   simulate_wilaya_btn: "Simulate fire spread for this wilaya",
   select_wilaya_hint: "Select a wilaya from the table to inspect its risk telemetry profile.",
-  source_sqlite_registry: "Source: SQLite Registry in9ad_history.db",
+  source_sqlite_registry: "Source: SQLite Registry inkad_history.db",
 
   // Emergency SMS Broadcast Modal
   sms_modal_title: "Emergency SMS Gateway",
@@ -382,7 +382,7 @@ export const en = {
   mh_last_refresh: "Last refresh:",
   mh_next_sync: "Next NASA sync:",
   mh_quota_title: "NASA Quota Management:",
-  mh_sync_log_title: "Recent Synchronization Log (SQLite in9ad_history.db)",
+  mh_sync_log_title: "Recent Synchronization Log (SQLite inkad_history.db)",
   mh_events_count: "events",
   mh_hourly_volume_title: "Hourly Prediction Volume & Error Rate",
   mh_hourly_volume_sub: "Operational load monitoring (last 12 hours)",
@@ -462,7 +462,7 @@ export const en = {
   fwi_fwi_desc: "Fire Weather Index (Composite numerical wildfire danger rating)",
 
   // Map Skeleton Loading
-  skeleton_title: "IN9AD · Operational Tactical Mapping System",
+  skeleton_title: "INKAD · Operational Tactical Mapping System",
   skeleton_loading_stream: "Loading tactical cartographic stream & telemetry...",
   skeleton_calibrating: "Calibrating Northern Algeria topographic corridor (Kabylie, Dahra, Aurès)",
   skeleton_sat_stream: "Satellite Stream",
@@ -563,7 +563,7 @@ export const en = {
   intercom_success: "Operational message dispatched in real time.",
 
   // Guided Onboarding Tour
-  tour_guide_title: "IN9AD Navigation Guide",
+  tour_guide_title: "INKAD Navigation Guide",
   tour_guide_btn: "Guide",
   tour_step_counter: "Step {current} of {total}",
   tour_skip: "Skip",
@@ -571,7 +571,7 @@ export const en = {
   tour_next: "Next",
   tour_finish: "Finish",
   tour_open_guide_tooltip: "View guided tour",
-  tour_step_brand_title: "IN9AD: National Early Warning System",
+  tour_step_brand_title: "INKAD: National Early Warning System",
   tour_step_brand_desc: "Institutional operational center for wildfire prediction and surveillance across Northern Algeria.",
   tour_step_analytics_title: "AI Model Analytics & Performance",
   tour_step_analytics_desc: "Review scientific evaluation of the XGBoost model: confusion matrix, ROC curve, and 95.4% operational accuracy.",
@@ -672,8 +672,8 @@ export const en = {
   // Login Page Extended
   login_republic: "People's Democratic Republic of Algeria",
   login_ministry: "Ministry of the Interior and Local Authorities",
-  login_secured_system: "IN9AD Secure System",
-  login_portal_title: "IN9AD Operational Portal",
+  login_secured_system: "INKAD Secure System",
+  login_portal_title: "INKAD Operational Portal",
   login_portal_desc: "Decision support platform for forest fire risk prediction",
   login_secure_tag: "AES-256 Encryption & Signed JWT Tokens",
   login_quick_profiles: "Quick Access by Operational Profile",
@@ -686,7 +686,7 @@ export const en = {
   login_public_disabled: "Public registration is disabled. Operational accounts are issued by Central Administration.",
   login_security_notice_title: "Operational Security Notice",
   login_security_notice_desc: "Any false alert or unauthorized access attempt is cryptographically traced and audited under national regulations.",
-  login_footer: "IN9AD (إنقاذ) Platform · Directorate General of Civil Protection & Directorate General of Forests · Algeria",
+  login_footer: "INKAD (إنقاذ) Platform · Directorate General of Civil Protection & Directorate General of Forests · Algeria",
   login_err_required: "Please enter your institutional email and password.",
 
   // Users Page Extended
@@ -799,7 +799,7 @@ export const en = {
   users_delete_modal_title: "Revoke Account Access",
   users_delete_modal_confirm: "Are you sure you want to delete this user? This action cannot be undone.",
   users_confirm_delete_btn: "Delete Account",
-  users_err_superadmin_immutable: "The primary Super Admin account (admin@in9ad.dz) cannot be deleted.",
+  users_err_superadmin_immutable: "The primary Super Admin account (admin@inkad.dz) cannot be deleted.",
   deleting: "Deleting...",
 
   // Intercom & Email Reporting

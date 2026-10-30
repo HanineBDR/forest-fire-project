@@ -1,5 +1,5 @@
 """
-IN9AD Monitoring & Diagnostics Package
+INKAD Monitoring & Diagnostics Package
 """
 
 from .service import (

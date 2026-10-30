@@ -1,5 +1,5 @@
 /**
- * IN9AD Realtime Notifications & Panel Intercom Helpers
+ * INKAD Realtime Notifications & Panel Intercom Helpers
  * Queries and updates Neon Lakebase Postgres (notifications, alert_acknowledgments, alerts)
  */
 

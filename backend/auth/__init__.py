@@ -1,5 +1,5 @@
 """
-IN9AD Authentication System
+INKAD Authentication System
 Role-Based Access Control (RBAC) for Algerian Civil Protection, Forest Guards, and Administrators.
 """
 

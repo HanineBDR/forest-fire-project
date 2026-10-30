@@ -428,7 +428,7 @@ export default function ModelHealthPage() {
               <p className="text-xs text-red-300/90 mt-0.5 leading-relaxed">
                 {language === "ar"
                   ? "3 محاولات فاشلة متتالية للمزامنة مع كوكبة FIRMS. قام نظام إنقاذ بالتبديل التلقائي إلى الملاحظات التاريخية الموحدة في قاعدة بيانات SQLite لضمان استمرارية التنبيهات."
-                  : "3 consecutive synchronization failures with FIRMS constellation. The IN9AD system automatically failed over to consolidated historical SQLite observations to maintain alert continuity."}
+                  : "3 consecutive synchronization failures with FIRMS constellation. The INKAD system automatically failed over to consolidated historical SQLite observations to maintain alert continuity."}
               </p>
             </div>
           </div>

@@ -1,5 +1,5 @@
 """
-IN9AD Machine Learning Package
+INKAD Machine Learning Package
 Wildfire Risk Prediction & Spread Simulation for Northern Algeria
 """
 

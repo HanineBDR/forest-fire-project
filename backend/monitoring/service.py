@@ -1,5 +1,5 @@
 """
-IN9AD - Model & API Health Monitoring Service
+INKAD - Model & API Health Monitoring Service
 Tracks AI model integrity, external API reachability (NASA FIRMS, Open-Meteo),
 system uptime, rate limits, audit logging, and prediction anomaly detection.
 """
@@ -15,7 +15,7 @@ from typing import Dict, Any, List, Optional
 import urllib.request
 import urllib.error
 
-logger = logging.getLogger("in9ad-monitoring")
+logger = logging.getLogger("inkad-monitoring")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "ml", "model.pkl")
@@ -148,7 +148,7 @@ def check_open_meteo_connectivity() -> Dict[str, Any]:
     test_url = "https://api.open-meteo.com/v1/forecast?latitude=36.75&longitude=5.05&current_weather=true"
 
     try:
-        req = urllib.request.Request(test_url, headers={"User-Agent": "IN9AD-Algeria-Wildfire/2.0"})
+        req = urllib.request.Request(test_url, headers={"User-Agent": "INKAD-Algeria-Wildfire/2.0"})
         with urllib.request.urlopen(req, timeout=3.0) as resp:
             status_code = resp.getcode()
             data = json.loads(resp.read().decode("utf-8"))

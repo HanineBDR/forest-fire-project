@@ -1,5 +1,5 @@
 """
-IN9AD Real-Time Notifications & Inter-Panel Communication Router
+INKAD Real-Time Notifications & Inter-Panel Communication Router
 Connects Protection Civile, Administration Centrale, and Mohafadat El Ghabat (DGF).
 Provides bidirectional alerts, acknowledgments, SSE real-time stream, and Email incident dispatch.
 """
@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from app.neon_db import execute_neon_sql
 from app.realtime_events import broadcast_realtime_event, sse_event_generator
 
-logger = logging.getLogger("in9ad-notifications")
+logger = logging.getLogger("inkad-notifications")
 
 router = APIRouter(prefix="/api/notifications", tags=["Notifications & Panel Intercom"])
 
@@ -64,7 +64,7 @@ ROLE_LABELS = {
     "protection_civile": "Protection Civile (CODIS)",
     "admin_centrale": "Administration Centrale",
     "mohafadat_ghabat": "Conservation des Forêts (DGF)",
-    "ai_model": "Système IA IN9AD",
+    "ai_model": "Système IA INKAD",
     "all": "Tous les Commandements"
 }
 
@@ -270,27 +270,27 @@ def send_email_report(payload: EmailReportPayload):
         )
 
     message_id = f"EMAIL-{uuid.uuid4().hex[:8].upper()}"
-    subject = f"[IN9AD OP-REPORT] {payload.severity} - {payload.forest_name} ({payload.wilaya}) · Ref: {payload.alert_id or message_id}"
+    subject = f"[INKAD OP-REPORT] {payload.severity} - {payload.forest_name} ({payload.wilaya}) · Ref: {payload.alert_id or message_id}"
 
     smtp_host = os.getenv("SMTP_HOST")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
     smtp_user = os.getenv("SMTP_USER")
     smtp_pass = os.getenv("SMTP_PASSWORD")
-    sender_email = os.getenv("SMTP_FROM", "alerte-in9ad@protectioncivile.dz")
+    sender_email = os.getenv("SMTP_FROM", "alerte-inkad@protectioncivile.dz")
 
     sent_live = False
     if smtp_host and smtp_user and smtp_pass:
         try:
             msg = MIMEMultipart("alternative")
             msg["Subject"] = subject
-            msg["From"] = f"IN9AD Wildfire Dispatch <{sender_email}>"
+            msg["From"] = f"INKAD Wildfire Dispatch <{sender_email}>"
             msg["To"] = email_clean
 
             text_content = f"""
 ========================================================================
 REPUBLIQUE ALGERIENNE DEMOCRATIQUE ET POPULAIRE
 MINISTERE DE L'INTERIEUR ET DES COLLECTIVITES LOCALES
-IN9AD - SYSTEME NATIONAL D'ALERTE ET TRANSMISSION OPERATIONNELLE
+INKAD - SYSTEME NATIONAL D'ALERTE ET TRANSMISSION OPERATIONNELLE
 ========================================================================
 
 RAPPORT D'INCIDENT / TRANSMISSION INTER-CENTRES
@@ -305,7 +305,7 @@ MESSAGE DE TRANSMISSION:
 {payload.message}
 ------------------------------------------------------------------------
 
-Rapport genere automatiquement par la plateforme IN9AD le {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}.
+Rapport genere automatiquement par la plateforme INKAD le {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}.
 ========================================================================
 """
             msg.attach(MIMEText(text_content, "plain"))

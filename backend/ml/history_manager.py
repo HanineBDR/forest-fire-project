@@ -1,5 +1,5 @@
 """
-IN9AD - History & Refresh Manager
+INKAD - History & Refresh Manager
 Persistent SQLite storage for model runs, burn snapshots, alerts lifecycle,
 and refresh telemetry.
 """
@@ -12,7 +12,9 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "in9ad_history.db")
+DB_PATH = os.path.join(BASE_DIR, "inkad_history.db")
+
+
 OUTPUTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "outputs")
 HISTORY_OUTPUTS_DIR = os.path.join(OUTPUTS_DIR, "history")
 os.makedirs(HISTORY_OUTPUTS_DIR, exist_ok=True)
@@ -23,7 +25,7 @@ NASA_CACHE_INTERVAL_SEC: float = 3600.0  # 1 hour cache
 
 
 def get_db_connection() -> sqlite3.Connection:
-    """Creates a thread-safe connection to in9ad_history.db with row factory."""
+    """Creates a thread-safe connection to inkad_history.db with row factory."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
@@ -607,7 +609,7 @@ def create_or_update_alert(data: Dict[str, Any]) -> Dict[str, Any]:
 
             cursor.execute("""
                 INSERT INTO alert_status_history (alert_id, old_status, new_status, changed_by, changed_at, note)
-                VALUES (?, 'NONE', 'DETECTED', 'Système IA IN9AD', ?, 'Création automatique suite à dépassement du seuil critique (Risk > 85%)')
+                VALUES (?, 'NONE', 'DETECTED', 'Système IA INKAD', ?, 'Création automatique suite à dépassement du seuil critique (Risk > 85%)')
             """, (new_id, now_str))
 
         conn.commit()

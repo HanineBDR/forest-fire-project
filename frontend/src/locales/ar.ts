@@ -1,6 +1,6 @@
 export const ar = {
   // Common & Branding
-  platform_name: "إنقاذ (IN9AD)",
+  platform_name: "إنقاذ (INKAD)",
   platform_sub: "المنظومة الوطنية للرصد والتنبؤ الاستباقي بحرائق الغابات",
   version: "v3.0 النسخة النهائية",
   loading: "جاري التحميل...",
@@ -266,7 +266,7 @@ export const ar = {
   refresh_all_data: "تحديث كافة البيانات",
   syncing_nasa: "جاري المزامنة مع ناسا...",
   kpi_section_title: "مؤشرات الأداء الرئيسية (انقر لعرض السجل التاريخي)",
-  source_sqlite: "المصدر: قاعدة بيانات SQLite in9ad_history.db",
+  source_sqlite: "المصدر: قاعدة بيانات SQLite inkad_history.db",
   model_roc_auc: "مؤشر التمييز ROC-AUC",
   calibrated_runs: "معاير على 7 دورات تدريبية",
   click_for_history_curve: "انقر لعرض المنحنى التاريخي",
@@ -301,7 +301,7 @@ export const ar = {
   generating_pdf_status: "جاري التوليد...",
 
   // Analytics Extended Sections
-  analytics_sec2_subtitle: "سجل دورات تدريب النموذج المحفوظة في قاعدة بيانات in9ad_history.db.",
+  analytics_sec2_subtitle: "سجل دورات تدريب النموذج المحفوظة في قاعدة بيانات inkad_history.db.",
   analytics_traceability_title: "التتبع والمعايرة العملياتية :",
   analytics_traceability_desc: "يتم تسجيل كل إعادة تدريب تلقائياً مع مقاييس الاختبار، حجم البيانات وملاحظات الإصدار.",
   col_version: "الإصدار",
@@ -327,7 +327,7 @@ export const ar = {
   dominant_forest_cover: "الغطاء الغابي السائد :",
   simulate_wilaya_btn: "محاكاة انتشار الحريق لهذه الولاية",
   select_wilaya_hint: "اختر ولاية من الجدول لمعاينة ملف التتبع والبيانات الخاص بها.",
-  source_sqlite_registry: "المصدر: سجل SQLite in9ad_history.db",
+  source_sqlite_registry: "المصدر: سجل SQLite inkad_history.db",
 
   // Emergency SMS Broadcast Modal
   sms_modal_title: "بوابة الرسائل القصيرة للإنذار العاجل (SMS)",
@@ -382,7 +382,7 @@ export const ar = {
   mh_last_refresh: "آخر تحديث:",
   mh_next_sync: "المزامنة القادمة لناسا:",
   mh_quota_title: "إدارة حصة ناسا:",
-  mh_sync_log_title: "سجل المزامنة الأخير (SQLite in9ad_history.db)",
+  mh_sync_log_title: "سجل المزامنة الأخير (SQLite inkad_history.db)",
   mh_events_count: "أحداث",
   mh_hourly_volume_title: "حجم التوقعات في الساعة ونسبة الخطأ",
   mh_hourly_volume_sub: "مراقبة الحمل التشغيلي (آخر 12 ساعة)",
@@ -686,7 +686,7 @@ export const ar = {
   login_public_disabled: "التسجيل العام مغلق. يتم تسليم الحسابات العملياتية اسمياً من قبل الإدارة المركزية.",
   login_security_notice_title: "تحذير أمني عملياتي",
   login_security_notice_desc: "أي بلاغ كاذب أو محاولة ولوج غير مصرح بها تخضع للتتبع المشفر وتدقيق المسؤولية وفقاً للقوانين الوطنية.",
-  login_footer: "منصة إنقاذ (IN9AD) · المديرية العامة للحماية المدنية والمديرية العامة للغابات · الجزائر",
+  login_footer: "منصة إنقاذ (INKAD) · المديرية العامة للحماية المدنية والمديرية العامة للغابات · الجزائر",
   login_err_required: "يرجى إدخال بريدك المؤسسي وكلمة المرور.",
 
   // Users Page Extended
@@ -799,7 +799,7 @@ export const ar = {
   users_delete_modal_title: "إلغاء صلاحية الحساب",
   users_delete_modal_confirm: "هل أنت متأكد من رغبتك في حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.",
   users_confirm_delete_btn: "حذف الحساب نهائياً",
-  users_err_superadmin_immutable: "لا يمكن حذف حساب المشرف الرئيسي الدائم (admin@in9ad.dz).",
+  users_err_superadmin_immutable: "لا يمكن حذف حساب المشرف الرئيسي الدائم (admin@inkad.dz).",
   deleting: "جاري الحذف...",
 
   // الاتصال الداخلي والتقارير عبر البريد الإلكتروني

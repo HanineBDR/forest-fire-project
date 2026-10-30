@@ -1,5 +1,5 @@
 """
-IN9AD - Wildfire Data Collector for Northern Algeria
+INKAD - Wildfire Data Collector for Northern Algeria
 Fetches historical fire observations from NASA FIRMS API and weather history from
 Open-Meteo Archive API. Generates balanced training datasets with fallback synthesis
 calibrated specifically for Northern Algerian Mediterranean wildfire regimes:
@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Tuple, Optional
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("in9ad-data-collector")
+logger = logging.getLogger("inkad-data-collector")
 
 # Base directories
 ML_DIR = os.path.dirname(os.path.abspath(__file__))

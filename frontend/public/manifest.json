@@ -1,6 +1,6 @@
 {
-  "name": "IN9AD (إنقاذ) - Colonnes Mobiles Protection Civile Algérienne",
-  "short_name": "IN9AD Mobile",
+  "name": "INKAD (إنقاذ) - Colonnes Mobiles Protection Civile Algérienne",
+  "short_name": "INKAD Mobile",
   "description": "Système tactique d'alerte, de propagation et de guidage pour les colonnes mobiles de la Protection Civile et les Vigies DGF dans le Tell algérien.",
   "start_url": "/dashboard",
   "scope": "/",
@@ -12,13 +12,13 @@
   "categories": ["government", "utilities", "weather", "navigation"],
   "icons": [
     {
-      "src": "/in9ad-logo.png",
+      "src": "/inkad-logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/in9ad-logo.png",
+      "src": "/inkad-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"

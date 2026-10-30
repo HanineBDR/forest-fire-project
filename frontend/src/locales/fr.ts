@@ -1,6 +1,6 @@
 export const fr = {
   // Common & Branding
-  platform_name: "IN9AD (إنقاذ)",
+  platform_name: "INKAD (إنقاذ)",
   platform_sub: "Système National de Veille & Simulation Prédictive",
   version: "v3.0 TOP 3",
   loading: "Chargement en cours...",
@@ -127,7 +127,7 @@ export const fr = {
   offline_ready: "Carte {zone} téléchargée ({size}) - Prête pour intervention hors-ligne !",
 
   // Feature 10: Roadmap
-  roadmap_title: "Feuille de Route Stratégique IN9AD (What Happens Next)",
+  roadmap_title: "Feuille de Route Stratégique INKAD (What Happens Next)",
   roadmap_subtitle: "Plan de déploiement opérationnel national pour la Protection Civile et la DGF.",
   phase1_title: "Mois 1 - 2 : Intégration Données DGF & Pilote Tizi Ouzou",
   phase1_desc: "Raccordement direct aux vigies de la Conservation des Forêts. Déploiement en salle opérationnelle du CODIS Tizi Ouzou.",
@@ -260,13 +260,13 @@ export const fr = {
   submitting: "Envoi...",
 
   // Analytics & Evaluation Page
-  analytics_title: "IN9AD Analytics & Évaluation Modèle",
+  analytics_title: "INKAD Analytics & Évaluation Modèle",
   analytics_subtitle: "Télémétrie satellitaire continue NASA FIRMS, calibration XGBoost et historique persistant (SQLite).",
   dynamic_system_live: "Système Dynamique Live",
   refresh_all_data: "Rafraîchir Toutes les Données",
   syncing_nasa: "Synchronisation NASA...",
   kpi_section_title: "Indicateurs de Performance Clés (Cliquer pour voir l'historique)",
-  source_sqlite: "Source : SQLite in9ad_history.db",
+  source_sqlite: "Source : SQLite inkad_history.db",
   model_roc_auc: "Modèle ROC-AUC",
   calibrated_runs: "Calibré sur 7 entraînements",
   click_for_history_curve: "Cliquez pour courbe historique",
@@ -280,7 +280,7 @@ export const fr = {
   estimated_burned_area: "Surface Brûlée Estimée",
   arc_tellien_kabylie: "88% dans l'Arc Tellien & Kabylie",
   click_for_monthly_detail: "Cliquez pour détail mensuel",
-  section_model_perf_title: "Performance du Modèle : Fonctionnement du Modèle IN9AD",
+  section_model_perf_title: "Performance du Modèle : Fonctionnement du Modèle INKAD",
   section_model_perf_desc: "Matrice de confusion, courbe ROC et rapport de classification validés sur les régimes de feux de forêt du Nord algérien.",
   regenerate_latest_data: "Régénérer avec les dernières données",
   retraining: "Réentraînement...",
@@ -301,7 +301,7 @@ export const fr = {
   generating_pdf_status: "Génération du PDF...",
 
   // Analytics Extended Sections
-  analytics_sec2_subtitle: "Historique des itérations d'entraînement persistant dans /backend/in9ad_history.db.",
+  analytics_sec2_subtitle: "Historique des itérations d'entraînement persistant dans /backend/inkad_history.db.",
   analytics_traceability_title: "Traçabilité & Calibration Opérationnelle :",
   analytics_traceability_desc: "Chaque réentraînement est automatiquement journalisé avec les métriques complètes de holdout, la taille du jeu de données et la note de version.",
   col_version: "Version",
@@ -327,7 +327,7 @@ export const fr = {
   dominant_forest_cover: "Couvert forestier dominant :",
   simulate_wilaya_btn: "Simuler la propagation pour cette wilaya",
   select_wilaya_hint: "Sélectionnez une wilaya dans la table pour inspecter son profil.",
-  source_sqlite_registry: "Source : Registre SQLite in9ad_history.db",
+  source_sqlite_registry: "Source : Registre SQLite inkad_history.db",
 
   // Emergency SMS Broadcast Modal
   sms_modal_title: "Passerelle SMS d'Urgence",
@@ -382,7 +382,7 @@ export const fr = {
   mh_last_refresh: "Dernier rafraîchissement :",
   mh_next_sync: "Prochaine synchro NASA :",
   mh_quota_title: "Gestion du Quota NASA :",
-  mh_sync_log_title: "Journal Récent des Synchronisations (SQLite in9ad_history.db)",
+  mh_sync_log_title: "Journal Récent des Synchronisations (SQLite inkad_history.db)",
   mh_events_count: "événements",
   mh_hourly_volume_title: "Volume de Prédictions par Heure & Taux d'Erreur",
   mh_hourly_volume_sub: "Surveillance de la charge opérationnelle (12 dernières heures)",
@@ -462,7 +462,7 @@ export const fr = {
   fwi_fwi_desc: "Indice Global Météo-Forêt unifié (Fire Weather Index)",
 
   // Map Skeleton Loading
-  skeleton_title: "IN9AD · Système Cartographique Opérationnel",
+  skeleton_title: "INKAD · Système Cartographique Opérationnel",
   skeleton_loading_stream: "Chargement du flux cartographique & télémétrie...",
   skeleton_calibrating: "Calibration du corridor topographique Nord Algérie (Kabylie, Dahra, Aurès)",
   skeleton_sat_stream: "Flux Satellite",
@@ -563,7 +563,7 @@ export const fr = {
   intercom_success: "Message opérationnel transmis en temps réel.",
 
   // Guided Onboarding Tour
-  tour_guide_title: "Guide de navigation IN9AD",
+  tour_guide_title: "Guide de navigation INKAD",
   tour_guide_btn: "Guide",
   tour_step_counter: "Étape {current} sur {total}",
   tour_skip: "Passer",
@@ -571,7 +571,7 @@ export const fr = {
   tour_next: "Suivant",
   tour_finish: "Terminer",
   tour_open_guide_tooltip: "Consulter le guide de navigation",
-  tour_step_brand_title: "IN9AD : Système national de veille",
+  tour_step_brand_title: "INKAD : Système national de veille",
   tour_step_brand_desc: "Centre opérationnel institutionnel pour la prédiction et la surveillance des feux de forêts en Algérie du Nord.",
   tour_step_analytics_title: "Analytics et performance du modèle IA",
   tour_step_analytics_desc: "Consultez l'évaluation scientifique du modèle XGBoost : matrice de confusion, courbe ROC et précision opérationnelle à 95.4%.",
@@ -672,8 +672,8 @@ export const fr = {
   // Login Page Extended
   login_republic: "République Algérienne Démocratique et Populaire",
   login_ministry: "Ministère de l'Intérieur et des Collectivités Locales",
-  login_secured_system: "Système Sécurisé IN9AD",
-  login_portal_title: "Portail Opérationnel IN9AD",
+  login_secured_system: "Système Sécurisé INKAD",
+  login_portal_title: "Portail Opérationnel INKAD",
   login_portal_desc: "Plateforme décisionnelle de prédiction du risque incendie de forêt",
   login_secure_tag: "Chiffrement AES-256 & Jetons JWT Signés",
   login_quick_profiles: "Accès rapide par profil opérationnel",
@@ -686,7 +686,7 @@ export const fr = {
   login_public_disabled: "Inscription publique désactivée. Les comptes opérationnels sont nominativement délivrés par l'Administration Centrale.",
   login_security_notice_title: "Avertissement Opérationnel de Sécurité",
   login_security_notice_desc: "Toute fausse alerte ou tentative d'accès non autorisé fait l'objet d'un traçage cryptographique et d'un audit de responsabilité conformément à la réglementation nationale.",
-  login_footer: "Plateforme IN9AD (إنقاذ) · Direction Générale de la Protection Civile & Direction Générale des Forêts · Algérie",
+  login_footer: "Plateforme INKAD (إنقاذ) · Direction Générale de la Protection Civile & Direction Générale des Forêts · Algérie",
   login_err_required: "Veuillez saisir votre adresse e-mail institutionnelle et votre mot de passe.",
 
   // Users Page Extended
@@ -799,7 +799,7 @@ export const fr = {
   users_delete_modal_title: "Révoquer l'Accès au Compte",
   users_delete_modal_confirm: "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.",
   users_confirm_delete_btn: "Supprimer Définitivement",
-  users_err_superadmin_immutable: "Le compte Super Admin principal (admin@in9ad.dz) ne peut pas être supprimé.",
+  users_err_superadmin_immutable: "Le compte Super Admin principal (admin@inkad.dz) ne peut pas être supprimé.",
   deleting: "Suppression en cours...",
 
   // Intercom & Rapports par E-mail

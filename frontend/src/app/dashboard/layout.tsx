@@ -83,17 +83,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (u) setUser(u);
       }
     };
-    window.addEventListener("in9ad_user_updated", handleUserUpdate);
-    return () => window.removeEventListener("in9ad_user_updated", handleUserUpdate);
+    window.addEventListener("inkad_user_updated", handleUserUpdate);
+    return () => window.removeEventListener("inkad_user_updated", handleUserUpdate);
   }, []);
 
   // Check for unauthorized access flash toast
   useEffect(() => {
     try {
-      const storedToast = sessionStorage.getItem("in9ad_auth_toast");
+      const storedToast = sessionStorage.getItem("inkad_auth_toast");
       if (storedToast) {
         setUnauthToast(JSON.parse(storedToast));
-        sessionStorage.removeItem("in9ad_auth_toast");
+        sessionStorage.removeItem("inkad_auth_toast");
         const timer = setTimeout(() => setUnauthToast(null), 5000);
         return () => clearTimeout(timer);
       }
@@ -259,7 +259,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <Image
                 src="/logo.png"
-                alt="IN9AD Logo"
+                alt="INKAD Logo"
                 width={36}
                 height={36}
                 className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 select-none object-contain"
@@ -267,7 +267,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               />
               <div>
                 <div className="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-1.5 leading-none">
-                  <span>IN9AD</span>
+                  <span>INKAD</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono font-medium">
                     v3.0
                   </span>

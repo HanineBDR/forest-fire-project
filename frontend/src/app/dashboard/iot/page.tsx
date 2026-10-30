@@ -662,7 +662,7 @@ export default function IoTPage() {
   useEffect(() => {
     try {
       if (typeof window !== "undefined") {
-        const saved = localStorage.getItem("in9ad_saved_tactical_report");
+        const saved = localStorage.getItem("inkad_saved_tactical_report") || localStorage.getItem("inkad_saved_tactical_report");
         if (saved) {
           const parsed: TacticalReportData = JSON.parse(saved);
           setPersistedReport(parsed);
@@ -860,7 +860,7 @@ export default function IoTPage() {
       timestamp: timeStr,
     };
     try {
-      localStorage.setItem("in9ad_saved_tactical_report", JSON.stringify(reportToSave));
+      localStorage.setItem("inkad_saved_tactical_report", JSON.stringify(reportToSave));
       setPersistedReport(reportToSave);
     } catch {}
 
@@ -1635,8 +1635,8 @@ export default function IoTPage() {
                   {language === "ar"
                     ? "المنظومة الوطنية إنقاذ : معالجة المستشعرات"
                     : language === "en"
-                    ? "IN9AD National System: Sensor Ingestion"
-                    : "Système National IN9AD : Ingestion Capteur"}{" "}
+                    ? "INKAD National System: Sensor Ingestion"
+                    : "Système National INKAD : Ingestion Capteur"}{" "}
                   ({getLocalizedNodeName(modalReport.massif)} - {modalReport.wilayaCode}) · {language === "ar" ? "صدر في :" : language === "en" ? "Issued:" : "Émis :"} {modalReport.timestamp}
                 </p>
               </div>

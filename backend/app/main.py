@@ -1,5 +1,5 @@
 """
-IN9AD Backend - Main Application Proxy
+INKAD Backend - Main Application Proxy
 Routes all requests to the comprehensive backend/main.py implementation
 (FastAPI, XGBoost, Cellular Automaton, SQLite history, DGF Watchtowers,
 Emergency SMS Gateway, Sirocco Corridors, Thermal Drone Patrols & Roadmap).

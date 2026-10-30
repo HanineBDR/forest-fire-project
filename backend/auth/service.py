@@ -1,5 +1,5 @@
 """
-IN9AD - Authentication Service & RBAC Security Engine
+INKAD - Authentication Service & RBAC Security Engine
 Handles password hashing, JWT generation/validation, role-based authorization,
 persistent user management, avatar validation, and self-profile updates.
 """
@@ -16,10 +16,10 @@ import jwt
 from fastapi import HTTPException, Security, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-logger = logging.getLogger("in9ad-auth")
+logger = logging.getLogger("inkad-auth")
 
 # Security configuration
-JWT_SECRET = os.getenv("JWT_SECRET", "in9ad-algeria-wildfire-defense-key-2026-sec-token")
+JWT_SECRET = os.getenv("JWT_SECRET", "inkad-algeria-wildfire-defense-key-2026-sec-token")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
@@ -37,10 +37,10 @@ USERS_FILE = os.path.join(AUTH_DIR, "users_store.json")
 DEMO_USERS = [
     {
         "id": "usr-admin-01",
-        "email": "admin@in9ad.dz",
+        "email": "admin@inkad.dz",
         "name": "Direction Générale - Super Admin",
         "role": ROLE_ADMIN,
-        "organization": "Ministère de l'Intérieur / IN9AD Admin",
+        "organization": "Ministère de l'Intérieur / INKAD Admin",
         "organization_ar": "الإدارة المركزية",
         "phone": "+213 21 00 11 22",
         "avatar": None,
@@ -48,7 +48,7 @@ DEMO_USERS = [
     },
     {
         "id": "usr-protect-01",
-        "email": "protection@in9ad.dz",
+        "email": "protection@inkad.dz",
         "name": "Commandant Protection Civile",
         "role": ROLE_CIVIL_PROTECTION,
         "organization": "Direction Générale de la Protection Civile (DGPC)",
@@ -59,7 +59,7 @@ DEMO_USERS = [
     },
     {
         "id": "usr-foret-01",
-        "email": "foret@in9ad.dz",
+        "email": "foret@inkad.dz",
         "name": "Inspecteur Principal des Forêts",
         "role": ROLE_FOREST_GUARD,
         "organization": "Direction Générale des Forêts (DGF - Kabylie)",
@@ -104,9 +104,9 @@ def _init_users_store():
         default_db = {}
         # Pre-seed demo users with their passwords
         demo_passwords = {
-            "admin@in9ad.dz": "Admin123!",
-            "protection@in9ad.dz": "Protect123!",
-            "foret@in9ad.dz": "Foret123!"
+            "admin@inkad.dz": "Admin123!",
+            "protection@inkad.dz": "Protect123!",
+            "foret@inkad.dz": "Foret123!"
         }
         for u in DEMO_USERS:
             email = u["email"]
@@ -153,7 +153,10 @@ def validate_avatar_data(avatar_data: Optional[str]):
 def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
     """Validates email and password, returning sanitized user info."""
     users = get_all_users()
-    user = users.get(email.strip().lower())
+    clean_email = email.strip().lower()
+    if clean_email.endswith("@inkad.dz"):
+        clean_email = clean_email.replace("@inkad.dz", "@inkad.dz")
+    user = users.get(clean_email)
     if not user:
         return None
     if verify_password(password, user.get("password_hash", "")):
@@ -207,8 +210,8 @@ def get_current_user(
     token = None
     if credentials:
         token = credentials.credentials
-    elif "in9ad_auth_token" in request.cookies:
-        token = request.cookies["in9ad_auth_token"]
+    elif "inkad_auth_token" in request.cookies:
+        token = request.cookies["inkad_auth_token"]
     elif "authorization" in request.headers:
         auth_hdr = request.headers["authorization"]
         if auth_hdr.startswith("Bearer "):
@@ -217,7 +220,7 @@ def get_current_user(
     if not token:
         # Check if authorized demo header is provided for evaluation
         demo_header = request.headers.get("x-demo-account") or request.headers.get("X-Demo-Account")
-        if demo_header in ["protection@in9ad.dz", "foret@in9ad.dz", "admin@in9ad.dz"]:
+        if demo_header in ["protection@inkad.dz", "foret@inkad.dz", "admin@inkad.dz"]:
             users = get_all_users()
             u = users.get(demo_header.lower())
             if u:
@@ -225,7 +228,7 @@ def get_current_user(
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required. Please log in with an authorized IN9AD account.",
+            detail="Authentication required. Please log in with an authorized INKAD account (admin@inkad.dz, protection@inkad.dz, foret@inkad.dz).",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
@@ -353,7 +356,7 @@ def admin_update_user(
 
     validate_avatar_data(avatar)
 
-    if email_clean == "admin@in9ad.dz" and role is not None and role != ROLE_ADMIN:
+    if email_clean == "admin@inkad.dz" and role is not None and role != ROLE_ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cannot alter Super Admin primary role."
@@ -391,14 +394,14 @@ def list_users() -> List[Dict[str, Any]]:
 def delete_user(email: str) -> bool:
     """
     Deletes user (Admin only).
-    CRITICAL: The primary Super Admin account (admin@in9ad.dz) CANNOT be deleted. Returns 403.
+    CRITICAL: The primary Super Admin account (admin@inkad.dz) CANNOT be deleted. Returns 403.
     Other Admin accounts CAN be deleted.
     """
     email_clean = email.strip().lower()
-    if email_clean == "admin@in9ad.dz":
+    if email_clean in ["admin@inkad.dz", "admin@inkad.dz"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="The primary Super Admin account (admin@in9ad.dz) cannot be deleted."
+            detail="The primary Super Admin account (admin@inkad.dz) cannot be deleted."
         )
 
     users = get_all_users()

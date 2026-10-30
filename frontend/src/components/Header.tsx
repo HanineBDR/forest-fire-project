@@ -52,7 +52,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
         <div data-tour="brand" className="flex items-center gap-3">
           <Image
             src="/logo.png"
-            alt="IN9AD Logo"
+            alt="INKAD Logo"
             width={40}
             height={40}
             className="w-10 h-10 shrink-0 select-none object-contain"
@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-                IN9AD <span className="text-xs font-semibold text-ember-400 font-mono">إنقاذ</span>
+                INKAD <span className="text-xs font-semibold text-ember-400 font-mono">إنقاذ</span>
               </h1>
             </div>
             <p className="text-xs text-slate-400 font-medium">

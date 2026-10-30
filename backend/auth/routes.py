@@ -1,5 +1,5 @@
 """
-IN9AD - Authentication Endpoints
+INKAD - Authentication Endpoints
 Provides login, user self-management (My Profile), avatar updates, and Admin User CRUD.
 """
 
@@ -26,12 +26,12 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 class LoginRequest(BaseModel):
-    email: str = Field(..., example="protection@in9ad.dz")
+    email: str = Field(..., example="protection@inkad.dz")
     password: str = Field(..., example="Protect123!")
 
 
 class CreateUserRequest(BaseModel):
-    email: str = Field(..., example="officer.tizi@in9ad.dz")
+    email: str = Field(..., example="officer.tizi@inkad.dz")
     password: str = Field(..., min_length=6, example="Officer2026!")
     name: str = Field(..., example="Lieutenant Karim Belkacem")
     role: str = Field(..., example="CIVIL_PROTECTION")
@@ -93,7 +93,7 @@ def login(req: LoginRequest, response: Response):
 
     # Set httpOnly cookie
     response.set_cookie(
-        key="in9ad_auth_token",
+        key="inkad_auth_token",
         value=token,
         httponly=True,
         max_age=86400,
@@ -190,7 +190,7 @@ def edit_user_by_admin(
 def remove_user(email: str, admin_user: dict = Depends(get_admin_user)):
     """
     Deletes an account (Admin only).
-    CRITICAL: The primary Super Admin account (admin@in9ad.dz) CANNOT be deleted (returns 403).
+    CRITICAL: The primary Super Admin account (admin@inkad.dz) CANNOT be deleted (returns 403).
     Other Admin accounts CAN be deleted.
     """
     try:
@@ -205,5 +205,5 @@ def remove_user(email: str, admin_user: dict = Depends(get_admin_user)):
 @router.post("/logout")
 def logout(response: Response):
     """Logs out user by clearing the authentication cookie."""
-    response.delete_cookie(key="in9ad_auth_token")
+    response.delete_cookie(key="inkad_auth_token")
     return {"status": "success", "message": "Déconnexion réussie."}

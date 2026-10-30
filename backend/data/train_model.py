@@ -1,5 +1,5 @@
 """
-IN9AD - Model Training Script
+INKAD - Model Training Script
 Trains an XGBoost Wildfire Risk Prediction Model calibrated for Northern Algeria
 Focus areas: Tizi Ouzou, Bejaia, Bouira (Kabylie & Djurdjura / Babors mountain ranges)
 Considers Mediterranean weather patterns, Canadian FWI system, and Sirocco (Chergui) wind anomalies.

@@ -1,5 +1,5 @@
 """
-IN9AD - XGBoost Wildfire Risk Model Training
+INKAD - XGBoost Wildfire Risk Model Training
 Trains a gradient boosted decision tree classifier calibrated for Northern Algeria.
 Features: [temp, humidity, wind_speed, precipitation, vegetation_index, month]
 Target: fire_occurred (0 or 1)
@@ -29,7 +29,7 @@ from sklearn.metrics import (
     confusion_matrix
 )
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("in9ad-train")
+logger = logging.getLogger("inkad-train")
 
 from sklearn.ensemble import GradientBoostingClassifier
 
@@ -63,7 +63,7 @@ def train_model():
     Executes end-to-end model training, evaluation, and artifact generation.
     """
     logger.info("=" * 60)
-    logger.info("IN9AD - Northern Algeria Wildfire Risk Model Training (XGBoost)")
+    logger.info("INKAD - Northern Algeria Wildfire Risk Model Training (XGBoost)")
     logger.info("=" * 60)
 
     # 1. Load or collect dataset
@@ -201,7 +201,7 @@ def generate_feature_importance_plot(clf, feature_names):
 
     plt.yticks(range(len(sorted_features)), display_labels[::-1], fontsize=11, fontweight="semibold")
     plt.xlabel("XGBoost Relative Importance (Gini Gain)", fontsize=12, fontweight="bold", labelpad=10)
-    plt.title("IN9AD - Why Wildfires Ignite in Northern Algeria\nFeature Importance Analysis (Kabylie & Babors Massifs)", fontsize=14, fontweight="bold", pad=15)
+    plt.title("INKAD - Why Wildfires Ignite in Northern Algeria\nFeature Importance Analysis (Kabylie & Babors Massifs)", fontsize=14, fontweight="bold", pad=15)
 
     # Add numeric labels to bars
     for bar in bars:

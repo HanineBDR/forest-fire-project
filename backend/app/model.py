@@ -1,5 +1,5 @@
 """
-IN9AD - XGBoost Wildfire Risk Model & FWI Scoring Engine
+INKAD - XGBoost Wildfire Risk Model & FWI Scoring Engine
 Provides hybrid ML + Canadian Forest Fire Weather Index (FWI) calibrated for Northern Algeria.
 """
 

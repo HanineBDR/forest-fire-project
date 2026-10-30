@@ -1,5 +1,5 @@
 """
-IN9AD - Wildfire Risk Predictor
+INKAD - Wildfire Risk Predictor
 Loads the pre-trained XGBoost model from /backend/ml/model.pkl and performs instantaneous inference.
 No retraining occurs during prediction.
 Evaluates local environmental parameters, computes risk score (0-100), classifies risk level
@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("in9ad-predictor")
+logger = logging.getLogger("inkad-predictor")
 
 ML_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(ML_DIR, "model.pkl")
@@ -95,7 +95,7 @@ def predict_risk(
     **kwargs
 ) -> Dict[str, Any]:
     """
-    Main prediction function required by IN9AD specification:
+    Main prediction function required by INKAD specification:
     Inputs: lat, lon, temp, humidity, wind, precip (and optional vegetation_index, month, wind_direction)
     Returns:
     {

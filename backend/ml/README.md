@@ -1,4 +1,4 @@
-# IN9AD (إنقاذ) Machine Learning Engine
+# INKAD (إنقاذ) Machine Learning Engine
 
 > **AI-Based Wildfire Risk Prediction & Spread Simulation for Northern Algeria**  
 > Priority Target Zone: **Bejaia, Tizi Ouzou, Bouira, Jijel, Setif, Bordj Bou Arreridj**
@@ -7,7 +7,7 @@
 
 ## 1. Overview & Architecture
 
-IN9AD's Machine Learning core replaces expensive physical IoT deployments with a high-speed, physics-calibrated machine learning and mathematical cellular automaton simulation engine deployable on **Render's Free Tier** (< 10MB memory footprint, zero GPU requirements, < 5ms inference latency).
+INKAD's Machine Learning core replaces expensive physical IoT deployments with a high-speed, physics-calibrated machine learning and mathematical cellular automaton simulation engine deployable on **Render's Free Tier** (< 10MB memory footprint, zero GPU requirements, < 5ms inference latency).
 
 ```
 /backend/ml/
@@ -141,9 +141,9 @@ simulation = simulate_fire_spread(
 
 ---
 
-## 7. Persistent History & Live Refresh System (`in9ad_history.db`)
+## 7. Persistent History & Live Refresh System (`inkad_history.db`)
 
-All training runs, satellite burn snapshots, active alerts, and status changes are permanently tracked in SQLite at `/backend/in9ad_history.db`.
+All training runs, satellite burn snapshots, active alerts, and status changes are permanently tracked in SQLite at `/backend/inkad_history.db`.
 
 To refresh live data via command line:
 ```bash

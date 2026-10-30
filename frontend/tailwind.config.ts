@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        /* IN9AD Editorial Design System */
+        /* INKAD Editorial Design System */
         pine: {
           50: "#e8f5f0",
           100: "#c5e6d9",

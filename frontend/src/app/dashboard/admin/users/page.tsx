@@ -39,17 +39,17 @@ interface ManagedUser {
 const DEFAULT_USERS: ManagedUser[] = [
   {
     id: "usr-admin-01",
-    email: "admin@in9ad.dz",
+    email: "admin@inkad.dz",
     name: "Direction Générale - Super Admin",
     role: "ADMIN",
     phone: "+213 21 73 00 00",
-    organization: "Ministère de l'Intérieur / IN9AD Admin",
+    organization: "Ministère de l'Intérieur / INKAD Admin",
     organization_ar: "الإدارة المركزية",
     created_at: "2024-01-15T08:00:00Z"
   },
   {
     id: "usr-protect-01",
-    email: "protection@in9ad.dz",
+    email: "protection@inkad.dz",
     name: "Commandant Protection Civile",
     role: "CIVIL_PROTECTION",
     phone: "+213 26 20 14 14",
@@ -59,7 +59,7 @@ const DEFAULT_USERS: ManagedUser[] = [
   },
   {
     id: "usr-foret-01",
-    email: "foret@in9ad.dz",
+    email: "foret@inkad.dz",
     name: "Inspecteur Principal des Forêts",
     role: "FOREST_GUARD",
     phone: "+213 26 21 88 02",
@@ -163,8 +163,8 @@ export default function UsersManagementPage() {
 
   // Open Delete Modal
   const handleOpenDelete = (user: ManagedUser) => {
-    if (user.email.toLowerCase() === "admin@in9ad.dz") {
-      setActionError(t("users_err_superadmin_immutable") || "The primary Super Admin account (admin@in9ad.dz) cannot be deleted.");
+    if (user.email.toLowerCase() === "admin@inkad.dz") {
+      setActionError(t("users_err_superadmin_immutable") || "The primary Super Admin account (admin@inkad.dz) cannot be deleted.");
       return;
     }
     setSelectedUser(user);
@@ -303,8 +303,8 @@ export default function UsersManagementPage() {
   // DELETE USER
   const handleConfirmDelete = async () => {
     if (!selectedUser) return;
-    if (selectedUser.email.toLowerCase() === "admin@in9ad.dz") {
-      setActionError(t("users_err_superadmin_immutable") || "The primary Super Admin account (admin@in9ad.dz) cannot be deleted.");
+    if (selectedUser.email.toLowerCase() === "admin@inkad.dz") {
+      setActionError(t("users_err_superadmin_immutable") || "The primary Super Admin account (admin@inkad.dz) cannot be deleted.");
       setIsDeleteModalOpen(false);
       return;
     }
@@ -389,7 +389,7 @@ export default function UsersManagementPage() {
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {users.map((u) => {
-                  const isSuperAdmin = u.email.toLowerCase() === "admin@in9ad.dz";
+                  const isSuperAdmin = u.email.toLowerCase() === "admin@inkad.dz";
 
                   return (
                     <tr key={u.id || u.email} className="hover:bg-slate-800/40 transition">
@@ -440,7 +440,7 @@ export default function UsersManagementPage() {
                           ? u.organization_ar || u.organization || "N/A"
                           : language === "en"
                           ? (u.organization?.includes("Intérieur")
-                              ? "Ministry of Interior / IN9AD Admin"
+                              ? "Ministry of Interior / INKAD Admin"
                               : u.organization?.includes("Protection Civile")
                               ? "General Directorate of Civil Protection (DGPC)"
                               : u.organization?.includes("Forêts")
@@ -575,7 +575,7 @@ export default function UsersManagementPage() {
                     type="email"
                     value={createEmail}
                     onChange={(e) => setCreateEmail(e.target.value)}
-                    placeholder="officier.tizi@in9ad.dz"
+                    placeholder="officier.tizi@inkad.dz"
                     required
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-600 font-mono"
                   />
@@ -757,7 +757,7 @@ export default function UsersManagementPage() {
                   <label className="text-xs font-semibold text-slate-300 block">{t("users_role_label")}</label>
                   <select
                     value={editRole}
-                    disabled={selectedUser.email.toLowerCase() === "admin@in9ad.dz"}
+                    disabled={selectedUser.email.toLowerCase() === "admin@inkad.dz"}
                     onChange={(e) => setEditRole(e.target.value as UserRole)}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 disabled:opacity-60 disabled:cursor-not-allowed"
                   >

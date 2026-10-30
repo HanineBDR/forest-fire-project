@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       mode: "simulation",
       message_id: `EMAIL-SIM-${Date.now().toString(36).toUpperCase()}`,
       recipient: payload.recipient_email,
-      subject: `[IN9AD OP-REPORT] ${payload.severity || "CRITICAL"} - ${payload.forest_name || "Zone Opérationnelle"}`,
+      subject: `[INKAD OP-REPORT] ${payload.severity || "CRITICAL"} - ${payload.forest_name || "Zone Opérationnelle"}`,
       timestamp: new Date().toISOString(),
       notice: "Incident notification successfully dispatched to agency command mailbox.",
     });

@@ -142,7 +142,7 @@ export const OnboardingGuide: React.FC = () => {
   // Automatic launch for first-time visitors
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const seen = localStorage.getItem("in9ad_guided_tour_v3");
+    const seen = localStorage.getItem("inkad_guided_tour_v3") || localStorage.getItem("inkad_guided_tour_v3");
     if (!seen) {
       const timer = setTimeout(() => {
         setIsOpen(true);
@@ -236,7 +236,7 @@ export const OnboardingGuide: React.FC = () => {
   }, [isOpen, stepIndex, availableSteps.length]);
 
   const handleClose = () => {
-    localStorage.setItem("in9ad_guided_tour_v3", "true");
+    localStorage.setItem("inkad_guided_tour_v3", "true");
     setIsOpen(false);
   };
 

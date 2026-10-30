@@ -722,11 +722,11 @@ export async function fetchAnalytics(): Promise<AnalyticsResponse> {
   }
 
   return {
-    title: "IN9AD Wildfire Analytics & Evaluation Suite",
+    title: "INKAD Wildfire Analytics & Evaluation Suite",
     model_architecture: "XGBoost Classifier + Cellular Automaton",
     diagrams: {
       model_performance: {
-        title: "IN9AD Model - How it works",
+        title: "INKAD Model - How it works",
         description: "Confusion Matrix, ROC Curve (AUC = 0.94), and Classification Report",
         static_url: `${API_BASE}/outputs/model_performance.png`,
         file_path: "/backend/ml/outputs/model_performance.png",
@@ -755,7 +755,7 @@ export async function fetchAnalytics(): Promise<AnalyticsResponse> {
 // -------------------------------------------------------------
 
 export async function refreshAllData(retrain: boolean = false, forceNasa: boolean = false): Promise<import("@/types").RefreshAllResponse> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const token = typeof window !== "undefined" ? localStorage.getItem("inkad_auth_token") : null;
   const res = await fetch(`${API_BASE}/api/refresh/all`, {
     method: "POST",
     headers: {
@@ -868,7 +868,7 @@ export async function updateAlertStatus(
   note: string = "",
   changedBy?: string
 ): Promise<import("@/types").AlertRecord> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const token = typeof window !== "undefined" ? localStorage.getItem("inkad_auth_token") : null;
   const res = await fetch(`${API_BASE}/api/alerts/${alertId}/status`, {
     method: "PUT",
     headers: {
@@ -1242,7 +1242,7 @@ export interface UpdateProfilePayload {
 }
 
 export async function updateMyProfile(payload: UpdateProfilePayload): Promise<any> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const token = typeof window !== "undefined" ? localStorage.getItem("inkad_auth_token") : null;
   const res = await fetch(`${API_BASE}/auth/me`, {
     method: "PUT",
     headers: {
@@ -1268,7 +1268,7 @@ export interface AdminUpdateUserPayload {
 }
 
 export async function adminUpdateUser(email: string, payload: AdminUpdateUserPayload): Promise<any> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const token = typeof window !== "undefined" ? localStorage.getItem("inkad_auth_token") : null;
   const res = await fetch(`${API_BASE}/auth/users/${encodeURIComponent(email.trim().toLowerCase())}`, {
     method: "PUT",
     headers: {
@@ -1285,7 +1285,7 @@ export async function adminUpdateUser(email: string, payload: AdminUpdateUserPay
 }
 
 export async function adminDeleteUser(email: string): Promise<any> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const token = typeof window !== "undefined" ? localStorage.getItem("inkad_auth_token") : null;
   const res = await fetch(`${API_BASE}/auth/users/${encodeURIComponent(email.trim().toLowerCase())}`, {
     method: "DELETE",
     headers: token ? { Authorization: `Bearer ${token}` } : {},

@@ -1,5 +1,5 @@
 """
-IN9AD Realtime Event Broadcaster
+INKAD Realtime Event Broadcaster
 Manages SSE (Server-Sent Events) and WebSocket notification distribution
 across connected operational panels (Protection Civile, Admin, Forêts).
 """

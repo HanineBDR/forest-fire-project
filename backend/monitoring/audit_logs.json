@@ -1,8 +1,8 @@
 [
   {
-    "id": "aud-107e92ac",
-    "timestamp": "2026-10-20T20:50:53.688053Z",
-    "user_email": "protection@in9ad.dz",
+    "id": "aud-74608b7e",
+    "timestamp": "2026-10-30T15:49:53.542189Z",
+    "user_email": "protection@inkad.dz",
     "user_name": "Commandant Protection Civile",
     "user_role": "CIVIL_PROTECTION",
     "user_org": "Direction G\u00e9n\u00e9rale de la Protection Civile (DGPC)",
@@ -14,6 +14,6 @@
     "wind": 30.0,
     "risk_score": 90.2,
     "risk_level": "Very High",
-    "latency_ms": 25.63
+    "latency_ms": 20.84
   }
 ]

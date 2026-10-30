@@ -2,7 +2,7 @@
 set -e
 
 echo "==================================================="
-echo "  IN9AD (إنقاذ) - Wildfire Prediction System"
+echo "  INKAD (إنقاذ) - Wildfire Prediction System"
 echo "  National Forest Fire Early Warning & Propagation"
 echo "==================================================="
 

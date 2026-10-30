@@ -1,5 +1,5 @@
 /**
- * IN9AD Notification and Alert Types & Constants (Client-Safe)
+ * INKAD Notification and Alert Types & Constants (Client-Safe)
  * Can be imported by React client components without pulling in server database libraries.
  */
 
@@ -36,7 +36,7 @@ export const ROLE_LABELS: Record<string, string> = {
   protection_civile: "Civil Protection (CODIS)",
   admin_centrale: "Central Administration",
   mohafadat_ghabat: "Forest Conservation (DGF)",
-  ai_model: "IN9AD AI System",
+  ai_model: "INKAD AI System",
   iot_vigie_network: "IoT Watchtower Network",
   all: "All Operational Commands",
 };
@@ -63,8 +63,8 @@ export function getLocalizedRole(role: string, lang: string = "en"): string {
       case "Forest Conservation":
         return "محافظة الغابات (DGF)";
       case "ai_model":
-      case "Système IA IN9AD":
-      case "IN9AD AI System":
+      case "Système IA INKAD":
+      case "INKAD AI System":
         return "نظام الذكاء الاصطناعي إنقاذ";
       case "iot_vigie_network":
       case "Réseau Vigies IoT":
@@ -93,9 +93,9 @@ export function getLocalizedRole(role: string, lang: string = "en"): string {
       case "محافظة الغابات (DGF)":
         return "Conservation des Forêts (DGF)";
       case "ai_model":
-      case "IN9AD AI System":
+      case "INKAD AI System":
       case "نظام الذكاء الاصطناعي إنقاذ":
-        return "Système IA IN9AD";
+        return "Système IA INKAD";
       case "iot_vigie_network":
       case "IoT Watchtower Network":
       case "شبكة مستشعرات ومراقبة IoT":
@@ -125,9 +125,9 @@ export function getLocalizedRole(role: string, lang: string = "en"): string {
     case "محافظة الغابات (DGF)":
       return "Forest Conservation (DGF)";
     case "ai_model":
-    case "Système IA IN9AD":
+    case "Système IA INKAD":
     case "نظام الذكاء الاصطناعي إنقاذ":
-      return "IN9AD AI System";
+      return "INKAD AI System";
     case "iot_vigie_network":
     case "Réseau Vigies IoT":
     case "شبكة مستشعرات ومراقبة IoT":

@@ -1,7 +1,7 @@
 """
-IN9AD - Model & Geospatial Visualization Engine
+INKAD - Model & Geospatial Visualization Engine
 Generates 3 presentation-grade diagrams and maps for pitch decks, README, and demo video:
-1. /backend/ml/outputs/model_performance.png ("IN9AD Model - How it works")
+1. /backend/ml/outputs/model_performance.png ("INKAD Model - How it works")
    - Confusion Matrix + Classification Report + ROC Curve
 2. /backend/ml/outputs/feature_importance.png ("Why Fire Happens")
    - XGBoost feature importance bar chart with physical explanations
@@ -34,7 +34,7 @@ from sklearn.metrics import (
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("in9ad-visualize")
+logger = logging.getLogger("inkad-visualize")
 
 # Path setup
 ML_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -205,7 +205,7 @@ def generate_model_performance_diagram():
     ax3.set_title("Performance & Deployment Metrics", fontsize=13, fontweight="bold", pad=12)
 
     # Super Title
-    fig.suptitle("IN9AD Model - How it works\nXGBoost Wildfire Prediction Performance for Northern Algeria", fontsize=16, fontweight="bold", y=0.98)
+    fig.suptitle("INKAD Model - How it works\nXGBoost Wildfire Prediction Performance for Northern Algeria", fontsize=16, fontweight="bold", y=0.98)
 
     plt.tight_layout(rect=[0, 0, 1, 0.93])
     plt.savefig(MODEL_PERF_PATH, dpi=300)
@@ -498,7 +498,7 @@ def _generate_matplotlib_burn_map(df_burns: pd.DataFrame, df_stats: pd.DataFrame
     fig.text(
         0.58,
         0.04,
-        f"Critical Summary: Kabylie & Babors (Tizi Ouzou, Bejaia, Bouira, Jijel) represent >85% of total damage (~{total_ha:,.0f} ha burned).\nIN9AD targets these priority corridors for predictive simulation and early containment.",
+        f"Critical Summary: Kabylie & Babors (Tizi Ouzou, Bejaia, Bouira, Jijel) represent >85% of total damage (~{total_ha:,.0f} ha burned).\nINKAD targets these priority corridors for predictive simulation and early containment.",
         fontsize=10,
         color="#cbd5e1",
         ha="left",
@@ -514,7 +514,7 @@ def _generate_matplotlib_burn_map(df_burns: pd.DataFrame, df_stats: pd.DataFrame
 def generate_all_visualizations():
     """Executes full visualization pipeline to generate all required judge deliverables."""
     logger.info("=" * 60)
-    logger.info("IN9AD - Generating Pitch Deck & README Visualizations")
+    logger.info("INKAD - Generating Pitch Deck & README Visualizations")
     logger.info("=" * 60)
 
     # 1. Model performance diagram

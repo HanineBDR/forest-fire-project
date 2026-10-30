@@ -93,7 +93,7 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center mb-2">
               <Image
                 src="/logo.png"
-                alt="IN9AD Official Emblem"
+                alt="INKAD Official Emblem"
                 width={76}
                 height={76}
                 className="w-20 h-20 select-none object-contain drop-shadow"
@@ -175,7 +175,7 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="officier@in9ad.dz"
+                    placeholder="officier@inkad.dz"
                     required
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-md text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors duration-150"
                   />

@@ -63,7 +63,7 @@ export const RoleGate: React.FC<RoleGateProps> = ({
       if (redirectTo) {
         if (showToast && typeof window !== "undefined") {
           sessionStorage.setItem(
-            "in9ad_auth_toast",
+            "inkad_auth_toast",
             JSON.stringify({
               title: t("unauthorized_access_title") || "Access Restricted",
               desc:

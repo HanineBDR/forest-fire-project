@@ -22,8 +22,8 @@ interface ExportBarProps {
 
 export const ExportBar: React.FC<ExportBarProps> = ({
   data,
-  title = "IN9AD Operational Intelligence Report",
-  filenamePrefix = "in9ad_report",
+  title = "INKAD Operational Intelligence Report",
+  filenamePrefix = "inkad_report",
   useBackendFirst = false,
   filters = {},
   className = "",

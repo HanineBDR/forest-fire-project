@@ -1,5 +1,5 @@
 """
-IN9AD - Cellular Automaton Fire Spread Simulation
+INKAD - Cellular Automaton Fire Spread Simulation
 Simulates wildfire propagation over a 6-hour horizon using a 2D cellular automaton model
 driven by wind direction, wind speed, and ML risk score.
 Outputs hourly burning coordinates and bounding polygons formatted for Leaflet animation.
@@ -288,7 +288,7 @@ if __name__ == "__main__":
         wind_speed=35.0,
         hours=6
     )
-    print("\n--- IN9AD Cellular Automaton Simulation ---")
+    print("\n--- INKAD Cellular Automaton Simulation ---")
     print(f"Ignition Point: {sim['ignition_point']}")
     print(f"Wind Direction: {sim['wind_direction']}° | Spread Azimuth: {sim['spread_azimuth_deg']}°")
     print(f"Total Burned Area (6 Hours): {sim['total_burned_area_ha']} hectares")

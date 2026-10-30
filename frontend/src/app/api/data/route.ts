@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      branch: process.env.NEON_BRANCH || "IN9AD",
+      branch: process.env.NEON_BRANCH || "INKAD",
       counts: {
         wilayas: wCount[0]?.c || 0,
         massifs: mCount[0]?.c || 0,

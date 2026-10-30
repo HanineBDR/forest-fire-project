@@ -1,7 +1,7 @@
-// IN9AD v3.0 - Offline Tactical Service Worker for Protection Civile & DGF
+// INKAD v3.0 - Offline Tactical Service Worker for Protection Civile & DGF
 // Provides offline capability in white zones (zones blanches sans couverture réseau)
 
-const CACHE_NAME = "in9ad-v3-offline-cache";
+const CACHE_NAME = "inkad-v3-offline-cache";
 
 // Critical core assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -19,9 +19,9 @@ const PRECACHE_ASSETS = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("[IN9AD SW] Pre-caching core command center assets...");
+      console.log("[INKAD SW] Pre-caching core command center assets...");
       return cache.addAll(PRECACHE_ASSETS).catch((err) => {
-        console.warn("[IN9AD SW] Pre-cache partial fail:", err);
+        console.warn("[INKAD SW] Pre-cache partial fail:", err);
       });
     })
   );
@@ -123,7 +123,7 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "CACHE_ZONE_TILES") {
     const urls = event.data.urls || [];
     caches.open(CACHE_NAME).then((cache) => {
-      console.log(`[IN9AD SW] Caching ${urls.length} tiles for offline zone: ${event.data.zoneName}`);
+      console.log(`[INKAD SW] Caching ${urls.length} tiles for offline zone: ${event.data.zoneName}`);
       urls.forEach((tileUrl) => {
         fetch(tileUrl, { mode: "no-cors" })
           .then((res) => cache.put(tileUrl, res))

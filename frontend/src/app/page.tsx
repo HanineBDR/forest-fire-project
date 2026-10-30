@@ -26,7 +26,7 @@ export default function RootPage() {
       <div className="flex flex-col items-center gap-4 text-center">
         <Image
           src="/logo.png"
-          alt="IN9AD Emblem"
+          alt="INKAD Emblem"
           width={72}
           height={72}
           className="w-16 h-16 object-contain animate-pulse"

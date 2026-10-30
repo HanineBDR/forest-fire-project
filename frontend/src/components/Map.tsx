@@ -639,7 +639,7 @@ export const Map: React.FC<MapProps> = ({
 
     setTimeout(() => {
       try {
-        localStorage.setItem(`in9ad_offline_${zoneKey}`, "cached_true");
+        localStorage.setItem(`inkad_offline_${zoneKey}`, "cached_true");
       } catch {}
       setDownloadingZone(null);
       setShowOfflineMenu(false);

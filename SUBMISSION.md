@@ -1,16 +1,16 @@
-# IN9AD (إنقاذ): Thirduni Cohort 1 Official Submission
+# INKAD (إنقاذ): Thirduni Cohort 1 Official Submission
 
 ## 1. Project name and one-line summary
 
-IN9AD (إنقاذ): An AI wildfire risk prediction and early warning system for vulnerable Algerian forest ecosystems.
+INKAD (إنقاذ): An AI wildfire risk prediction and early warning system for vulnerable Algerian forest ecosystems.
 
 ## 2. Project description
 
 Seasonal wildfires across Northern Algeria destroy tens of thousands of forest hectares annually, endangering rural communities, biodiversity, and critical mountain massifs. Emergency response is often reactive, mobilizing resources only after fires are visible and spreading out of control.
 
-IN9AD provides predictive early warning and spatial risk intelligence across eight strategic Algerian forest zones, including Yakouren, Akfadou, and Chréa. By analyzing real-time atmospheric conditions, thermal satellite anomalies, and Sirocco wind dynamics, the platform predicts ignition risk levels and simulates fire spread contours before outbreaks escalate.
+INKAD provides predictive early warning and spatial risk intelligence across eight strategic Algerian forest zones, including Yakouren, Akfadou, and Chréa. By analyzing real-time atmospheric conditions, thermal satellite anomalies, and Sirocco wind dynamics, the platform predicts ignition risk levels and simulates fire spread contours before outbreaks escalate.
 
-Built for Algerian Civil Protection dispatchers, forestry conservation officers, and regional crisis teams, IN9AD shifts wildland fire management from reactive suppression to proactive operational readiness, safeguarding human life and preserving natural heritage.
+Built for Algerian Civil Protection dispatchers, forestry conservation officers, and regional crisis teams, INKAD shifts wildland fire management from reactive suppression to proactive operational readiness, safeguarding human life and preserving natural heritage.
 
 ## 3. Team members and roles
 

@@ -31,7 +31,7 @@ if (!dbUrl) {
 const sql = neon(dbUrl);
 
 console.log("=================================================");
-console.log("    IN9AD NEON DATABASE IMPORT (IN9AD BRANCH)    ");
+console.log("    INKAD NEON DATABASE IMPORT (INKAD BRANCH)    ");
 console.log("=================================================");
 console.log("Connecting to:", dbUrl.replace(/:[^:@]+@/, ":***@"));
 
@@ -111,7 +111,7 @@ const MASSIFS_DATA = [
 ];
 
 async function createSchema() {
-  console.log("\n[1/6] Creating Schema in IN9AD branch...");
+  console.log("\n[1/6] Creating Schema in INKAD branch...");
 
   await sql`
     CREATE TABLE IF NOT EXISTS wilayas (
@@ -519,7 +519,7 @@ async function uploadModelToStorage() {
 }
 
 async function verifyCounts() {
-  console.log("\n[6/6] Verifying Table Row Counts in IN9AD branch:");
+  console.log("\n[6/6] Verifying Table Row Counts in INKAD branch:");
   const tables = ["wilayas", "massifs", "predictions", "reports", "historical_fires", "burn_stats", "alerts", "algeria_wildfires"];
   for (const t of tables) {
     try {

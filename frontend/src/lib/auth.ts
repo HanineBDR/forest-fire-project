@@ -1,5 +1,5 @@
 /**
- * IN9AD - Client Authentication & RBAC Session Manager
+ * INKAD - Client Authentication & RBAC Session Manager
  * Provides institutional JWT session handling, role enforcement, and token persistence.
  */
 
@@ -93,14 +93,14 @@ export function canAccessRoute(role: UserRole | undefined, pathname: string): bo
   return true;
 }
 
-const TOKEN_KEY = "in9ad_auth_token";
-const USER_KEY = "in9ad_auth_user";
+const TOKEN_KEY = "inkad_auth_token";
+const USER_KEY = "inkad_auth_user";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 // Standard demo benchmark accounts for evaluation judges
 export const DEMO_ACCOUNTS = [
   {
-    email: "protection@in9ad.dz",
+    email: "protection@inkad.dz",
     password: "Protect123!",
     role: "CIVIL_PROTECTION" as UserRole,
     label: "Civil Protection (CODIS)",
@@ -108,7 +108,7 @@ export const DEMO_ACCOUNTS = [
     org: "General Directorate of Civil Protection (DGPC)"
   },
   {
-    email: "foret@in9ad.dz",
+    email: "foret@inkad.dz",
     password: "Foret123!",
     role: "FOREST_GUARD" as UserRole,
     label: "Forest Conservation (DGF)",
@@ -116,12 +116,12 @@ export const DEMO_ACCOUNTS = [
     org: "General Directorate of Forests (DGF - Kabylie)"
   },
   {
-    email: "admin@in9ad.dz",
+    email: "admin@inkad.dz",
     password: "Admin123!",
     role: "ADMIN" as UserRole,
     label: "Central Administration (Super Admin)",
     officer: "General Directorate - Super Admin",
-    org: "Ministry of Interior / IN9AD Admin"
+    org: "Ministry of Interior / INKAD Admin"
   }
 ];
 
@@ -139,7 +139,7 @@ export function getLocalizedDemoAccount(account: typeof DEMO_ACCOUNTS[0], lang: 
       ...account,
       label: account.role === "CIVIL_PROTECTION" ? "Protection Civile (CODIS)" : account.role === "FOREST_GUARD" ? "Conservation des Forêts (DGF)" : "Administration Centrale (Super Admin)",
       officer: account.role === "CIVIL_PROTECTION" ? "Commandant Protection Civile" : account.role === "FOREST_GUARD" ? "Inspecteur Principal des Forêts" : "Direction Générale - Super Admin",
-      org: account.role === "CIVIL_PROTECTION" ? "Direction Générale de la Protection Civile (DGPC)" : account.role === "FOREST_GUARD" ? "Direction Générale des Forêts (DGF - Kabylie)" : "Ministère de l'Intérieur / IN9AD Admin"
+      org: account.role === "CIVIL_PROTECTION" ? "Direction Générale de la Protection Civile (DGPC)" : account.role === "FOREST_GUARD" ? "Direction Générale des Forêts (DGF - Kabylie)" : "Ministère de l'Intérieur / INKAD Admin"
     };
   }
   return account;
@@ -147,7 +147,7 @@ export function getLocalizedDemoAccount(account: typeof DEMO_ACCOUNTS[0], lang: 
 
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
-  const local = localStorage.getItem(TOKEN_KEY);
+  const local = localStorage.getItem(TOKEN_KEY) || localStorage.getItem("inkad_auth_token");
   if (local) return local;
 
   // Fallback check cookie
@@ -157,7 +157,7 @@ export function getStoredToken(): string | null {
 
 export function getStoredUser(): AuthUser | null {
   if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(USER_KEY);
+  const raw = localStorage.getItem(USER_KEY) || localStorage.getItem("inkad_auth_user");
   if (!raw) return null;
   try {
     return JSON.parse(raw);
@@ -172,7 +172,7 @@ export function setSession(token: string, user: AuthUser) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=86400; SameSite=Lax`;
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("in9ad_user_updated", { detail: user }));
+    window.dispatchEvent(new CustomEvent("inkad_user_updated", { detail: user }));
   }
 }
 
@@ -182,7 +182,7 @@ export function updateStoredUser(updated: Partial<AuthUser>): AuthUser | null {
   if (!current) return null;
   const merged: AuthUser = { ...current, ...updated };
   localStorage.setItem(USER_KEY, JSON.stringify(merged));
-  window.dispatchEvent(new CustomEvent("in9ad_user_updated", { detail: merged }));
+  window.dispatchEvent(new CustomEvent("inkad_user_updated", { detail: merged }));
   return merged;
 }
 
@@ -194,7 +194,7 @@ export function clearSession() {
 }
 
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
-  const cleanEmail = email.trim().toLowerCase();
+  const cleanEmail = email.trim().toLowerCase().replace("@in9ad.dz", "@inkad.dz");
 
   try {
     const res = await fetch(`${API_BASE}/auth/login`, {

@@ -1,5 +1,5 @@
 /**
- * IN9AD Platform - Official Crisis & Tactical Report PDF Generator
+ * INKAD Platform - Official Crisis & Tactical Report PDF Generator
  * Generates an official, printable Algerian Government Wildfire Alert Protocol
  * using client-side jsPDF + jspdf-autotable without backend dependencies.
  */
@@ -76,7 +76,7 @@ export async function generateOfficialTacticalReportPDF(data: TacticalReportData
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text("SYSTÈME NATIONAL DE VEILLE PRÉDICTIVE DES FEUX DE FORÊT (IN9AD)", pageWidth / 2, currentY + 46, {
+  doc.text("SYSTÈME NATIONAL DE VEILLE PRÉDICTIVE DES FEUX DE FORÊT (INKAD)", pageWidth / 2, currentY + 46, {
     align: "center",
   });
 
@@ -276,7 +276,7 @@ export async function generateOfficialTacticalReportPDF(data: TacticalReportData
   doc.text("[X] Direction Générale de la Protection Civile (CODIS / Colonnes Mobiles)", margin + 8, currentY + 26);
   doc.text("[X] Direction Générale des Forêts / Mohafadat El Ghabat (Vigies & Brigades)", margin + 8, currentY + 38);
   doc.text("[X] Ministère de l'Intérieur / Administration Centrale (Gestion de Crise ORSEC)", margin + contentWidth / 2, currentY + 26);
-  doc.text("Cachet électronique certifié : Plateforme Nationale IN9AD", margin + contentWidth / 2, currentY + 38);
+  doc.text("Cachet électronique certifié : Plateforme Nationale INKAD", margin + contentWidth / 2, currentY + 38);
 
   // Save PDF
   const cleanMassif = data.massif.replace(/[\s()]+/g, "_");

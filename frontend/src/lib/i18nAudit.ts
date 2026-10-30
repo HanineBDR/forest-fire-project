@@ -143,7 +143,7 @@ export function getLocalizedOperatorName(operator: string, lang: string): string
     return "System Administrator (General Directorate - Super Admin)";
   }
   if (operator.includes("Système IA") || operator.includes("XGBoost") || operator.includes("IA")) {
-    return "IN9AD AI Autonomous System (XGBoost)";
+    return "INKAD AI Autonomous System (XGBoost)";
   }
   if (operator.includes("Officier CODIS") || operator.includes("CODIS")) {
     return "Central CODIS Officer";

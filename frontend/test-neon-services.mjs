@@ -23,7 +23,7 @@ if (fs.existsSync(envPath)) {
 }
 
 console.log("=================================================");
-console.log("       IN9AD NEON END-TO-END SERVICE TEST        ");
+console.log("       INKAD NEON END-TO-END SERVICE TEST        ");
 console.log("=================================================");
 
 let allPassed = true;
@@ -38,7 +38,7 @@ async function testPostgres() {
     console.log("  - Server time:", rows[0].current_time);
     console.log("  - Version:", rows[0].pg_version.slice(0, 50) + "...");
     
-    // Check IN9AD Wildfire tables
+    // Check INKAD Wildfire tables
     try {
       const [w, m, p, f] = await Promise.all([
         sql`SELECT COUNT(*)::int as c FROM wilayas`,
@@ -46,7 +46,7 @@ async function testPostgres() {
         sql`SELECT COUNT(*)::int as c FROM predictions`,
         sql`SELECT COUNT(*)::int as c FROM algeria_wildfires`,
       ]);
-      console.log(`  - IN9AD Wildfire Data: ${w[0].c} wilayas, ${m[0].c} massifs, ${p[0].c} predictions, ${f[0].c} fire observations`);
+      console.log(`  - INKAD Wildfire Data: ${w[0].c} wilayas, ${m[0].c} massifs, ${p[0].c} predictions, ${f[0].c} fire observations`);
     } catch (e) {
       console.log("  - Table count query note:", e.message);
     }
@@ -70,8 +70,8 @@ async function testObjectStorage() {
       forcePathStyle: true,
     });
 
-    const testKey = `test-in9ad-${Date.now()}.txt`;
-    const testContent = "IN9AD Wildfire Telemetry Verification - Neon Object Storage";
+    const testKey = `test-inkad-${Date.now()}.txt`;
+    const testContent = "INKAD Wildfire Telemetry Verification - Neon Object Storage";
     
     await s3.send(new PutObjectCommand({
       Bucket: "assets",

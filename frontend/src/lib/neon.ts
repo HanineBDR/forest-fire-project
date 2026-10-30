@@ -1,5 +1,5 @@
 /**
- * IN9AD Neon Cloud Backend Primitives Integration
+ * INKAD Neon Cloud Backend Primitives Integration
  * Lakebase Postgres, Object Storage, Functions, Auth, Realtime
  */
 

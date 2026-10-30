@@ -1,5 +1,5 @@
 """
-IN9AD - Open-Meteo Weather Service
+INKAD - Open-Meteo Weather Service
 Fetches real-time meteorological parameters for Northern Algeria (free, no API key required)
 """
 

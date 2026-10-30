@@ -1,5 +1,5 @@
 """
-IN9AD - Wildfire Risk Prediction & Simulation Backend
+INKAD - Wildfire Risk Prediction & Simulation Backend
 FastAPI production application configured for Render Free-Tier deployment.
 
 Endpoints:
@@ -100,14 +100,14 @@ from app.firms import fetch_nasa_firms_hotspots
 from app.report_generator import generate_alert_pdf_report, generate_zone_pdf_report
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("in9ad-api")
+logger = logging.getLogger("inkad-api")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ML_OUTPUTS_DIR = os.path.join(BASE_DIR, "ml", "outputs")
 os.makedirs(ML_OUTPUTS_DIR, exist_ok=True)
 
 app = FastAPI(
-    title="IN9AD Wildfire Risk & Simulation API",
+    title="INKAD Wildfire Risk & Simulation API",
     description="AI-Based Wildfire Risk Prediction & Spread Simulation for Northern Algeria (Bejaia, Tizi Ouzou, Bouira, Jijel, Setif, Bordj Bou Arreridj)",
     version="2.0.0"
 )
@@ -302,7 +302,7 @@ STRATEGIC_REGIONS = [
 @app.get("/")
 def root():
     return {
-        "project": "IN9AD (إنقاذ) - AI Wildfire Risk & Simulation Engine",
+        "project": "INKAD (إنقاذ) - AI Wildfire Risk & Simulation Engine",
         "target_region": "Northern Algeria (Bejaia, Tizi Ouzou, Bouira, Jijel, Setif, Bordj Bou Arreridj)",
         "deployment": "Render Free-Tier Compatible (< 10MB Model)",
         "status": "operational",
@@ -522,11 +522,11 @@ def get_analytics():
         ]
 
     return {
-        "title": "IN9AD Wildfire Analytics & Evaluation Suite",
+        "title": "INKAD Wildfire Analytics & Evaluation Suite",
         "model_architecture": "XGBoost Classifier + Cellular Automaton",
         "diagrams": {
             "model_performance": {
-                "title": "IN9AD Model - How it works",
+                "title": "INKAD Model - How it works",
                 "description": "Confusion Matrix, ROC Curve (AUC = 0.94), and Classification Report",
                 "static_url": "/outputs/model_performance.png",
                 "file_path": "/backend/ml/outputs/model_performance.png"
@@ -595,7 +595,7 @@ def get_regions():
 
 
 # ============================================================================
-# 13. LIVE REFRESH & HISTORY ENDPOINTS (SQLite backend/in9ad_history.db)
+# 13. LIVE REFRESH & HISTORY ENDPOINTS (SQLite backend/inkad_history.db)
 # ============================================================================
 
 class RefreshAllPayload(BaseModel):
@@ -610,7 +610,7 @@ def refresh_all_data(payload: Optional[RefreshAllPayload] = None):
     2. Fetches/increments live FIRMS data for Northern Algeria.
     3. Re-calibrates model if retrain requested or data points > 50.
     4. Regenerates timestamps and updates diagram archives.
-    5. Saves snapshot in in9ad_history.db and returns diff.
+    5. Saves snapshot in inkad_history.db and returns diff.
     """
     start_time = time.time()
     retrain = payload.retrain if payload else False
@@ -727,7 +727,7 @@ def refresh_burn_map():
 def refresh_model_training():
     """
     Retrains / re-calibrates XGBoost with latest fire observations,
-    records run in in9ad_history.db, and returns new metrics.
+    records run in inkad_history.db, and returns new metrics.
     """
     now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     run_record = save_model_run({
@@ -1168,7 +1168,7 @@ def api_export_audit_csv():
         ])
 
     csv_content = output.getvalue()
-    filename = f"journal_audit_in9ad_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+    filename = f"journal_audit_inkad_{time.strftime('%Y%m%d_%H%M%S')}.csv"
 
     return Response(
         content=csv_content,
@@ -1358,7 +1358,7 @@ def api_reset_roadmap():
                 "metrics": "Validation CODIS Tizi Ouzou · Raccordement DGF Azazga",
                 "description": "Déploiement sur le site pilote prioritaire de Kabylie (Tizi Ouzou) avec raccordement direct des postes de vigie DGF d'Azazga et Yakouren.",
                 "livrables": [
-                    {"id": "p1_1", "name": "Installation du serveur local IN9AD au CODIS central de Tizi Ouzou", "completed": True},
+                    {"id": "p1_1", "name": "Installation du serveur local INKAD au CODIS central de Tizi Ouzou", "completed": True},
                     {"id": "p1_2", "name": "Interconnexion directe avec les postes de vigie DGF d'Azazga et Yakouren", "completed": True},
                     {"id": "p1_3", "name": "Formation certifiée des officiers de garde aux tableaux de bord tactiques", "completed": False}
                 ]
@@ -1674,7 +1674,7 @@ def api_get_sirocco_corridors():
 
 DRONE_PATROLS = [
     {
-        "drone_id": "DRONE-IN9AD-01",
+        "drone_id": "DRONE-INKAD-01",
         "model": "DJI Matrice 300 RTK + FLIR Zenmuse H20T",
         "home_base": "Base Mobile DGF / Protection Civile Azazga",
         "mission_name": "Patrouille Thermique Forêt de Yakouren (Crête Nord)",
@@ -1699,7 +1699,7 @@ DRONE_PATROLS = [
         ]
     },
     {
-        "drone_id": "DRONE-IN9AD-02",
+        "drone_id": "DRONE-INKAD-02",
         "model": "Autel EVO Max 4T (Caméra Thermique 640 + Zoom 8K)",
         "home_base": "Poste Avancé Protection Civile Adekar",
         "mission_name": "Surveillance Crête Soummam - Akfadou",
@@ -1733,7 +1733,6 @@ def api_get_drone_patrols():
 
 
 
-@app.on_event("startup")
 async def start_periodic_wildfire_scanner():
     """
     Background worker that runs every 5 minutes:
@@ -1754,3 +1753,6 @@ async def start_periodic_wildfire_scanner():
             await asyncio.sleep(300)
 
     asyncio.create_task(periodic_worker())
+
+if os.environ.get("TESTING") != "1":
+    app.on_event("startup")(start_periodic_wildfire_scanner)

@@ -1,5 +1,5 @@
 """
-IN9AD - Spatial Fire Spread Simulation Engine
+INKAD - Spatial Fire Spread Simulation Engine
 Simulates wildfire propagation perimeters based on Huygens' Elliptical Principle
 and Rothermel Rate of Spread (ROS) formulas adapted for Northern Algerian topography and winds.
 """

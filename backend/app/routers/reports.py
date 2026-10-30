@@ -1,5 +1,5 @@
 """
-IN9AD - Report Export Router (CSV, PDF, Excel, JSON)
+INKAD - Report Export Router (CSV, PDF, Excel, JSON)
 Provides server-side generation of operational reports for Civil Protection and DGF.
 """
 
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/reports", tags=["Reports"])
 
 
 class ExportRequest(BaseModel):
-    title: Optional[str] = "IN9AD Operational Intelligence Report"
+    title: Optional[str] = "INKAD Operational Intelligence Report"
     data: Optional[List[Dict[str, Any]]] = None
     filters: Optional[Dict[str, Any]] = None
 
@@ -103,7 +103,7 @@ def _build_pdf_report(title: str, rows: List[Dict[str, Any]]) -> bytes:
         # Fallback to plain text if fpdf2 is somehow not present
         return f"{title}\n\n".encode("utf-8") + json.dumps(rows, indent=2).encode("utf-8")
 
-    class In9adPDF(FPDF):
+    class InkadPDF(FPDF):
         def header(self):
             # Top dark green banner #0A4D3C (10, 77, 60)
             self.set_fill_color(10, 77, 60)
@@ -113,7 +113,7 @@ def _build_pdf_report(title: str, rows: List[Dict[str, Any]]) -> bytes:
             self.set_text_color(245, 241, 232)
             self.set_font("Helvetica", "B", 11)
             self.set_xy(10, 5)
-            self.cell(0, 7, "IN9AD (EN: Saving) - AI Wildfire Intelligence Platform", 0, 1, "L")
+            self.cell(0, 7, "INKAD (EN: Saving) - AI Wildfire Intelligence Platform", 0, 1, "L")
             self.set_font("Helvetica", "", 8)
             self.set_xy(10, 13)
             self.cell(0, 6, "Civil Protection (DPC) & Forest Conservation (DGF) Operational Report", 0, 1, "L")
@@ -123,9 +123,9 @@ def _build_pdf_report(title: str, rows: List[Dict[str, Any]]) -> bytes:
             self.set_y(-15)
             self.set_font("Helvetica", "", 8)
             self.set_text_color(120, 120, 120)
-            self.cell(0, 10, f"Page {self.page_no()}/{{nb}} - Confidential Operational Data - IN9AD Algeria", 0, 0, "C")
+            self.cell(0, 10, f"Page {self.page_no()}/{{nb}} - Confidential Operational Data - INKAD Algeria", 0, 0, "C")
 
-    pdf = In9adPDF(orientation="L", unit="mm", format="A4")
+    pdf = InkadPDF(orientation="L", unit="mm", format="A4")
     pdf.set_auto_page_break(auto=True, margin=18)
     pdf.alias_nb_pages()
     pdf.add_page()
@@ -191,7 +191,7 @@ async def export_report(
     Query type: csv | pdf | json | xlsx
     """
     data = (payload and payload.data) if (payload and payload.data) else DEFAULT_EXPORT_DATA
-    title = (payload and payload.title) if (payload and payload.title) else "IN9AD Operational Intelligence Report"
+    title = (payload and payload.title) if (payload and payload.title) else "INKAD Operational Intelligence Report"
     timestamp = int(time.time())
 
     if type == "csv":
@@ -204,7 +204,7 @@ async def export_report(
         return Response(
             content=content,
             media_type="text/csv",
-            headers={"Content-Disposition": f'attachment; filename="in9ad_report_{timestamp}.csv"'}
+            headers={"Content-Disposition": f'attachment; filename="inkad_report_{timestamp}.csv"'}
         )
 
     elif type == "json":
@@ -212,7 +212,7 @@ async def export_report(
         return Response(
             content=content,
             media_type="application/json",
-            headers={"Content-Disposition": f'attachment; filename="in9ad_report_{timestamp}.json"'}
+            headers={"Content-Disposition": f'attachment; filename="inkad_report_{timestamp}.json"'}
         )
 
     elif type == "xlsx":
@@ -232,7 +232,7 @@ async def export_report(
         return Response(
             content=buf.getvalue(),
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f'attachment; filename="in9ad_report_{timestamp}.xlsx"'}
+            headers={"Content-Disposition": f'attachment; filename="inkad_report_{timestamp}.xlsx"'}
         )
 
     elif type == "pdf":
@@ -240,7 +240,7 @@ async def export_report(
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={"Content-Disposition": f'attachment; filename="in9ad_report_{timestamp}.pdf"'}
+            headers={"Content-Disposition": f'attachment; filename="inkad_report_{timestamp}.pdf"'}
         )
 
     raise HTTPException(status_code=400, detail="Unsupported format")

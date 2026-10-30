@@ -27,7 +27,7 @@ if (fs.existsSync(envPath)) {
 
 async function run() {
   console.log("=================================================");
-  console.log("       IN9AD NEON API ROUTE VERIFICATION         ");
+  console.log("       INKAD NEON API ROUTE VERIFICATION         ");
   console.log("=================================================");
 
   // 1. /api/neon/health
