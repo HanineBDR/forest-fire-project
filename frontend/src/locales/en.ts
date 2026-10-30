@@ -547,8 +547,8 @@ export const en = {
   iot_offline: "Offline",
 
   // Intercom Modal (Panel Action)
-  intercom_alert_panel: "Alert another command",
-  intercom_modal_aria: "Alert another operational command",
+  intercom_alert_panel: "Alert other panel",
+  intercom_modal_aria: "Alert other operational command",
   intercom_emitter: "Sender (Your role)",
   intercom_target: "Target Recipient",
   role_protection_civile: "Civil Protection (CODIS)",

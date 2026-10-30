@@ -444,7 +444,7 @@ export default function AlertsPage() {
             <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true" />
             <span>{isRefreshing ? t("loading") : t("refresh_alerts")}</span>
           </button>
-          <PanelIntercomModal buttonLabel="Alerter autre panel" />
+          <PanelIntercomModal buttonLabel={t("intercom_alert_panel")} />
         </div>
       </div>
 

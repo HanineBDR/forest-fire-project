@@ -547,7 +547,7 @@ export const fr = {
   iot_offline: "Hors-Ligne",
 
   // Intercom Modal (Panel Action)
-  intercom_alert_panel: "Alerter autre panel",
+  intercom_alert_panel: "Alerter un autre panel",
   intercom_modal_aria: "Alerter un autre commandement opérationnel",
   intercom_emitter: "Émetteur (Votre rôle)",
   intercom_target: "Destinataire ciblé",
