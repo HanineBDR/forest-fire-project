@@ -31,3 +31,4 @@ export async function DELETE(
     return NextResponse.json({ ok: true, id: notifId, deleted: true });
   }
 }
+
