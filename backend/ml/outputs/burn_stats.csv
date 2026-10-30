@@ -1,9 +1,9 @@
 wilaya_code,wilaya_name,region,total_burned_points,estimated_burned_area_ha,risk_category,top_vegetation_type
-15,Tizi Ouzou,Northern (Grande Kabylie),483,20527.5,Critical Red Zone,Cork Oak & Cedar Massif
-6,Bejaia,Northern (Petite Kabylie),405,17212.5,Critical Red Zone,Deciduous Mountain Forest
-10,Bouira,Northern (Djurdjura Belt),294,12495.0,Critical Red Zone,Atlas Cedar & Pine Woodland
-18,Jijel,Northern (Babors Coastal),223,9477.5,Critical Red Zone,Dense Subhumid Forest
-19,Setif,Hauts Plateaux East,69,2932.5,Moderate,Babor Foothills & Agriculture
-34,Bordj Bou Arreridj,Hauts Plateaux North,68,2890.0,Moderate,Semi-Arid Scrub & Aleppo Pine
-36,El Tarf,Northeastern Coast,52,2210.0,Moderate,Wetland Fringe & Cork Oak
-24,Guelma,Northeastern Interior,29,1232.5,Moderate,Maquis & Olive Scrub
+15,Tizi Ouzou,Northern (Grande Kabylie),486,20655.0,Critical Red Zone,Cork Oak & Cedar Massif
+6,Bejaia,Northern (Petite Kabylie),410,17425.0,Critical Red Zone,Deciduous Mountain Forest
+10,Bouira,Northern (Djurdjura Belt),287,12197.5,Critical Red Zone,Atlas Cedar & Pine Woodland
+18,Jijel,Northern (Babors Coastal),238,10115.0,Critical Red Zone,Dense Subhumid Forest
+34,Bordj Bou Arreridj,Hauts Plateaux North,67,2847.5,Moderate,Semi-Arid Scrub & Aleppo Pine
+19,Setif,Hauts Plateaux East,66,2805.0,Moderate,Babor Foothills & Agriculture
+36,El Tarf,Northeastern Coast,53,2252.5,Moderate,Wetland Fringe & Cork Oak
+24,Guelma,Northeastern Interior,31,1317.5,Moderate,Maquis & Olive Scrub
