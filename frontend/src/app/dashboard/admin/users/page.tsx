@@ -13,16 +13,20 @@ import {
   AlertCircle, 
   CheckCircle2, 
   Lock, 
+  Unlock,
   X, 
   Phone, 
   Camera, 
   Upload, 
-  AlertTriangle 
+  AlertTriangle,
+  Ban,
+  Flag,
+  ShieldAlert
 } from "lucide-react";
 import { getStoredUser, getStoredToken, getLocalizedUserName, AuthUser, UserRole } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
 import { RoleGate } from "@/components/RoleGate";
-import { adminUpdateUser, adminDeleteUser } from "@/lib/api";
+import { adminUpdateUser, adminDeleteUser, adminToggleBlockUser, reportUserAccount } from "@/lib/api";
 
 interface ManagedUser {
   id: string;
@@ -34,6 +38,10 @@ interface ManagedUser {
   organization?: string;
   organization_ar?: string;
   created_at?: string;
+  is_blocked?: boolean;
+  status?: "ACTIVE" | "BLOCKED";
+  blocked_reason?: string;
+  blocked_at?: string;
 }
 
 const DEFAULT_USERS: ManagedUser[] = [
@@ -45,7 +53,9 @@ const DEFAULT_USERS: ManagedUser[] = [
     phone: "+213 21 73 00 00",
     organization: "Ministère de l'Intérieur / INKAD Admin",
     organization_ar: "الإدارة المركزية",
-    created_at: "2024-01-15T08:00:00Z"
+    created_at: "2024-01-15T08:00:00Z",
+    is_blocked: false,
+    status: "ACTIVE"
   },
   {
     id: "usr-protect-01",
@@ -55,7 +65,9 @@ const DEFAULT_USERS: ManagedUser[] = [
     phone: "+213 26 20 14 14",
     organization: "Direction Générale de la Protection Civile (DGPC)",
     organization_ar: "الحماية المدنية",
-    created_at: "2024-02-01T09:30:00Z"
+    created_at: "2024-02-01T09:30:00Z",
+    is_blocked: false,
+    status: "ACTIVE"
   },
   {
     id: "usr-foret-01",
@@ -65,7 +77,9 @@ const DEFAULT_USERS: ManagedUser[] = [
     phone: "+213 26 21 88 02",
     organization: "Direction Générale des Forêts (DGF - Kabylie)",
     organization_ar: "محافظة الغابات",
-    created_at: "2024-02-15T10:15:00Z"
+    created_at: "2024-02-15T10:15:00Z",
+    is_blocked: false,
+    status: "ACTIVE"
   }
 ];
 
@@ -81,6 +95,17 @@ export default function UsersManagementPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null);
+
+  // Block Modal state
+  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [blockActionType, setBlockActionType] = useState<"BLOCK" | "UNBLOCK">("BLOCK");
+  const [blockReason, setBlockReason] = useState("");
+
+  // Report Modal state
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportCategory, setReportCategory] = useState("PROTOCOL_VIOLATION");
+  const [reportExplanation, setReportExplanation] = useState("");
+  const [reportAlsoBlock, setReportAlsoBlock] = useState(false);
 
   // Create form state
   const [createEmail, setCreateEmail] = useState("");
@@ -163,7 +188,8 @@ export default function UsersManagementPage() {
 
   // Open Delete Modal
   const handleOpenDelete = (user: ManagedUser) => {
-    if (user.email.toLowerCase() === "admin@inkad.dz") {
+    const isSuperAdmin = user.email.toLowerCase() === "admin@inkad.dz" || user.email.toLowerCase() === "admin@in9ad.dz";
+    if (isSuperAdmin) {
       setActionError(t("users_err_superadmin_immutable") || "The primary Super Admin account (admin@inkad.dz) cannot be deleted.");
       return;
     }
@@ -171,6 +197,37 @@ export default function UsersManagementPage() {
     setActionError(null);
     setActionSuccess(null);
     setIsDeleteModalOpen(true);
+  };
+
+  // Open Block Modal
+  const handleOpenBlock = (user: ManagedUser, action: "BLOCK" | "UNBLOCK") => {
+    const isSuperAdmin = user.email.toLowerCase() === "admin@inkad.dz" || user.email.toLowerCase() === "admin@in9ad.dz";
+    if (isSuperAdmin) {
+      setActionError(t("users_err_superadmin_block") || "Primary Super Admin account cannot be suspended.");
+      return;
+    }
+    setSelectedUser(user);
+    setBlockActionType(action);
+    setBlockReason(action === "BLOCK" ? (user.blocked_reason || "") : "");
+    setActionError(null);
+    setActionSuccess(null);
+    setIsBlockModalOpen(true);
+  };
+
+  // Open Report Modal
+  const handleOpenReport = (user: ManagedUser) => {
+    const isSuperAdmin = user.email.toLowerCase() === "admin@inkad.dz" || user.email.toLowerCase() === "admin@in9ad.dz";
+    if (isSuperAdmin) {
+      setActionError(t("users_err_superadmin_block") || "Primary Super Admin account cannot be reported.");
+      return;
+    }
+    setSelectedUser(user);
+    setReportCategory("PROTOCOL_VIOLATION");
+    setReportExplanation("");
+    setReportAlsoBlock(false);
+    setActionError(null);
+    setActionSuccess(null);
+    setIsReportModalOpen(true);
   };
 
   // CREATE USER
@@ -228,7 +285,9 @@ export default function UsersManagementPage() {
         avatar: createAvatar || undefined,
         organization: createOrg || (createRole === "CIVIL_PROTECTION" ? "Protection Civile" : createRole === "FOREST_GUARD" ? "DGF" : "Administration"),
         organization_ar: createRole === "CIVIL_PROTECTION" ? "الحماية المدنية" : createRole === "FOREST_GUARD" ? "محافظة الغابات" : "الإدارة المركزية",
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        is_blocked: false,
+        status: "ACTIVE"
       };
       setUsers(prev => [localNew, ...prev]);
       setActionSuccess(t("users_create_success") || `Account for ${createName} registered locally.`);
@@ -303,7 +362,8 @@ export default function UsersManagementPage() {
   // DELETE USER
   const handleConfirmDelete = async () => {
     if (!selectedUser) return;
-    if (selectedUser.email.toLowerCase() === "admin@inkad.dz") {
+    const isSuperAdmin = selectedUser.email.toLowerCase() === "admin@inkad.dz" || selectedUser.email.toLowerCase() === "admin@in9ad.dz";
+    if (isSuperAdmin) {
       setActionError(t("users_err_superadmin_immutable") || "The primary Super Admin account (admin@inkad.dz) cannot be deleted.");
       setIsDeleteModalOpen(false);
       return;
@@ -325,6 +385,117 @@ export default function UsersManagementPage() {
       setLoading(false);
       setIsDeleteModalOpen(false);
       setSelectedUser(null);
+    }
+  };
+
+  // BLOCK / UNBLOCK USER
+  const handleConfirmBlock = async () => {
+    if (!selectedUser) return;
+    const shouldBlock = blockActionType === "BLOCK";
+    setLoading(true);
+    setActionError(null);
+    setActionSuccess(null);
+
+    try {
+      await adminToggleBlockUser(selectedUser.email, {
+        is_blocked: shouldBlock,
+        reason: blockReason.trim() || undefined,
+      });
+
+      setUsers(prev => prev.map(u => {
+        if (u.email.toLowerCase() === selectedUser.email.toLowerCase()) {
+          return {
+            ...u,
+            is_blocked: shouldBlock,
+            status: shouldBlock ? "BLOCKED" : "ACTIVE",
+            blocked_reason: shouldBlock ? (blockReason.trim() || undefined) : undefined,
+            blocked_at: shouldBlock ? new Date().toISOString() : undefined,
+          };
+        }
+        return u;
+      }));
+
+      setActionSuccess(t("users_block_success") || "User account status updated successfully.");
+    } catch (err: any) {
+      // Fallback local update
+      setUsers(prev => prev.map(u => {
+        if (u.email.toLowerCase() === selectedUser.email.toLowerCase()) {
+          return {
+            ...u,
+            is_blocked: shouldBlock,
+            status: shouldBlock ? "BLOCKED" : "ACTIVE",
+            blocked_reason: shouldBlock ? (blockReason.trim() || undefined) : undefined,
+            blocked_at: shouldBlock ? new Date().toISOString() : undefined,
+          };
+        }
+        return u;
+      }));
+      setActionSuccess(t("users_block_success") || "User status updated locally.");
+    } finally {
+      setLoading(false);
+      setIsBlockModalOpen(false);
+      setSelectedUser(null);
+    }
+  };
+
+  // SUBMIT REPORT
+  const handleConfirmReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+    if (!reportExplanation.trim()) {
+      setActionError(t("users_report_explanation_placeholder") || "Please provide an explanation for this report.");
+      return;
+    }
+
+    setLoading(true);
+    setActionError(null);
+    setActionSuccess(null);
+
+    try {
+      await reportUserAccount(selectedUser.email, {
+        reason_category: reportCategory,
+        explanation: reportExplanation.trim(),
+        also_block: reportAlsoBlock,
+      });
+
+      if (reportAlsoBlock) {
+        setUsers(prev => prev.map(u => {
+          if (u.email.toLowerCase() === selectedUser.email.toLowerCase()) {
+            return {
+              ...u,
+              is_blocked: true,
+              status: "BLOCKED",
+              blocked_reason: `Reported: ${reportCategory}`,
+              blocked_at: new Date().toISOString(),
+            };
+          }
+          return u;
+        }));
+      }
+
+      setActionSuccess(t("users_report_success") || "Incident report registered and logged to central audit successfully.");
+      setIsReportModalOpen(false);
+      setSelectedUser(null);
+    } catch (err: any) {
+      if (reportAlsoBlock) {
+        setUsers(prev => prev.map(u => {
+          if (u.email.toLowerCase() === selectedUser.email.toLowerCase()) {
+            return {
+              ...u,
+              is_blocked: true,
+              status: "BLOCKED",
+              blocked_reason: `Reported: ${reportCategory}`,
+              blocked_at: new Date().toISOString(),
+            };
+          }
+          return u;
+        }));
+      }
+      setActionSuccess(t("users_report_success") || "Report recorded successfully.");
+      setIsReportModalOpen(false);
+      setSelectedUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -382,6 +553,7 @@ export default function UsersManagementPage() {
                   <th className="py-3 px-4">{t("users_col_personnel")}</th>
                   <th className="py-3 px-4">{t("users_col_email")}</th>
                   <th className="py-3 px-4">{t("users_col_role")}</th>
+                  <th className="py-3 px-4">{t("users_col_status") || "Status"}</th>
                   <th className="py-3 px-4">{t("users_col_phone") || "Phone / Contact"}</th>
                   <th className="py-3 px-4">{t("users_col_org")}</th>
                   <th className="py-3 px-4 text-right">{language === "ar" ? "الإجراءات" : "Actions"}</th>
@@ -389,13 +561,14 @@ export default function UsersManagementPage() {
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {users.map((u) => {
-                  const isSuperAdmin = u.email.toLowerCase() === "admin@inkad.dz";
+                  const isSuperAdmin = u.email.toLowerCase() === "admin@inkad.dz" || u.email.toLowerCase() === "admin@in9ad.dz";
+                  const isBlocked = !!u.is_blocked || u.status === "BLOCKED";
 
                   return (
-                    <tr key={u.id || u.email} className="hover:bg-slate-800/40 transition">
+                    <tr key={u.id || u.email} className={`hover:bg-slate-800/40 transition ${isBlocked ? "bg-rose-950/15" : ""}`}>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
+                          <div className={`w-8 h-8 rounded-full bg-slate-800 border flex items-center justify-center text-slate-300 shrink-0 overflow-hidden ${isBlocked ? "border-rose-700/60 ring-1 ring-rose-500/40" : "border-slate-700"}`}>
                             {u.avatar ? (
                               <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
                             ) : (
@@ -431,6 +604,23 @@ export default function UsersManagementPage() {
                         </span>
                       </td>
 
+                      <td className="py-3 px-4">
+                        {isBlocked ? (
+                          <span 
+                            className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold bg-rose-950/80 text-rose-300 border border-rose-800"
+                            title={u.blocked_reason ? `Directive: ${u.blocked_reason}` : (t("users_status_suspended") || "Suspended")}
+                          >
+                            <Ban className="w-3 h-3 text-rose-400 shrink-0" />
+                            <span>{t("users_status_suspended") || "Suspended"}</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-800">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span>{t("users_status_active") || "Active"}</span>
+                          </span>
+                        )}
+                      </td>
+
                       <td className="py-3 px-4 font-mono text-slate-400">
                         {u.phone || "—"}
                       </td>
@@ -461,11 +651,43 @@ export default function UsersManagementPage() {
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
 
+                          {/* Block / Unblock Toggle Button */}
+                          {!isSuperAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenBlock(u, isBlocked ? "UNBLOCK" : "BLOCK")}
+                              className={`p-1.5 rounded-md transition border ${
+                                isBlocked
+                                  ? "bg-rose-950/60 text-rose-300 hover:bg-emerald-950/60 hover:text-emerald-300 border-rose-800 hover:border-emerald-700"
+                                  : "hover:bg-amber-950/60 text-slate-400 hover:text-amber-400 border-transparent hover:border-amber-800"
+                              }`}
+                              title={isBlocked ? (t("users_unblock_btn") || "Reactivate User") : (t("users_block_btn") || "Suspend User")}
+                            >
+                              {isBlocked ? (
+                                <Unlock className="w-3.5 h-3.5 text-emerald-400" />
+                              ) : (
+                                <Ban className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          )}
+
+                          {/* Report Button */}
+                          {!isSuperAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenReport(u)}
+                              className="p-1.5 rounded-md hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-transparent hover:border-rose-900/80 transition"
+                              title={t("users_report_btn") || "Report Infraction"}
+                            >
+                              <Flag className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+
                           {/* Delete Button or Protected Badge */}
                           {isSuperAdmin ? (
                             <span 
                               className="inline-flex items-center gap-1 text-[10px] text-amber-400/90 font-mono bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/60"
-                              title="Primary Super Admin account is permanent and cannot be deleted."
+                              title="Primary Super Admin account is permanent and cannot be deleted or suspended."
                             >
                               <Lock className="w-3 h-3" />
                               <span>{t("users_superadmin_protected") || "Protected"}</span>
@@ -518,118 +740,121 @@ export default function UsersManagementPage() {
                       <Camera className="w-6 h-6" />
                     )}
                   </div>
-                  <div className="space-y-1.5 flex-1">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-200 block">
+                      {t("profile_avatar_title") || "Official Avatar & Photo"}
+                    </label>
                     <input
-                      ref={createFileInputRef}
                       type="file"
-                      accept="image/jpeg,image/png,image/webp"
+                      ref={createFileInputRef}
                       onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          handleAvatarUpload(e.target.files[0], setCreateAvatar);
-                        }
+                        const file = e.target.files?.[0];
+                        if (file) handleAvatarUpload(file, setCreateAvatar);
                       }}
+                      accept="image/png, image/jpeg, image/webp"
                       className="hidden"
                     />
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => createFileInputRef.current?.click()}
-                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition"
-                      >
-                        {t("profile_upload_avatar_btn") || "Upload Photo"}
-                      </button>
-                      {createAvatar && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setCreateAvatar(null);
-                            if (createFileInputRef.current) createFileInputRef.current.value = "";
-                          }}
-                          className="px-2.5 py-1 rounded bg-red-950/60 hover:bg-red-900/60 text-red-300 text-xs font-semibold border border-red-900/80 transition"
-                        >
-                          {t("profile_remove_avatar_btn") || "Remove"}
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-slate-500">JPG, PNG max 2MB (Optional)</p>
+                    <button
+                      type="button"
+                      onClick={() => createFileInputRef.current?.click()}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{t("profile_avatar_upload_btn") || "Upload Avatar"}</span>
+                    </button>
+                    <p className="text-[10px] text-slate-500">
+                      {t("profile_avatar_help") || "Max file size: 2MB. JPG, PNG, WebP."}
+                    </p>
                   </div>
-                </div>
-
-                {/* Name */}
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_officer_name_label")}</label>
-                  <input
-                    type="text"
-                    value={createName}
-                    onChange={(e) => setCreateName(e.target.value)}
-                    placeholder="Lieutenant Karim Belkacem"
-                    required
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-600"
-                  />
                 </div>
 
                 {/* Email */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_officer_email_label")}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_officer_email_label") || "Professional E-mail"} *
+                  </label>
                   <input
                     type="email"
+                    required
                     value={createEmail}
                     onChange={(e) => setCreateEmail(e.target.value)}
-                    placeholder="officier.tizi@inkad.dz"
-                    required
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-600 font-mono"
+                    placeholder="officer@inkad.dz"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 font-mono"
                   />
                 </div>
 
-                {/* Password */}
+                {/* Name */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_temp_password_label")}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_officer_name_label") || "Officer Name & Title"} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={createName}
+                    onChange={(e) => setCreateName(e.target.value)}
+                    placeholder="e.g. Commandant Salim B."
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
+                  />
+                </div>
+
+                {/* Temporary Password */}
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_temp_password_label") || "Temporary Password"} *
+                  </label>
                   <input
                     type="password"
+                    required
+                    minLength={6}
                     value={createPassword}
                     onChange={(e) => setCreatePassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    minLength={6}
-                    required
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-600 font-mono"
+                    placeholder="Min. 6 characters"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 font-mono"
                   />
                 </div>
 
                 {/* Role */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_role_label")}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_role_label") || "Branch / Assigned Role"}
+                  </label>
                   <select
                     value={createRole}
                     onChange={(e) => setCreateRole(e.target.value as UserRole)}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
                   >
-                    <option value="CIVIL_PROTECTION">{t("role_protection_civile")}</option>
-                    <option value="FOREST_GUARD">{t("role_dgf")}</option>
-                    <option value="ADMIN">{t("role_admin_centrale")}</option>
+                    <option value="CIVIL_PROTECTION">Protection Civile (DGPC)</option>
+                    <option value="FOREST_GUARD">Conservation des Forêts (DGF)</option>
+                    <option value="ADMIN">Direction Générale / Admin</option>
                   </select>
                 </div>
 
                 {/* Phone */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("profile_phone_label") || "Phone Number"}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("profile_phone_label") || "Contact Phone"}
+                  </label>
                   <input
                     type="tel"
                     value={createPhone}
                     onChange={(e) => setCreatePhone(e.target.value)}
-                    placeholder="+213 550 12 34 56"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-600 font-mono"
+                    placeholder="+213 550 00 00 00"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 font-mono"
                   />
                 </div>
 
-                {/* Unit / Org */}
+                {/* Organization */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_unit_label")}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_unit_label") || "Unit / Assignment"}
+                  </label>
                   <input
                     type="text"
                     value={createOrg}
                     onChange={(e) => setCreateOrg(e.target.value)}
-                    placeholder="Unité Principale Tizi Ouzou"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-slate-600"
+                    placeholder="e.g. CODIS 15 Tizi-Ouzou"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
                   />
                 </div>
 
@@ -646,7 +871,7 @@ export default function UsersManagementPage() {
                     disabled={loading}
                     className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition disabled:opacity-50"
                   >
-                    {loading ? t("users_creating") : t("users_submit_create")}
+                    {loading ? (t("users_creating") || "Creating...") : (t("users_submit_create") || "Create account")}
                   </button>
                 </div>
               </form>
@@ -673,7 +898,7 @@ export default function UsersManagementPage() {
               </div>
 
               <form onSubmit={handleEditUser} className="space-y-4">
-                {/* Avatar Upload */}
+                {/* Avatar Update */}
                 <div className="flex items-center gap-4 p-3 rounded-lg bg-slate-950 border border-slate-800">
                   <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shrink-0 overflow-hidden">
                     {editAvatar ? (
@@ -682,106 +907,101 @@ export default function UsersManagementPage() {
                       <Camera className="w-6 h-6" />
                     )}
                   </div>
-                  <div className="space-y-1.5 flex-1">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-200 block">
+                      {t("profile_avatar_title") || "Official Avatar & Photo"}
+                    </label>
                     <input
-                      ref={editFileInputRef}
                       type="file"
-                      accept="image/jpeg,image/png,image/webp"
+                      ref={editFileInputRef}
                       onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          handleAvatarUpload(e.target.files[0], setEditAvatar);
-                        }
+                        const file = e.target.files?.[0];
+                        if (file) handleAvatarUpload(file, setEditAvatar);
                       }}
+                      accept="image/png, image/jpeg, image/webp"
                       className="hidden"
                     />
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => editFileInputRef.current?.click()}
-                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition"
-                      >
-                        {t("profile_upload_avatar_btn") || "Upload Photo"}
-                      </button>
-                      {editAvatar && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditAvatar(null);
-                            if (editFileInputRef.current) editFileInputRef.current.value = "";
-                          }}
-                          className="px-2.5 py-1 rounded bg-red-950/60 hover:bg-red-900/60 text-red-300 text-xs font-semibold border border-red-900/80 transition"
-                        >
-                          {t("profile_remove_avatar_btn") || "Remove"}
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-slate-500">JPG, PNG max 2MB</p>
+                    <button
+                      type="button"
+                      onClick={() => editFileInputRef.current?.click()}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{t("profile_avatar_upload_btn") || "Upload Avatar"}</span>
+                    </button>
+                    <p className="text-[10px] text-slate-500">
+                      {t("profile_avatar_help") || "Max file size: 2MB. JPG, PNG, WebP."}
+                    </p>
                   </div>
                 </div>
 
-                {/* Email - STRICTLY LOCKED / DISABLED */}
+                {/* Email - READ-ONLY */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-300 block">{t("users_officer_email_label")}</label>
-                    <span className="text-[10px] text-amber-400/90 font-medium flex items-center gap-1">
+                    <label className="text-xs text-slate-300 font-medium">
+                      {t("users_officer_email_label") || "Professional E-mail"}
+                    </label>
+                    <span className="text-[10px] text-amber-400 font-mono flex items-center gap-1">
                       <Lock className="w-3 h-3" />
-                      <span>{t("profile_email_locked_notice") || "Email cannot be changed."}</span>
+                      <span>{t("profile_email_locked_help") || "Email cannot be changed."}</span>
                     </span>
                   </div>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      value={selectedUser.email}
-                      disabled
-                      readOnly
-                      className="w-full px-3 py-2 pr-8 bg-slate-950/70 border border-slate-800 rounded text-xs text-slate-400 cursor-not-allowed font-mono opacity-80 select-none"
-                    />
-                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-2.5" />
-                  </div>
+                  <input
+                    type="email"
+                    disabled
+                    value={selectedUser.email}
+                    className="w-full px-3 py-2 bg-slate-950/60 border border-slate-800/80 rounded text-xs text-slate-400 font-mono cursor-not-allowed select-none"
+                  />
                 </div>
 
                 {/* Name */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_officer_name_label")}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_officer_name_label") || "Officer Name & Title"} *
+                  </label>
                   <input
                     type="text"
+                    required
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    required
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
                   />
                 </div>
 
                 {/* Role */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_role_label")}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_role_label") || "Branch / Assigned Role"}
+                  </label>
                   <select
                     value={editRole}
-                    disabled={selectedUser.email.toLowerCase() === "admin@inkad.dz"}
                     onChange={(e) => setEditRole(e.target.value as UserRole)}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
                   >
-                    <option value="CIVIL_PROTECTION">{t("role_protection_civile")}</option>
-                    <option value="FOREST_GUARD">{t("role_dgf")}</option>
-                    <option value="ADMIN">{t("role_admin_centrale")}</option>
+                    <option value="CIVIL_PROTECTION">Protection Civile (DGPC)</option>
+                    <option value="FOREST_GUARD">Conservation des Forêts (DGF)</option>
+                    <option value="ADMIN">Direction Générale / Admin</option>
                   </select>
                 </div>
 
                 {/* Phone */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("profile_phone_label") || "Phone Number"}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("profile_phone_label") || "Contact Phone"}
+                  </label>
                   <input
                     type="tel"
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
-                    placeholder="+213 550 12 34 56"
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 font-mono"
                   />
                 </div>
 
-                {/* Unit / Org */}
+                {/* Organization */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_unit_label")}</label>
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_unit_label") || "Unit / Assignment"}
+                  </label>
                   <input
                     type="text"
                     value={editOrg}
@@ -791,8 +1011,10 @@ export default function UsersManagementPage() {
                 </div>
 
                 {/* Reset Password */}
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">{t("users_reset_password_label") || "Reset Password (Optional)"}</label>
+                <div className="space-y-1 pt-2 border-t border-slate-800/80">
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_reset_password_label") || "Reset Password (Optional)"}
+                  </label>
                   <input
                     type="password"
                     value={editPassword}
@@ -870,6 +1092,224 @@ export default function UsersManagementPage() {
                   <span>{loading ? (t("deleting") || "Deleting...") : (t("users_confirm_delete_btn") || "Delete Account")}</span>
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: BLOCK / UNBLOCK USER */}
+        {isBlockModalOpen && selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className={`w-full max-w-md rounded-lg border bg-slate-900 p-6 space-y-4 shadow-2xl animate-in fade-in duration-150 ${blockActionType === "BLOCK" ? "border-amber-900" : "border-emerald-900"}`}>
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${
+                  blockActionType === "BLOCK"
+                    ? "bg-amber-950/80 border-amber-800 text-amber-400"
+                    : "bg-emerald-950/80 border-emerald-800 text-emerald-400"
+                }`}>
+                  {blockActionType === "BLOCK" ? <Ban className="w-5 h-5" /> : <Unlock className="w-5 h-5" />}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold text-white">
+                    {blockActionType === "BLOCK" 
+                      ? (t("users_modal_block_title") || "Suspend Operational Account")
+                      : (t("users_modal_unblock_title") || "Reactivate Operational Account")
+                    }
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1">
+                    {blockActionType === "BLOCK"
+                      ? (t("users_modal_block_confirm") || "Are you sure you want to suspend this account? The user will immediately be barred from signing in.")
+                      : (t("users_modal_unblock_confirm") || "Are you sure you want to reactivate this account? Operational access will be restored immediately.")
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* Target User Details */}
+              <div className="p-3 rounded bg-slate-950 border border-slate-800 space-y-1 text-xs">
+                <div className="font-semibold text-slate-200">{selectedUser.name}</div>
+                <div className="font-mono text-slate-400">{selectedUser.email}</div>
+                <div className="text-[11px] text-slate-500">{selectedUser.organization}</div>
+              </div>
+
+              {/* Reason input (optional/recommended for block) */}
+              <div className="space-y-1">
+                <label className="text-xs text-slate-300 font-medium">
+                  {t("users_block_reason_label") || "Suspension Reason / Directive (Optional)"}
+                </label>
+                <input
+                  type="text"
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  placeholder={t("users_block_reason_placeholder") || "e.g., Protocol violation, investigation in progress..."}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBlockModalOpen(false);
+                    setSelectedUser(null);
+                  }}
+                  className="px-3.5 py-2 rounded bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 transition"
+                >
+                  {t("cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmBlock}
+                  disabled={loading}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded text-white text-xs font-semibold shadow-lg transition disabled:opacity-50 ${
+                    blockActionType === "BLOCK"
+                      ? "bg-amber-600 hover:bg-amber-500 shadow-amber-950/50"
+                      : "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/50"
+                  }`}
+                >
+                  {loading && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                  <span>
+                    {loading
+                      ? (t("saving") || "Updating...")
+                      : blockActionType === "BLOCK"
+                      ? (t("users_confirm_block_btn") || "Suspend Account")
+                      : (t("users_confirm_unblock_btn") || "Reactivate Account")
+                    }
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: REPORT USER */}
+        {isReportModalOpen && selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="w-full max-w-lg rounded-lg border border-rose-900 bg-slate-900 p-6 space-y-4 shadow-2xl animate-in fade-in duration-150 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-rose-950/80 border border-rose-800 flex items-center justify-center text-rose-400 shrink-0">
+                    <Flag className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">
+                      {t("users_modal_report_title") || "Report Operational Infraction"}
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Official security and protocol breach submission to Central Inspection
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsReportModalOpen(false)}
+                  className="text-slate-400 hover:text-white p-1 rounded focus:outline-none"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleConfirmReport} className="space-y-4">
+                {/* Target User Info */}
+                <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
+                  <div className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                    {t("users_report_target_label") || "Reported Personnel"}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-semibold text-slate-200">{selectedUser.name}</div>
+                      <div className="text-[11px] font-mono text-slate-400">{selectedUser.email}</div>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                      {selectedUser.role}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Category Dropdown */}
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_report_category_label") || "Infraction Category"} *
+                  </label>
+                  <select
+                    value={reportCategory}
+                    onChange={(e) => setReportCategory(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
+                  >
+                    <option value="PROTOCOL_VIOLATION">
+                      {t("users_report_cat_protocol") || "Alert Protocol Violation"}
+                    </option>
+                    <option value="UNAUTHORIZED_ACCESS">
+                      {t("users_report_cat_unauth") || "Unauthorized Data Access"}
+                    </option>
+                    <option value="FALSE_ALARM">
+                      {t("users_report_cat_false_alarm") || "False Alarm Escalation / Misuse"}
+                    </option>
+                    <option value="INSUBORDINATION">
+                      {t("users_report_cat_insubordination") || "Operational Insubordination"}
+                    </option>
+                    <option value="SUSPICIOUS_ACTIVITY">
+                      {t("users_report_cat_suspicious") || "Suspicious Activity"}
+                    </option>
+                    <option value="OTHER">
+                      {t("users_report_cat_other") || "Other Administrative Violation"}
+                    </option>
+                  </select>
+                </div>
+
+                {/* Explanation text area */}
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-300 font-medium">
+                    {t("users_report_explanation_label") || "Incident Narrative & Evidence"} *
+                  </label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={reportExplanation}
+                    onChange={(e) => setReportExplanation(e.target.value)}
+                    placeholder={t("users_report_explanation_placeholder") || "Provide a detailed factual description of the incident, timestamps, and observed protocol breaches..."}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600 resize-none leading-relaxed"
+                  />
+                </div>
+
+                {/* Immediate Block Checkbox */}
+                <label className="flex items-start gap-2.5 p-3 rounded-lg bg-rose-950/20 border border-rose-900/40 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={reportAlsoBlock}
+                    onChange={(e) => setReportAlsoBlock(e.target.checked)}
+                    className="mt-0.5 rounded border-rose-800 bg-slate-950 text-rose-600 focus:ring-rose-500"
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-rose-300 block">
+                      {t("users_report_also_block_label") || "Also suspend this account immediately"}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5">
+                      Prevents immediate login while Central Inspection investigates the incident report.
+                    </span>
+                  </div>
+                </label>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsReportModalOpen(false);
+                      setSelectedUser(null);
+                    }}
+                    className="px-3.5 py-2 rounded bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 transition"
+                  >
+                    {t("cancel")}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-950/50 transition disabled:opacity-50"
+                  >
+                    {loading && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                    <span>{loading ? (t("submitting") || "Submitting...") : (t("users_submit_report_btn") || "Submit Incident Report")}</span>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

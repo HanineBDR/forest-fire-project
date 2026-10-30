@@ -1,0 +1,13 @@
+[
+  {
+    "report_id": "REP-06D403B5",
+    "reporter": "admin@inkad.dz",
+    "target_email": "foret@inkad.dz",
+    "target_name": "Inspecteur Principal des For\u00eats",
+    "target_role": "FOREST_GUARD",
+    "reason_category": "PROTOCOL_VIOLATION",
+    "explanation": "Did not acknowledge wildfire escalation level 4",
+    "timestamp": "2026-10-30T16:30:58.548357Z",
+    "status": "LOGGED_CENTRAL_AUDIT"
+  }
+]

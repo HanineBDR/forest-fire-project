@@ -8,6 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
 
 from .service import (
+    toggle_user_block,
+    report_user,
     authenticate_user,
     create_access_token,
     get_current_user,
@@ -65,6 +67,10 @@ class UserResponse(BaseModel):
     organization_ar: Optional[str] = None
     phone: Optional[str] = None
     avatar: Optional[str] = None
+    is_blocked: Optional[bool] = False
+    status: Optional[str] = "ACTIVE"
+    blocked_reason: Optional[str] = None
+    blocked_at: Optional[str] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -201,6 +207,45 @@ def remove_user(email: str, admin_user: dict = Depends(get_admin_user)):
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+
+
+
+class BlockUserRequest(BaseModel):
+    is_blocked: bool = Field(..., example=True)
+    reason: Optional[str] = Field(None, example="Compte suspendu pour violation du protocole d'alerte.")
+
+
+class ReportUserRequest(BaseModel):
+    reason_category: str = Field(..., example="Violation de protocole")
+    explanation: str = Field(..., example="Déclenchement intempestif de sirène sans confirmation visuelle.")
+    also_block: Optional[bool] = Field(False, example=True)
+
+
+@router.put("/users/{email}/block", response_model=UserResponse)
+def toggle_block_status(
+    email: str,
+    req: BlockUserRequest,
+    admin_user: dict = Depends(get_admin_user)
+):
+    """Blocks (suspends) or unblocks a user account (Admin only)."""
+    return toggle_user_block(email, req.is_blocked, req.reason)
+
+
+@router.post("/users/{email}/report")
+def file_user_report(
+    email: str,
+    req: ReportUserRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Files an official incident report against a user account."""
+    is_admin = current_user.get("role") == ROLE_ADMIN
+    return report_user(
+        reporter_email=current_user["email"],
+        target_email=email,
+        reason_category=req.reason_category,
+        explanation=req.explanation,
+        also_block=req.also_block if is_admin else False
+    )
 
 @router.post("/logout")
 def logout(response: Response):

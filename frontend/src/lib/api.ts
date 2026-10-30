@@ -1322,3 +1322,49 @@ export async function sendEmailReport(payload: EmailReportPayload): Promise<any>
   }
   return await res.json();
 }
+
+
+export interface BlockUserPayload {
+  is_blocked: boolean;
+  reason?: string;
+}
+
+export async function adminToggleBlockUser(email: string, payload: BlockUserPayload): Promise<any> {
+  const token = typeof window !== "undefined" ? (localStorage.getItem("inkad_auth_token") || localStorage.getItem("in9ad_auth_token")) : null;
+  const res = await fetch(`${API_BASE}/auth/users/${encodeURIComponent(email.trim().toLowerCase())}/block`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail || "Erreur de blocage / déblocage de l'utilisateur");
+  }
+  return await res.json();
+}
+
+export interface ReportUserPayload {
+  reason_category: string;
+  explanation: string;
+  also_block?: boolean;
+}
+
+export async function reportUserAccount(email: string, payload: ReportUserPayload): Promise<any> {
+  const token = typeof window !== "undefined" ? (localStorage.getItem("inkad_auth_token") || localStorage.getItem("in9ad_auth_token")) : null;
+  const res = await fetch(`${API_BASE}/auth/users/${encodeURIComponent(email.trim().toLowerCase())}/report`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail || "Erreur lors de l'enregistrement du signalement");
+  }
+  return await res.json();
+}

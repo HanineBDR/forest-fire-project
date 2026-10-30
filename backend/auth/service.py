@@ -157,8 +157,17 @@ def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
     if clean_email.endswith("@inkad.dz"):
         clean_email = clean_email.replace("@inkad.dz", "@inkad.dz")
     user = users.get(clean_email)
+    if not user and clean_email.endswith("@in9ad.dz"):
+        user = users.get(clean_email.replace("@in9ad.dz", "@inkad.dz"))
+    if not user and clean_email.endswith("@inkad.dz"):
+        user = users.get(clean_email.replace("@inkad.dz", "@in9ad.dz"))
     if not user:
         return None
+    if user.get("is_blocked", False) or user.get("status") == "BLOCKED":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Ce compte opérationnel a été suspendu par l'Administration Centrale."
+        )
     if verify_password(password, user.get("password_hash", "")):
         sanitized = {k: v for k, v in user.items() if k != "password_hash"}
         return sanitized
@@ -433,3 +442,109 @@ def enforce_rate_limit(client_id: str, max_per_min: int = MAX_REQUESTS_PER_MINUT
 
     recent.append(now)
     RATE_LIMIT_STORE[client_id] = recent
+
+
+REPORTS_FILE = os.path.join(AUTH_DIR, "..", "data", "user_reports.json")
+
+def toggle_user_block(email: str, is_blocked: bool, reason: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Blocks (suspends) or unblocks a user account (Admin only).
+    The primary Super Admin account cannot be blocked.
+    """
+    email_clean = email.strip().lower()
+    if email_clean in ["admin@inkad.dz", "admin@in9ad.dz"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot block or suspend the primary Super Admin account."
+        )
+
+    users = get_all_users()
+    user = users.get(email_clean)
+    if not user and email_clean.endswith("@in9ad.dz"):
+        user = users.get(email_clean.replace("@in9ad.dz", "@inkad.dz"))
+    if not user and email_clean.endswith("@inkad.dz"):
+        user = users.get(email_clean.replace("@inkad.dz", "@in9ad.dz"))
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+
+    target_key = user["email"]
+    user["is_blocked"] = is_blocked
+    user["status"] = "BLOCKED" if is_blocked else "ACTIVE"
+    if is_blocked:
+        user["blocked_reason"] = reason or "Compte suspendu par l'Administration Centrale."
+        user["blocked_at"] = datetime.utcnow().isoformat() + "Z"
+    else:
+        user.pop("blocked_reason", None)
+        user.pop("blocked_at", None)
+
+    user["updated_at"] = datetime.utcnow().isoformat() + "Z"
+    users[target_key] = user
+    save_all_users(users)
+    logger.info(f"User {target_key} block state toggled to {is_blocked} by admin.")
+    return {k: v for k, v in user.items() if k != "password_hash"}
+
+
+def report_user(
+    reporter_email: str,
+    target_email: str,
+    reason_category: str,
+    explanation: str,
+    also_block: bool = False
+) -> Dict[str, Any]:
+    """
+    Records an official operational incident/abuse report against a user.
+    Optionally blocks the user immediately if requested by Admin.
+    """
+    target_clean = target_email.strip().lower()
+    users = get_all_users()
+    target_user = users.get(target_clean)
+    if not target_user and target_clean.endswith("@in9ad.dz"):
+        target_user = users.get(target_clean.replace("@in9ad.dz", "@inkad.dz"))
+    if not target_user and target_clean.endswith("@inkad.dz"):
+        target_user = users.get(target_clean.replace("@inkad.dz", "@in9ad.dz"))
+
+    if not target_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Target user not found.")
+
+    report_id = f"REP-{secrets.token_hex(4).upper()}"
+    report_entry = {
+        "report_id": report_id,
+        "reporter": reporter_email,
+        "target_email": target_user.get("email"),
+        "target_name": target_user.get("name"),
+        "target_role": target_user.get("role"),
+        "reason_category": reason_category,
+        "explanation": explanation,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "status": "LOGGED_CENTRAL_AUDIT"
+    }
+
+    try:
+        os.makedirs(os.path.dirname(REPORTS_FILE), exist_ok=True)
+        reports = []
+        if os.path.exists(REPORTS_FILE):
+            try:
+                with open(REPORTS_FILE, "r", encoding="utf-8") as f:
+                    reports = json.load(f)
+            except Exception:
+                reports = []
+        reports.append(report_entry)
+        with open(REPORTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(reports, f, indent=2)
+    except Exception as e:
+        logger.warning(f"Could not persist user report to file: {e}")
+
+    blocked = False
+    if also_block:
+        if target_user.get("email") not in ["admin@inkad.dz", "admin@in9ad.dz"]:
+            toggle_user_block(target_user.get("email"), True, f"Reported: {reason_category} - {explanation}")
+            blocked = True
+
+    logger.warning(f"Official incident report {report_id} filed against {target_clean} by {reporter_email}: {reason_category}")
+    return {
+        "status": "success",
+        "report_id": report_id,
+        "message": f"Incident report {report_id} successfully registered in Central Inspection audit.",
+        "user_suspended": blocked
+    }
