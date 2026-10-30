@@ -310,7 +310,7 @@ export default function AnalyticsPage() {
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-base sm:text-lg font-bold tracking-tight text-white">
+                  <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white">
                     {t("analytics_title")}
                   </h1>
                   <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800 font-mono font-medium flex items-center gap-1">
@@ -424,7 +424,7 @@ export default function AnalyticsPage() {
                 <BarChart3 className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
               </div>
               <div className="mt-1 text-2xl font-bold text-slate-900 dark:text-white font-mono">{accuracyValue}% / {f1Value}</div>
-              <div className="mt-1 text-xs text-slate-300 font-mono">
+              <div className="mt-1 text-xs text-slate-600 dark:text-slate-300 font-mono">
                 {modelDrift?.drift_detected ? (
                   <span className="text-amber-400 font-semibold">{t("drift_detected")}</span>
                 ) : (
@@ -505,7 +505,7 @@ export default function AnalyticsPage() {
 
               {activeKpiModal === "roc_auc" && (
                 <div className="space-y-2">
-                  <div className="text-xs text-slate-300">
+                  <div className="text-xs text-slate-700 dark:text-slate-300">
                     {language === "ar" 
                       ? "تقدم مستمر في دقة AUC من 0.912 إلى 0.987 (v2.1-LIVE)، مما يؤكد قدرة استثنائية على تمييز ظروف الخطر الحرج."
                       : language === "en"
@@ -546,14 +546,14 @@ export default function AnalyticsPage() {
 
               {activeKpiModal === "burn_points" && (
                 <div className="text-xs space-y-1.5 font-mono">
-                  <div className="text-slate-300">
+                  <div className="text-slate-700 dark:text-slate-300">
                     {language === "ar" ? "لقطات تاريخية مسجلة في قاعدة بيانات inkad_history.db:" : language === "en" ? "Historical snapshots persisted in inkad_history.db:" : "Snapshots historiques enregistrés dans inkad_history.db:"}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1">
                     {burnSnapshots.map((s) => (
                       <div key={s.id} className="p-2.5 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                         <div className="text-slate-400 text-[10px]">{new Date(s.timestamp).toLocaleDateString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}</div>
-                        <div suppressHydrationWarning className="text-white font-bold text-sm">{formatNumber(s.total_points)} points</div>
+                        <div suppressHydrationWarning className="text-slate-900 dark:text-white font-bold text-sm">{formatNumber(s.total_points)} points</div>
                         <div suppressHydrationWarning className="text-rose-400 text-[10px]">{formatNumber(s.total_ha)} ha</div>
                       </div>
                     ))}
@@ -562,7 +562,7 @@ export default function AnalyticsPage() {
               )}
 
               {activeKpiModal === "burned_area" && (
-                <div className="text-xs text-slate-300 space-y-2">
+                <div className="text-xs text-slate-700 dark:text-slate-300 space-y-2">
                   <p>
                     {language === "ar"
                       ? "تقدير محسوب وفقاً للدقة المكانية لمستشعر VIIRS (375 م / بكسل بما يعادل ~14.06 هكتار لكل نقطة شذوذ حراري مؤكدة)."
@@ -698,7 +698,7 @@ export default function AnalyticsPage() {
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
                   {t("holdout_accuracy_label")}
                 </span>
-                <span className="font-mono text-slate-300">
+                <span className="font-mono text-slate-700 dark:text-slate-300">
                   {t("last_calibration_label")}: <strong>95.38%</strong> ({latestRun?.model_version || "v2.0-PROD"})
                 </span>
               </div>
@@ -709,10 +709,10 @@ export default function AnalyticsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-slate-300 shrink-0" aria-hidden="true" />
+                    <BarChart3 className="w-4 h-4 text-slate-600 dark:text-slate-300 shrink-0" aria-hidden="true" />
                     {t("feature_importance_title")}
                   </h3>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
                     {t("feature_importance_desc")}
                   </p>
                 </div>
@@ -748,7 +748,7 @@ export default function AnalyticsPage() {
               <HistoryIcon className="w-4 h-4 text-ember-400" />
               <span>2. {t("section_historic_evolution")}</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
               {t("analytics_sec2_subtitle")}
             </p>
           </div>
@@ -800,7 +800,7 @@ export default function AnalyticsPage() {
                             {r.model_version}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-slate-400 font-sans">
+                        <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400 font-sans">
                           {new Date(r.timestamp).toLocaleString(language === "fr" ? "fr-FR" : "en-US", {
                             month: "short",
                             day: "2-digit",
@@ -820,7 +820,7 @@ export default function AnalyticsPage() {
                         <td className="py-2.5 px-3 text-right text-slate-800 dark:text-slate-200">
                           {r.f1.toFixed(3)}
                         </td>
-                        <td className="py-2.5 px-3 font-sans text-slate-300 text-[11px]">
+                        <td className="py-2.5 px-3 font-sans text-slate-700 dark:text-slate-300 text-[11px]">
                           {r.notes}
                         </td>
                       </tr>
@@ -840,7 +840,7 @@ export default function AnalyticsPage() {
                 <Layers className="w-4 h-4 text-rose-400" />
                 <span>3. {t("analytics_sec3_title")}</span>
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                 {t("analytics_sec3_desc")}
               </p>
             </div>
@@ -994,10 +994,10 @@ export default function AnalyticsPage() {
                           }`}
                         >
                           <td className="py-2.5 px-3 flex items-center gap-2">
-                            <span className="w-6 text-slate-400">{w.wilaya_code}</span>
+                            <span className="w-6 text-slate-500 dark:text-slate-400">{w.wilaya_code}</span>
                             <span className="font-sans font-medium text-slate-900 dark:text-slate-100">{w.wilaya_name}</span>
                           </td>
-                          <td className="py-2.5 px-3 font-sans text-slate-400">{w.region}</td>
+                          <td className="py-2.5 px-3 font-sans text-slate-600 dark:text-slate-400">{w.region}</td>
                           <td className="py-2.5 px-3 text-right text-rose-400 font-bold">
                             {w.total_burned_points}
                           </td>
@@ -1031,7 +1031,7 @@ export default function AnalyticsPage() {
                 <>
                   <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
                     <div>
-                      <div className="text-xs text-slate-400">{t("selected_wilaya_details")}</div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400">{t("selected_wilaya_details")}</div>
                       <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mt-0.5">
                         <MapPin className="w-4 h-4 text-ember-400" />
                         <span>{selectedWilaya.wilaya_name}</span>
@@ -1045,7 +1045,7 @@ export default function AnalyticsPage() {
 
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800/60">
-                      <span className="text-slate-400">{t("thermal_anomalies_count")}</span>
+                      <span className="text-slate-600 dark:text-slate-400">{t("thermal_anomalies_count")}</span>
                       <span className="font-mono font-bold text-rose-400">{selectedWilaya.total_burned_points} pts</span>
                     </div>
 

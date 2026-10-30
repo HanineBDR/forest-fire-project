@@ -94,13 +94,13 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 cursor-help"
             >
               <Info className="w-3.5 h-3.5 text-red-400 shrink-0" aria-hidden="true" />
-              <span className="text-slate-400">{t("legend_title")}</span>
+              <span className="text-slate-600 dark:text-slate-400">{t("legend_title")}</span>
               <span className="font-mono text-slate-900 dark:text-white font-semibold">[W. N°]</span>
-              <span className="text-slate-400 font-normal">{t("legend_wilaya_code")}</span>
+              <span className="text-slate-600 dark:text-slate-400 font-normal">{t("legend_wilaya_code")}</span>
             </div>
           </Tooltip>
 
-          <span className="text-[11px] text-slate-400 hidden md:inline font-medium">
+          <span className="text-[11px] text-slate-600 dark:text-slate-400 hidden md:inline font-medium">
             {t("click_to_inspect")}
           </span>
         </div>

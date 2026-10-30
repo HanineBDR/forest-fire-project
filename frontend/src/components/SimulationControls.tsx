@@ -111,30 +111,30 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
       {/* Dynamic Telemetry for the active timestep */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-200 dark:border-slate-800/80">
         <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40">
-          <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_burned_area_label")}</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 block mb-0.5">{t("sim_burned_area_label")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
             {activeStep.burned_area_hectares} <span className="text-xs font-normal text-slate-600 dark:text-slate-300">ha</span>
           </span>
         </div>
 
         <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40">
-          <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_rate_of_spread")}</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 block mb-0.5">{t("sim_rate_of_spread")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
             {activeStep.rate_of_spread_m_h} <span className="text-xs font-normal text-slate-600 dark:text-slate-300">m/h</span>
           </span>
         </div>
 
         <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40">
-          <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_flame_length")}</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 block mb-0.5">{t("sim_flame_length")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
             {simulation.estimated_flame_height_m} <span className="text-xs font-normal text-slate-600 dark:text-slate-300">m</span>
           </span>
         </div>
 
         <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40">
-          <span className="text-[10px] text-slate-400 block mb-0.5">{t("sim_evacuation_radius")}</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 block mb-0.5">{t("sim_evacuation_radius")}</span>
           <span className="text-sm font-bold font-mono tabular-nums text-ember-400">
-            {simulation.recommended_evacuation_radius_km} <span className="text-xs font-normal text-slate-300">km</span>
+            {simulation.recommended_evacuation_radius_km} <span className="text-xs font-normal text-slate-600 dark:text-slate-300">km</span>
           </span>
         </div>
       </div>

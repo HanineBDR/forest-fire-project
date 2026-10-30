@@ -116,13 +116,17 @@ export const Tooltip: React.FC<TooltipProps> = ({
     setCoords({ top, left, actualPosition: actualPos });
   }, [position]);
 
+  const hasValidContent = Boolean(
+    content && (typeof content !== "string" || content.trim().length > 0)
+  );
+
   const show = useCallback(() => {
-    if (disabled || !content) return;
+    if (disabled || !hasValidContent) return;
     clearTimer();
     timerRef.current = setTimeout(() => {
       setIsVisible(true);
     }, effectiveDelay);
-  }, [clearTimer, effectiveDelay, disabled, content]);
+  }, [clearTimer, effectiveDelay, disabled, hasValidContent]);
 
   const hide = useCallback(() => {
     clearTimer();
@@ -186,7 +190,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       {mounted &&
         isVisible &&
         !disabled &&
-        content &&
+        hasValidContent &&
         typeof document !== "undefined" &&
         createPortal(
           <div
@@ -199,21 +203,21 @@ export const Tooltip: React.FC<TooltipProps> = ({
               left: `${coords.left}px`,
             }}
           >
-            <div className="relative bg-slate-900/98 text-slate-100 text-[11px] font-medium leading-snug px-2.5 py-1.5 rounded-lg border border-slate-700/80 shadow-2xl shadow-black/90 backdrop-blur-md max-w-xs whitespace-normal text-center select-none">
+            <div className="relative bg-slate-900 text-slate-100 text-[11px] font-medium leading-snug px-2.5 py-1.5 rounded-lg border border-slate-700 shadow-2xl shadow-black/80 backdrop-blur-md max-w-xs whitespace-normal text-center select-none">
               {content}
 
               {/* Pointing Arrow */}
               {coords.actualPosition === "top" && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b border-slate-700/80 rotate-45" />
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b border-slate-700 rotate-45" />
               )}
               {coords.actualPosition === "bottom" && (
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-700/80 rotate-45" />
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-700 rotate-45" />
               )}
               {coords.actualPosition === "left" && (
-                <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900 border-t border-r border-slate-700/80 rotate-45" />
+                <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900 border-t border-r border-slate-700 rotate-45" />
               )}
               {coords.actualPosition === "right" && (
-                <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900 border-b border-l border-slate-700/80 rotate-45" />
+                <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900 border-b border-l border-slate-700 rotate-45" />
               )}
             </div>
           </div>,

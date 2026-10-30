@@ -75,7 +75,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
           <div className="absolute inset-0 rounded-full border-2 border-red-500 border-t-transparent animate-spin"></div>
         </div>
         <div>
-          <h3 className="font-bold text-base text-slate-100">{t("loading")}</h3>
+          <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">{t("loading")}</h3>
           <p className="text-xs text-slate-400 mt-1 max-w-xs">
             {t("loading_telemetry")}
           </p>
@@ -87,7 +87,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
   if (!prediction) {
     return (
       <div className="bg-white dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-lg p-6 text-center flex flex-col items-center justify-center min-h-[380px] space-y-3 shadow-sm">
-        <h3 className="font-bold text-slate-200">{t("no_point_selected")}</h3>
+        <h3 className="font-bold text-slate-900 dark:text-slate-200">{t("no_point_selected")}</h3>
         <p className="text-xs text-slate-400 max-w-xs">
           {t("click_map_prompt")}
         </p>
@@ -170,7 +170,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-slate-400">{t("risk_index")}</span>
+            <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400">{t("risk_index")}</span>
             {is_sirocco && (
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/90 text-red-400 border border-red-800/60 animate-pulse">
                 {t("sirocco_alert")}
@@ -218,13 +218,13 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
       {/* Target Location Metadata */}
       <div className="bg-slate-50 dark:bg-slate-800/40 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700/40 flex items-center justify-between text-slate-700 dark:text-slate-300">
         <div>
-          <span className="text-[10px] text-slate-400 font-semibold block">{t("target_coordinates")}</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block">{t("target_coordinates")}</span>
           <span className="font-mono tabular-nums text-xs font-semibold text-slate-800 dark:text-slate-200">
             {prediction.input.lat.toFixed(4)}° N, {prediction.input.lon.toFixed(4)}° E
           </span>
         </div>
         <div className="text-right">
-          <span className="text-[10px] text-slate-400 font-semibold block">{t("model_accuracy")}</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block">{t("model_accuracy")}</span>
           <span className="font-mono text-[11px] text-emerald-400 font-semibold">95.4% ROC-AUC</span>
         </div>
       </div>
@@ -290,14 +290,14 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
           <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
             {t("weather_observations")}
           </span>
-          <span className="text-[10px] font-mono text-slate-400">
+          <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400">
             {isCustomOverrideActive ? t("simulated_scenario") : t("live_satellite")}
           </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div className="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/50">
-            <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-[10px] mb-0.5">
               <span>{t("temperature")}</span>
               <Thermometer className="w-3 h-3 text-red-400" />
             </div>
@@ -305,7 +305,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
           </div>
 
           <div className="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/50">
-            <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-[10px] mb-0.5">
               <span>{t("humidity")}</span>
               <Droplets className="w-3 h-3 text-cyan-400" />
             </div>
@@ -313,7 +313,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
           </div>
 
           <div className="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/50">
-            <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-[10px] mb-0.5">
               <span>{t("wind_speed")}</span>
               <Wind className="w-3 h-3 text-amber-400" />
             </div>
@@ -321,7 +321,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
           </div>
 
           <div className="bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/50">
-            <div className="flex items-center justify-between text-slate-400 text-[10px] mb-0.5">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-[10px] mb-0.5">
               <span>{t("wind_direction")}</span>
               <Compass className="w-3 h-3 text-slate-400" />
             </div>
@@ -335,19 +335,19 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
       {/* Canadian Forest Fire Weather Index (FWI) Components */}
       <div className="grid grid-cols-4 gap-2">
         <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40 text-center" title={t("fwi_ffmc_desc")}>
-          <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">FFMC</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 block font-semibold uppercase tracking-wider">FFMC</span>
           <span className="text-sm font-mono tabular-nums font-bold text-amber-400">{fwi_metrics.ffmc}</span>
         </div>
         <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40 text-center" title={t("fwi_isi_desc")}>
-          <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">ISI</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 block font-semibold uppercase tracking-wider">ISI</span>
           <span className="text-sm font-mono tabular-nums font-bold text-amber-400">{fwi_metrics.isi}</span>
         </div>
         <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40 text-center" title={t("fwi_bui_desc")}>
-          <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">BUI</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 block font-semibold uppercase tracking-wider">BUI</span>
           <span className="text-sm font-mono tabular-nums font-bold text-amber-400">{fwi_metrics.bui}</span>
         </div>
         <div className="bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/40 text-center" title={t("fwi_fwi_desc")}>
-          <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">FWI</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400 block font-semibold uppercase tracking-wider">FWI</span>
           <span className="text-sm font-mono tabular-nums font-bold text-amber-400">{fwi_metrics.fwi}</span>
         </div>
       </div>
@@ -430,7 +430,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
                 <div className="flex items-center gap-2">
                   <Wind className="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
                   <div>
-                    <div className="font-bold text-white text-[11px]">{simulation6hData.sirocco_corridor.name}</div>
+                    <div className="font-bold text-slate-900 dark:text-white text-[11px]">{simulation6hData.sirocco_corridor.name}</div>
                     <div className="text-[10px] text-amber-300 font-mono">{simulation6hData.sirocco_corridor.label}</div>
                   </div>
                 </div>

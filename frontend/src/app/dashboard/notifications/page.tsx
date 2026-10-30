@@ -168,11 +168,11 @@ export default function NotificationsPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <Radio className="w-5 h-5 text-red-500" aria-hidden="true" />
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               {t("notifications_page_title")}
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
             {t("notifications_page_subtitle")}
           </p>
         </div>
@@ -567,7 +567,7 @@ export default function NotificationsPage() {
                           {isUnread && (
                             <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
                           )}
-                          <h2 className="font-bold text-white text-sm tracking-tight">{translateNotificationTitle(n.title, language)}</h2>
+                          <h2 className="font-bold text-slate-900 dark:text-white text-sm tracking-tight">{translateNotificationTitle(n.title, language)}</h2>
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                               (n.risk_level || "").includes("Très")

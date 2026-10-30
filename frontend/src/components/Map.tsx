@@ -68,6 +68,8 @@ export const Map: React.FC<MapProps> = ({
   initialFocus = null,
 }) => {
   const { t, language } = useLanguage();
+  const { theme } = useTheme();
+  const userManuallySetLayerRef = useRef<boolean>(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -83,7 +85,9 @@ export const Map: React.FC<MapProps> = ({
 
   // View Scope & Layers
   const [viewScope, setViewScope] = useState<"northern" | "all_algeria">("northern");
-  const [activeTileLayer, setActiveTileLayer] = useState<"satellite" | "dark" | "osm">("satellite");
+  const [activeTileLayer, setActiveTileLayer] = useState<"satellite" | "dark" | "osm">(
+    theme === "light" ? "osm" : "satellite"
+  );
   const [showFirms, setShowFirms] = useState<boolean>(true);
   const [showRegions, setShowRegions] = useState<boolean>(true);
   const [selectedWilaya, setSelectedWilaya] = useState<WilayaBurnStat | null>(null);
@@ -151,21 +155,30 @@ export const Map: React.FC<MapProps> = ({
       );
 
       const dark = L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
         {
-          attribution: "&copy; OpenStreetMap contributors",
+          attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+          subdomains: "abcd",
           maxZoom: 19,
-          className: "leaflet-dark-mode-tiles",
         }
       );
 
-      const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-        maxZoom: 19,
-      });
+      const osm = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+          subdomains: "abcd",
+          maxZoom: 19,
+        }
+      );
 
       tileLayersRef.current = { satellite, dark, osm };
-      satellite.addTo(map);
+      const defaultLayerKey = (theme === "light" && !userManuallySetLayerRef.current) ? "osm" : "satellite";
+      if (defaultLayerKey === "osm") {
+        osm.addTo(map);
+      } else {
+        satellite.addTo(map);
+      }
 
       // Initialize Layer Groups
       const simGroup = L.layerGroup().addTo(map);
@@ -206,6 +219,17 @@ export const Map: React.FC<MapProps> = ({
       }
     };
   }, []);
+
+  // Automatically adapt default tile layer on theme toggle (unless manually overridden by user)
+  useEffect(() => {
+    if (!userManuallySetLayerRef.current) {
+      if (theme === "light") {
+        setActiveTileLayer("osm");
+      } else {
+        setActiveTileLayer("satellite");
+      }
+    }
+  }, [theme]);
 
   // Handle Tile Layer Switch
   useEffect(() => {
@@ -769,7 +793,7 @@ export const Map: React.FC<MapProps> = ({
               type="button"
               role="radio"
               aria-checked={activeTileLayer === "satellite"}
-              onClick={() => setActiveTileLayer("satellite")}
+              onClick={() => { userManuallySetLayerRef.current = true; setActiveTileLayer("satellite"); }}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 activeTileLayer === "satellite" 
                   ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm" 
@@ -786,7 +810,7 @@ export const Map: React.FC<MapProps> = ({
               type="button"
               role="radio"
               aria-checked={activeTileLayer === "dark"}
-              onClick={() => setActiveTileLayer("dark")}
+              onClick={() => { userManuallySetLayerRef.current = true; setActiveTileLayer("dark"); }}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 activeTileLayer === "dark" 
                   ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm" 
@@ -803,7 +827,7 @@ export const Map: React.FC<MapProps> = ({
               type="button"
               role="radio"
               aria-checked={activeTileLayer === "osm"}
-              onClick={() => setActiveTileLayer("osm")}
+              onClick={() => { userManuallySetLayerRef.current = true; setActiveTileLayer("osm"); }}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 activeTileLayer === "osm" 
                   ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm" 

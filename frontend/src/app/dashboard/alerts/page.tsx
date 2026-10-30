@@ -401,7 +401,7 @@ export default function AlertsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-white flex items-center gap-2">
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" aria-hidden="true" />
               <span>{t("alerts_title")}</span>
             </h1>
@@ -512,7 +512,7 @@ export default function AlertsPage() {
         {filteredAlerts.length === 0 ? (
           <div className="p-12 text-center rounded-lg border border-slate-800 bg-slate-900/40 space-y-3">
             <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto opacity-70" aria-hidden="true" />
-            <h3 className="text-sm font-bold text-white">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               {language === "ar" ? "لا توجد تنبيهات نشطة مطابقة للمعايير المحددة" : language === "en" ? "No active alerts match current criteria" : "Aucune alerte active ne correspond aux critères"}
             </h3>
             <p className="text-xs text-slate-400 font-mono">
@@ -616,7 +616,7 @@ export default function AlertsPage() {
 
                     {/* Zone & Wilaya Title */}
                     <div>
-                      <h2 className="text-base font-bold text-white flex items-center gap-2">
+                      <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-rose-400" />
                         <span>{alert.forest_name}</span>
                         <span className="text-xs text-slate-400 font-normal">({alert.wilaya})</span>

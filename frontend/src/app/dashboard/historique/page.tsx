@@ -149,7 +149,7 @@ export default function HistoriqueAuditPage() {
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
+            <span className="text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 font-semibold">
               {t("governance_transparency")}
             </span>
           </div>
@@ -157,7 +157,7 @@ export default function HistoriqueAuditPage() {
             <HistoryIcon className="w-6 h-6 text-red-500" />
             <span>{t("audit_title")}</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
             {t("audit_subtitle")}
           </p>
         </div>
@@ -188,7 +188,7 @@ export default function HistoriqueAuditPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-center justify-between shadow-sm">
           <div>
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">{t("total_actions_today")}</div>
+            <div className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold uppercase">{t("total_actions_today")}</div>
             <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tabular-nums mt-1">{stats.actionsToday}</div>
           </div>
           <Activity className="w-5 h-5 text-emerald-400 shrink-0" aria-hidden="true" />
@@ -196,7 +196,7 @@ export default function HistoriqueAuditPage() {
 
         <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-center justify-between shadow-sm">
           <div>
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">{t("alerts_created_count")}</div>
+            <div className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold uppercase">{t("alerts_created_count")}</div>
             <div className="text-2xl font-black text-red-400 font-mono tabular-nums mt-1">{stats.alertsCreated}</div>
           </div>
           <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" aria-hidden="true" />
@@ -204,7 +204,7 @@ export default function HistoriqueAuditPage() {
 
         <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-center justify-between shadow-sm">
           <div>
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">{t("status_changes_count")}</div>
+            <div className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold uppercase">{t("status_changes_count")}</div>
             <div className="text-2xl font-black text-amber-400 font-mono tabular-nums mt-1">{stats.statusChanges}</div>
           </div>
           <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0" aria-hidden="true" />
@@ -212,7 +212,7 @@ export default function HistoriqueAuditPage() {
 
         <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-center justify-between shadow-sm">
           <div>
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">{t("total_archived_events")}</div>
+            <div className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold uppercase">{t("total_archived_events")}</div>
             <div className="text-2xl font-black text-slate-900 dark:text-slate-200 font-mono tabular-nums mt-1">{stats.totalEvents}</div>
           </div>
           <Clock className="w-5 h-5 text-slate-400 shrink-0" aria-hidden="true" />
@@ -349,12 +349,12 @@ export default function HistoriqueAuditPage() {
               placeholder={t("search_user_placeholder")}
               value={searchUser}
               onChange={(e) => setSearchUser(e.target.value)}
-              className="pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 text-xs w-48"
+              className="pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs w-48 shadow-sm"
             />
           </div>
           <button
             type="submit"
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200"
+            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm"
           >
             {t("filter_label")}
           </button>
@@ -362,10 +362,10 @@ export default function HistoriqueAuditPage() {
       </div>
 
       {/* Main Audit Table */}
-      <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/60">
+      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900/60 shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+            <thead className="bg-slate-100 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3 px-4">{t("col_datetime")}</th>
                 <th className="py-3 px-4">{t("col_action_type")}</th>
@@ -374,7 +374,7 @@ export default function HistoriqueAuditPage() {
                 <th className="py-3 px-4">{t("col_details")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800/80">
               {isLoading ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-400 font-mono">
@@ -400,7 +400,7 @@ export default function HistoriqueAuditPage() {
 
                   return (
                     <tr key={ev.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition text-slate-800 dark:text-slate-200">
-                      <td className="py-3 px-4 font-mono text-slate-400 whitespace-nowrap">
+                      <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-400 whitespace-nowrap">
                         {new Date(ev.timestamp).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", {
                           day: "2-digit",
                           month: "2-digit",
@@ -417,13 +417,13 @@ export default function HistoriqueAuditPage() {
                           {localizedLabel}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-slate-200 font-semibold whitespace-nowrap">
+                      <td className="py-3 px-4 text-slate-900 dark:text-slate-200 font-semibold whitespace-nowrap">
                         {getLocalizedWilaya(ev.wilaya, language)}
                       </td>
-                      <td className="py-3 px-4 text-slate-300 whitespace-nowrap">
+                      <td className="py-3 px-4 text-slate-700 dark:text-slate-300 whitespace-nowrap">
                         <span className="font-medium">{localizedRole}</span>
                       </td>
-                      <td className="py-3 px-4 text-slate-300 max-w-md">
+                      <td className="py-3 px-4 text-slate-700 dark:text-slate-300 max-w-md">
                         <p className="line-clamp-2 leading-relaxed">{localizedDetails}</p>
                       </td>
                     </tr>
