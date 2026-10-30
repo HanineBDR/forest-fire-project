@@ -42,6 +42,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { OnboardingGuide } from "@/components/OnboardingGuide";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -569,6 +570,7 @@ alt="INKAD Logo"
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col">{children}</main>
+      <OnboardingGuide />
     </div>
   );
 }

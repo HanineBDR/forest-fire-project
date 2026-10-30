@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import {
   Shield,
   BarChart3,
-  Lock,
   Users,
   Bell,
   Trees,
@@ -30,6 +30,8 @@ interface StepDef {
 
 export const OnboardingGuide: React.FC = () => {
   const { t } = useLanguage();
+  const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -45,6 +47,15 @@ export const OnboardingGuide: React.FC = () => {
     arrowLeft: 40,
   });
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Close tour if user navigates to another route
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
   const allSteps: StepDef[] = useMemo(() => [
     {
       target: '[data-tour="brand"]',
@@ -54,24 +65,17 @@ export const OnboardingGuide: React.FC = () => {
       preferredPlacement: "bottom",
     },
     {
-      target: '[data-tour="analytics"]',
-      icon: BarChart3,
-      title: t("tour_step_analytics_title"),
-      desc: t("tour_step_analytics_desc"),
-      preferredPlacement: "bottom",
-    },
-    {
-      target: '[data-tour="security-portal"]',
-      icon: Lock,
-      title: t("tour_step_security_title"),
-      desc: t("tour_step_security_desc"),
-      preferredPlacement: "bottom",
-    },
-    {
       target: '[data-tour="roles"]',
       icon: Users,
       title: t("tour_step_roles_title"),
       desc: t("tour_step_roles_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="nav"]',
+      icon: Radio,
+      title: t("tour_step_nav_title"),
+      desc: t("tour_step_nav_desc"),
       preferredPlacement: "bottom",
     },
     {
@@ -110,13 +114,6 @@ export const OnboardingGuide: React.FC = () => {
       preferredPlacement: "top",
     },
     {
-      target: '[data-tour="nav"]',
-      icon: Radio,
-      title: t("tour_step_nav_title"),
-      desc: t("tour_step_nav_desc"),
-      preferredPlacement: "bottom",
-    },
-    {
       target: '[data-tour="drones"]',
       icon: Plane,
       title: t("tour_step_drones_title"),
@@ -132,25 +129,33 @@ export const OnboardingGuide: React.FC = () => {
     },
   ], [t]);
 
-  // Filter available steps present in current DOM
+  // Filter steps strictly available and visible on the current active page
   const availableSteps = useMemo(() => {
-    if (typeof window === "undefined") return allSteps;
-    const matched = allSteps.filter((step) => Boolean(document.querySelector(step.target)));
-    return matched.length > 0 ? matched : allSteps;
-  }, [allSteps, isOpen, stepIndex]);
+    if (typeof window === "undefined" || !mounted) return [];
+    return allSteps.filter((step) => {
+      const el = document.querySelector(step.target) as HTMLElement | null;
+      return Boolean(el && (el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0));
+    });
+  }, [allSteps, mounted, pathname, isOpen]);
 
-  // Automatic launch for first-time visitors
+  // Automatic launch strictly for first-time visitors on the main operational dashboard (/dashboard)
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const seen = localStorage.getItem("inkad_guided_tour_v3") || localStorage.getItem("inkad_guided_tour_v3");
+    if (typeof window === "undefined" || !mounted) return;
+    // CRITICAL: NEVER auto-start on login or outside the main dashboard
+    if (pathname !== "/dashboard") return;
+
+    const seen = localStorage.getItem("inkad_guided_tour_v3");
     if (!seen) {
       const timer = setTimeout(() => {
-        setIsOpen(true);
-        setStepIndex(0);
+        const hasBrand = document.querySelector('[data-tour="brand"]');
+        if (hasBrand) {
+          setStepIndex(0);
+          setIsOpen(true);
+        }
       }, 700);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [pathname, mounted]);
 
   // Update target positioning when step changes or on window resize/scroll
   const updatePosition = useCallback(() => {
@@ -255,9 +260,26 @@ export const OnboardingGuide: React.FC = () => {
   };
 
   const handleRestart = () => {
-    setStepIndex(0);
-    setIsOpen(true);
+    const visible = allSteps.filter((step) => {
+      const el = document.querySelector(step.target) as HTMLElement | null;
+      return Boolean(el && (el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0));
+    });
+    if (visible.length > 0) {
+      setStepIndex(0);
+      setIsOpen(true);
+    }
   };
+
+  // Guard: Never render on login or outside dashboard routes
+  if (!mounted) return null;
+  if (!pathname || pathname === "/login" || pathname === "/" || !pathname.startsWith("/dashboard")) {
+    return null;
+  }
+
+  // If no steps are present on the current page, do not render trigger or modal
+  if (availableSteps.length === 0) {
+    return null;
+  }
 
   const currentStep = availableSteps[stepIndex] || availableSteps[0];
   const StepIcon = currentStep?.icon || Shield;

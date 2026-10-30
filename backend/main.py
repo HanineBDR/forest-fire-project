@@ -1733,7 +1733,10 @@ def api_get_drone_patrols():
 
 
 
+
 async def start_periodic_wildfire_scanner():
+    if os.environ.get("TESTING") == "1":
+        return
     """
     Background worker that runs every 5 minutes:
     Re-evaluates high-risk forest massifs using Open-Meteo weather + NASA FIRMS + FWI

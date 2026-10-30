@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 import { LanguageProvider } from "@/context/LanguageContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
-import { OnboardingGuide } from "@/components/OnboardingGuide";
+
 
 export default function RootLayout({
   children,
@@ -66,7 +66,7 @@ export default function RootLayout({
         <LanguageProvider>
           <NotificationProvider>
             {children}
-            <OnboardingGuide />
+
           </NotificationProvider>
         </LanguageProvider>
       </body>
