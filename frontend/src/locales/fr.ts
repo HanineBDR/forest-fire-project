@@ -261,6 +261,14 @@ export const fr = {
 
   // Analytics & Evaluation Page
   analytics_title: "INKAD Analytics & Évaluation Modèle",
+  analytics_sync_success_title: "Synchronisation réussie",
+  analytics_sync_success_msg: "+{count} nouveaux foyers détectés par NASA FIRMS. Total: {total} points.",
+  analytics_sync_error_title: "Erreur de rafraîchissement",
+  analytics_sync_error_msg: "Impossible de contacter l'API NASA FIRMS.",
+  analytics_model_retrain_title: "Modèle Réentraîné",
+  analytics_model_retrain_msg: "Version {version} générée avec succès (Accuracy: {acc}%, ROC-AUC: {auc}).",
+  analytics_model_retrain_error_title: "Erreur de réentraînement",
+  analytics_model_retrain_error_msg: "Échec de réentraînement du modèle.",
   analytics_subtitle: "Télémétrie satellitaire continue NASA FIRMS, calibration XGBoost et historique persistant (SQLite).",
   dynamic_system_live: "Système Dynamique Live",
   refresh_all_data: "Rafraîchir Toutes les Données",

@@ -261,6 +261,14 @@ export const ar = {
 
   // Analytics & Evaluation Page
   analytics_title: "تحليلات إنقاذ وتقييم النموذج الذكي",
+  analytics_sync_success_title: "تمت المزامنة بنجاح",
+  analytics_sync_success_msg: "+{count} بؤرة جديدة مرصودة عبر ناسا فيرمس. الإجمالي: {total} نقطة.",
+  analytics_sync_error_title: "خطأ في التحديث",
+  analytics_sync_error_msg: "تعذر الاتصال بواجهة برمجة تطبيقات ناسا فيرمس.",
+  analytics_model_retrain_title: "تمت إعادة تدريب النموذج",
+  analytics_model_retrain_msg: "تم إنشاء الإصدار {version} بنجاح (الدقة: {acc}%، ROC-AUC: {auc}).",
+  analytics_model_retrain_error_title: "خطأ في إعادة التدريب",
+  analytics_model_retrain_error_msg: "فشل في إعادة تدريب النموذج.",
   analytics_subtitle: "رصد فضائي متواصل عبر أقمار ناسا، معايرة خوارزمية XGBoost وسجل بيانات دائم.",
   dynamic_system_live: "نظام حي مباشر",
   refresh_all_data: "تحديث كافة البيانات",

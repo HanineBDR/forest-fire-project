@@ -261,6 +261,14 @@ export const en = {
 
   // Analytics & Evaluation Page
   analytics_title: "INKAD Analytics & Model Evaluation",
+  analytics_sync_success_title: "Synchronization Successful",
+  analytics_sync_success_msg: "+{count} new hotspots detected by NASA FIRMS. Total: {total} points.",
+  analytics_sync_error_title: "Refresh Error",
+  analytics_sync_error_msg: "Unable to contact NASA FIRMS API.",
+  analytics_model_retrain_title: "Model Retrained",
+  analytics_model_retrain_msg: "Version {version} generated successfully (Accuracy: {acc}%, ROC-AUC: {auc}).",
+  analytics_model_retrain_error_title: "Retraining Error",
+  analytics_model_retrain_error_msg: "Failed to retrain model.",
   analytics_subtitle: "Continuous NASA FIRMS satellite telemetry, XGBoost calibration and persistent SQLite history.",
   dynamic_system_live: "Live Dynamic System",
   refresh_all_data: "Refresh All Data",

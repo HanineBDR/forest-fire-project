@@ -57,7 +57,7 @@ function formatNumber(n: number | null | undefined): string {
 }
 
 export default function AnalyticsPage() {
-  const { t, language } = useLanguage();
+  const { t, language, isRTL } = useLanguage();
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
   const [wilayaStats, setWilayaStats] = useState<WilayaBurnStat[]>(DEFAULT_WILAYA_STATS);
   const [activeMapTab, setActiveMapTab] = useState<"static" | "interactive">("interactive");
@@ -151,16 +151,45 @@ export default function AnalyticsPage() {
     setIsRefreshingAll(true);
     try {
       const res: RefreshAllResponse = await refreshAllData(false, false);
+      const newPts = res?.diff_from_last?.new_points ?? 0;
+      const totalPts = formatNumber(res?.new_stats?.total_points);
+
+      const title = t("analytics_sync_success_title") || (
+        language === "ar"
+          ? "تمت المزامنة بنجاح"
+          : language === "fr"
+          ? "Synchronisation réussie"
+          : "Synchronization Successful"
+      );
+
+      const message = language === "ar"
+        ? `+${newPts} بؤرة جديدة مرصودة عبر ناسا فيرمس. الإجمالي: ${totalPts} نقطة.`
+        : language === "fr"
+        ? `+${newPts} nouveaux foyers détectés par NASA FIRMS. Total: ${totalPts} points.`
+        : `+${newPts} new hotspots detected by NASA FIRMS. Total: ${totalPts} points.`;
+
       setToast({
-        title: "Synchronisation réussie",
-        message: `+${res.diff_from_last.new_points} nouveaux foyers détectés par NASA FIRMS. Total: ${formatNumber(res.new_stats.total_points)} points.`,
+        title,
+        message,
         type: "success"
       });
       await loadAllData(true);
     } catch (err: any) {
       setToast({
-        title: "Erreur de rafraîchissement",
-        message: err.message || "Impossible de contacter l'API NASA FIRMS.",
+        title: t("analytics_sync_error_title") || (
+          language === "ar"
+            ? "خطأ في التحديث"
+            : language === "fr"
+            ? "Erreur de rafraîchissement"
+            : "Refresh Error"
+        ),
+        message: err.message || t("analytics_sync_error_msg") || (
+          language === "ar"
+            ? "تعذر الاتصال بواجهة برمجة تطبيقات ناسا فيرمس."
+            : language === "fr"
+            ? "Impossible de contacter l'API NASA FIRMS."
+            : "Unable to contact NASA FIRMS API."
+        ),
         type: "warning"
       });
     } finally {
@@ -174,16 +203,42 @@ export default function AnalyticsPage() {
     setIsRegeneratingModel(true);
     try {
       const res = await refreshModel();
+      const version = res.model_version || "v2.1-LIVE";
+      const acc = (res.accuracy * 100).toFixed(1);
+      const auc = res.roc_auc.toFixed(3);
+
+      const title = t("analytics_model_retrain_title") || (
+        language === "ar"
+          ? "تمت إعادة تدريب النموذج"
+          : language === "fr"
+          ? "Modèle Réentraîné"
+          : "Model Retrained"
+      );
+
+      const message = language === "ar"
+        ? `تم إنشاء الإصدار ${version} بنجاح (الدقة: ${acc}%، ROC-AUC: ${auc}).`
+        : language === "fr"
+        ? `Version ${version} générée avec succès (Accuracy: ${acc}%, ROC-AUC: ${auc}).`
+        : `Version ${version} generated successfully (Accuracy: ${acc}%, ROC-AUC: ${auc}).`;
+
       setToast({
-        title: "Modèle Réentraîné",
-        message: `Version ${res.model_version || "v2.1-LIVE"} générée avec succès (Accuracy: ${(res.accuracy * 100).toFixed(1)}%, ROC-AUC: ${res.roc_auc.toFixed(3)}).`,
+        title,
+        message,
         type: "success"
       });
       await loadAllData(true);
     } catch (err: any) {
       setToast({
-        title: "Erreur",
-        message: "Échec de réentraînement du modèle.",
+        title: t("analytics_model_retrain_error_title") || (
+          language === "ar" ? "خطأ" : language === "fr" ? "Erreur" : "Error"
+        ),
+        message: err.message || t("analytics_model_retrain_error_msg") || (
+          language === "ar"
+            ? "فشل في إعادة تدريب النموذج."
+            : language === "fr"
+            ? "Échec de réentraînement du modèle."
+            : "Failed to retrain model."
+        ),
         type: "warning"
       });
     } finally {
@@ -213,7 +268,7 @@ export default function AnalyticsPage() {
       <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-ember-500/30">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 max-w-md p-4 rounded-xl border border-slate-700 bg-slate-900/95 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-3">
+        <div className={`fixed bottom-6 ${isRTL ? "left-6" : "right-6"} z-50 max-w-md p-4 rounded-xl border border-slate-700 bg-slate-900/95 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-3 ${isRTL ? "text-right" : "text-left"}`}>
           <div className="flex items-start gap-3">
             {toast.type === "success" ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0" />
