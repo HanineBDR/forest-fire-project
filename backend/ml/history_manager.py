@@ -971,14 +971,22 @@ def get_unified_audit_log(
     hourly_counts = {f"{h:02d}h": 0 for h in range(24)}
     for e in events:
         ts = e.get("timestamp", "")
+        hour = None
         if "T" in ts:
             try:
                 hour = int(ts.split("T")[1].split(":")[0])
-                key = f"{hour:02d}h"
-                if key in hourly_counts:
-                    hourly_counts[key] += 1
             except Exception:
                 pass
+        elif " " in ts:
+            try:
+                time_part = ts.split(" ")[1]
+                hour = int(time_part.split(":")[0])
+            except Exception:
+                pass
+        if hour is not None and 0 <= hour <= 23:
+            key = f"{hour:02d}h"
+            if key in hourly_counts:
+                hourly_counts[key] += 1
 
     return {
         "total_events": len(events),

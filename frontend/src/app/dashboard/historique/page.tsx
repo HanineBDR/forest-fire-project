@@ -70,7 +70,9 @@ export default function HistoriqueAuditPage() {
   const { t, language, setLanguage } = useLanguage();
   const [showPdfModal, setShowPdfModal] = useState<boolean>(false);
   const [events, setEvents] = useState<AuditEvent[]>([]);
-  const [hourlyDistribution, setHourlyDistribution] = useState<{ hour: string; count: number }[]>([]);
+  const [hourlyDistribution, setHourlyDistribution] = useState<{ hour: string; count: number }[]>(
+    Array.from({ length: 24 }, (_, i) => ({ hour: `${String(i).padStart(2, "0")}h`, count: 0 }))
+  );
   const [stats, setStats] = useState({
     actionsToday: 0,
     alertsCreated: 0,
@@ -218,31 +220,83 @@ export default function HistoriqueAuditPage() {
       </div>
 
       {/* Actions per Hour Chart */}
-      <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-3 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
-            <h2 className="font-bold text-slate-800 dark:text-slate-200 text-xs">{t("hourly_frequency_title")}</h2>
+      <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-4 shadow-sm transition-colors duration-150">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Clock className="w-4 h-4 text-emerald-500 shrink-0" aria-hidden="true" />
+            <h2 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm tracking-wide">
+              {t("hourly_frequency_title") || "Action Frequency per Hour (24h)"}
+            </h2>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400">
+              {events.length} {language === "ar" ? "عملية مسجلة" : language === "en" ? "events recorded" : "événements tracés"}
+            </span>
           </div>
-          <span className="text-[10px] text-slate-400 font-mono">{t("utc_time")}</span>
+
+          <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-red-600 to-amber-400" />
+              <span>{language === "ar" ? "ذروة العمليات" : language === "en" ? "Peak Activity" : "Pic d'activité"}</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-red-500" />
+              <span>{language === "ar" ? "نشاط مسجل" : language === "en" ? "Recorded Event" : "Événement"}</span>
+            </span>
+            <span className="text-slate-400 font-mono">UTC</span>
+          </div>
         </div>
 
-        <div className="h-24 flex items-end gap-1.5 pt-4 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
+        {/* 24-Hour Bar Chart with explicit heights and high-contrast bars */}
+        <div className="h-36 flex items-end gap-1 sm:gap-1.5 pt-6 pb-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto select-none">
           {hourlyDistribution.map((item) => {
-            const heightPct = Math.max(8, (item.count / maxHourCount) * 100);
+            const hasData = item.count > 0;
+            const isPeak = hasData && item.count === maxHourCount;
+            const heightPct = hasData ? Math.round((item.count / maxHourCount) * 100) : 0;
+
             return (
-              <div key={item.hour} className="flex-1 min-w-[20px] flex flex-col items-center gap-1 group">
-                <div
-                  className="w-full bg-slate-200 dark:bg-slate-800 group-hover:bg-red-500 rounded-t transition-all duration-300 relative"
-                  style={{ height: `${heightPct}%` }}
+              <div
+                key={item.hour}
+                className="flex-1 min-w-[24px] h-full flex flex-col justify-end items-center gap-1 group relative"
+              >
+                {/* Count Badge on top of bar */}
+                <span
+                  className={`text-[10px] font-mono font-bold transition-transform duration-150 ${
+                    hasData
+                      ? isPeak
+                        ? "text-amber-500 dark:text-amber-400 scale-110"
+                        : "text-red-600 dark:text-red-400"
+                      : "text-transparent"
+                  }`}
                 >
-                  {item.count > 0 && (
-                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-slate-300 opacity-0 group-hover:opacity-100">
-                      {item.count}
-                    </span>
-                  )}
+                  {hasData ? item.count : "0"}
+                </span>
+
+                {/* The Bar Pillar Container */}
+                <div className="w-full flex-1 flex items-end justify-center">
+                  <div
+                    className={`w-full max-w-[28px] rounded-t-md transition-all duration-300 relative ${
+                      hasData
+                        ? isPeak
+                          ? "bg-gradient-to-t from-red-600 via-rose-500 to-amber-400 shadow-md shadow-red-500/30"
+                          : "bg-red-500 hover:bg-red-400 dark:bg-red-500/90 dark:hover:bg-red-400 shadow-sm"
+                        : "bg-slate-200 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-700"
+                    }`}
+                    style={{
+                      height: hasData ? `${Math.max(18, heightPct)}%` : "4px",
+                    }}
+                    title={`${item.hour}: ${item.count} ${item.count === 1 ? "action" : "actions"}`}
+                  />
                 </div>
-                <span className="text-[9px] font-mono text-slate-500">{item.hour}</span>
+
+                {/* Hour Label */}
+                <span
+                  className={`text-[10px] font-mono transition-colors ${
+                    hasData
+                      ? "font-bold text-slate-900 dark:text-slate-100"
+                      : "text-slate-600 dark:text-slate-400"
+                  }`}
+                >
+                  {item.hour}
+                </span>
               </div>
             );
           })}
