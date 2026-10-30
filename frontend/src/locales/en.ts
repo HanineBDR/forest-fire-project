@@ -1081,4 +1081,9 @@ export const en = {
   tooltip_export_excel: "Export formatted operational spreadsheet in Excel (.xlsx) format",
   tooltip_export_pdf: "Generate printable institutional intelligence report in PDF format",
   tooltip_export_json: "Export raw machine-readable JSON telemetry feed",
+  "theme_switch_light": "Switch to Light Mode",
+  "theme_switch_dark": "Switch to Dark Mode",
+  "tooltip_theme_toggle": "Switch between Light and Dark mode",
+  "theme_mode_light": "Light Mode",
+  "theme_mode_dark": "Dark Mode (Default)",
 };

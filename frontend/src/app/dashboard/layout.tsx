@@ -46,6 +46,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { OnboardingGuide } from "@/components/OnboardingGuide";
 import { Tooltip } from "@/components/Tooltip";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -238,9 +239,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${isRTL ? "font-arabic" : ""}`}>
+    <div className={`min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-150 ${isRTL ? "font-arabic" : ""}`}>
       {/* Top Security Header */}
-      <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60 w-full overflow-x-clip">
+      <header className="sticky top-0 z-[1500] bg-white/95 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-md dark:shadow-slate-950/60 w-full overflow-x-clip transition-colors duration-150">
         {/* Unauthorized Flash Toast */}
         {unauthToast && (
           <div className="fixed top-20 right-4 z-[2000] p-4 bg-red-950/95 border border-red-700 text-red-200 rounded-xl shadow-2xl flex items-start gap-3 max-w-md animate-fadeIn">
@@ -269,8 +270,8 @@ alt="INKAD Logo"
                 priority
               />
               <div className="flex items-center gap-1.5 leading-none">
-                <span className="text-sm font-bold tracking-tight text-white">INKAD</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono font-medium">
+                <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">INKAD</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono font-medium">
                   v3.0
                 </span>
               </div>
@@ -354,8 +355,8 @@ alt="INKAD Logo"
                     aria-current={active ? "page" : undefined}
                     className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
                       active
-                        ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
-                        : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
+                        ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm ring-1 ring-slate-300 dark:ring-slate-700/60"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-transparent"
                     }`}
                   >
                     <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
@@ -377,8 +378,8 @@ alt="INKAD Logo"
                     data-tour="nav-more" aria-label={t("nav_operational_tools")}
                     className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0 ${
                       isMoreOpen || isMoreActive
-                        ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
-                        : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
+                        ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm ring-1 ring-slate-300 dark:ring-slate-700/60"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-transparent"
                     }`}
                   >
                     <MoreHorizontal className={`w-3.5 h-3.5 shrink-0 ${isMoreActive ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
@@ -391,7 +392,7 @@ alt="INKAD Logo"
                   <div 
                     role="menu"
                     aria-orientation="vertical"
-                    className="absolute start-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none animate-in fade-in slide-in-from-top-2 duration-150"
+                    className="absolute start-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none animate-in fade-in slide-in-from-top-2 duration-150 text-slate-800 dark:text-slate-200"
                   >
                     <div className="px-3 py-1.5 border-b border-slate-800 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
                       <span>{t("nav_more")} & {t("nav_operational_tools")}</span>
@@ -438,7 +439,7 @@ alt="INKAD Logo"
                 data-tour="help-btn"
                 onClick={handleStartTour}
                 aria-label={t("tour_open_guide_tooltip") || "Start Interactive Guide"}
-                className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-slate-800 bg-slate-900/90 text-slate-400 hover:text-emerald-400 hover:border-emerald-700/60 hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 shrink-0"
+                className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-500/60 hover:bg-emerald-50/50 dark:hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 shrink-0"
               >
                 <HelpCircle className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               </button>
@@ -446,6 +447,9 @@ alt="INKAD Logo"
 
             {/* Real-time Notification Bell */}
             <div data-tour="bell" className="shrink-0"><NotificationBell /></div>
+
+            {/* Light / Dark Mode Toggle */}
+            <div className="shrink-0"><ThemeToggle /></div>
 
             {/* Standard Clean Language Selector */}
             <div className="shrink-0"><LanguageSwitcher /></div>
@@ -461,8 +465,8 @@ alt="INKAD Logo"
                   aria-label={t("nav_system_supervision")}
                   className={`flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                     isProfileOpen || pathname === "/dashboard/profile"
-                      ? "bg-slate-800 border-slate-700 text-white"
-                      : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/70"
+                      ? "bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70"
                   }`}
                 >
                 <div className="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
@@ -487,7 +491,7 @@ alt="INKAD Logo"
                 <div 
                   role="menu"
                   aria-orientation="vertical"
-                  className="absolute end-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none"
+                  className="absolute end-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none text-slate-800 dark:text-slate-200"
                 >
                   <div className="px-3.5 py-2.5 border-b border-slate-800 flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">

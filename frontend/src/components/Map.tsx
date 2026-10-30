@@ -14,6 +14,7 @@ import {
 } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import { Tooltip } from "@/components/Tooltip";
+import { useTheme } from "@/context/ThemeContext";
 import {
   Flame,
   Globe2,
@@ -724,17 +725,17 @@ export const Map: React.FC<MapProps> = ({
       {/* Top Map Control Bar - Command Center Toolbar */}
       <nav 
         aria-label="Contrôles cartographiques opérationnels"
-        className="absolute top-3 left-3 z-[400] flex flex-wrap items-center gap-1.5 p-1 bg-slate-900/95 border border-slate-800 rounded-lg backdrop-blur-md"
+        className="absolute top-3 left-3 z-[400] flex flex-wrap items-center gap-1.5 p-1 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 rounded-lg backdrop-blur-md shadow-md"
       >
         {/* View Scope Switcher */}
-        <div className="flex items-center gap-1 p-0.5 bg-slate-950 rounded-md border border-slate-800 text-xs">
+        <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-950 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
           <Tooltip content={t("tooltip_scope_northern")} position="bottom">
             <button
               type="button"
               onClick={() => setViewScope("northern")}
               aria-pressed={viewScope === "northern"}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-                viewScope === "northern" ? "bg-red-600 text-white" : "text-slate-400 hover:text-slate-200"
+                viewScope === "northern" ? "bg-red-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               <Flame className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
@@ -748,7 +749,7 @@ export const Map: React.FC<MapProps> = ({
               onClick={() => setViewScope("all_algeria")}
               aria-pressed={viewScope === "all_algeria"}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-                viewScope === "all_algeria" ? "bg-red-600 text-white" : "text-slate-400 hover:text-slate-200"
+                viewScope === "all_algeria" ? "bg-red-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               <Globe2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
@@ -761,7 +762,7 @@ export const Map: React.FC<MapProps> = ({
         <div 
           role="radiogroup"
           aria-label={t("map_base_layer_label")}
-          className="flex items-center gap-0.5 p-0.5 bg-slate-950 rounded-md border border-slate-800 text-xs"
+          className="flex items-center gap-0.5 p-0.5 bg-slate-100 dark:bg-slate-950 rounded-md border border-slate-200 dark:border-slate-800 text-xs"
         >
           <Tooltip content={t("tooltip_map_satellite")} position="bottom">
             <button
@@ -771,8 +772,8 @@ export const Map: React.FC<MapProps> = ({
               onClick={() => setActiveTileLayer("satellite")}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 activeTileLayer === "satellite" 
-                  ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm" 
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               <Satellite className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
@@ -788,8 +789,8 @@ export const Map: React.FC<MapProps> = ({
               onClick={() => setActiveTileLayer("dark")}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 activeTileLayer === "dark" 
-                  ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm" 
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
@@ -805,8 +806,8 @@ export const Map: React.FC<MapProps> = ({
               onClick={() => setActiveTileLayer("osm")}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 activeTileLayer === "osm" 
-                  ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm" 
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
@@ -825,7 +826,7 @@ export const Map: React.FC<MapProps> = ({
             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               showWindAnimation
                 ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-                : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                : "bg-slate-900/90 border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-800/60"
             }`}
           >
           <Wind className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
@@ -855,7 +856,7 @@ export const Map: React.FC<MapProps> = ({
             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               showDgfVigies
                 ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-                : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                : "bg-slate-900/90 border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-800/60"
             }`}
           >
           <Radio className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
@@ -885,7 +886,7 @@ export const Map: React.FC<MapProps> = ({
             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               showSiroccoCorridors
                 ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-                : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                : "bg-slate-900/90 border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-800/60"
             }`}
           >
           <Wind className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
@@ -915,7 +916,7 @@ export const Map: React.FC<MapProps> = ({
             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
               showDronePatrols
                 ? "bg-slate-800 border-slate-600 text-white shadow-sm"
-                : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                : "bg-slate-900/90 border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-800/60"
             }`}
           >
           <Plane className="w-3.5 h-3.5 text-violet-400 shrink-0" aria-hidden="true" />

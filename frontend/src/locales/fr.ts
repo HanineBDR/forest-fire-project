@@ -1081,4 +1081,9 @@ export const fr = {
   tooltip_export_excel: "Exporter le tableau opérationnel au format Excel (.xlsx)",
   tooltip_export_pdf: "Générer un rapport institutionnel imprimable en PDF",
   tooltip_export_json: "Exporter le flux brut de télémétrie au format JSON",
+  "theme_switch_light": "Passer en mode clair",
+  "theme_switch_dark": "Passer en mode sombre",
+  "tooltip_theme_toggle": "Basculer entre mode clair et mode sombre",
+  "theme_mode_light": "Mode clair",
+  "theme_mode_dark": "Mode sombre (Par défaut)",
 };

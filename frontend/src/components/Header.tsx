@@ -7,6 +7,7 @@ import Image from "next/image";
 import { ShieldAlert, Satellite, Wind, Layers, PhoneCall, BarChart3, ChevronDown, Lock } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { DEMO_ACCOUNTS, getLocalizedDemoAccount, setSession, AuthUser } from "@/lib/auth";
 
@@ -61,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 INKAD <span className="text-xs font-semibold text-ember-400 font-mono">إنقاذ</span>
               </h1>
             </div>
@@ -182,6 +183,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
 
           {/* Real-time Notification Bell with unread badge & live popover */}
           <div data-tour="bell"><NotificationBell /></div>
+
+          {/* Theme Toggle (Light / Dark) */}
+          <ThemeToggle />
 
           {/* Language Switcher */}
           <LanguageSwitcher />

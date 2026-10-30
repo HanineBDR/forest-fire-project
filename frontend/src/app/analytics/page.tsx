@@ -46,6 +46,7 @@ import {
 } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { RoleGate } from "@/components/RoleGate";
 
 
@@ -326,6 +327,9 @@ export default function AnalyticsPage() {
 
           {/* Top Bar Refresh Controls & Language Switcher */}
           <div className="flex flex-wrap items-center gap-2.5 text-xs">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Language Switcher */}
             <LanguageSwitcher />
 
@@ -651,15 +655,15 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Clean SVG Line Graph for Model Calibration Progression */}
-              <div className="w-full h-36 relative border border-slate-800/70 rounded-md bg-slate-900/40 p-2 overflow-hidden">
+              <div className="w-full h-36 relative border border-slate-300 dark:border-slate-800/70 rounded-md bg-white dark:bg-slate-900/40 p-2 overflow-hidden shadow-inner">
                 <svg className="w-full h-full" viewBox="0 0 600 120" preserveAspectRatio="none">
                   {/* Critical 85% threshold dashed line */}
-                  <line x1="0" y1="90" x2="600" y2="90" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.7" />
+                  <line x1="0" y1="90" x2="600" y2="90" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.8" />
                   <text x="6" y="84" fill="#ef4444" fontSize="10" fontFamily="monospace">{t("critical_threshold_label")}</text>
 
-                  {/* Grid lines */}
-                  <line x1="0" y1="30" x2="600" y2="30" stroke="#334155" strokeWidth="0.5" opacity="0.4" />
-                  <text x="6" y="24" fill="#94a3b8" fontSize="9" fontFamily="monospace">98% ROC-AUC</text>
+                  {/* Grid lines - adaptive to light and dark */}
+                  <line x1="0" y1="30" x2="600" y2="30" stroke="currentColor" className="stroke-slate-300 dark:stroke-slate-700" strokeWidth="0.8" opacity="0.6" />
+                  <text x="6" y="24" fill="currentColor" className="fill-slate-600 dark:fill-slate-400" fontSize="9" fontFamily="monospace">98% ROC-AUC</text>
 
                   {/* Accuracy Path (Emerald) */}
                   <path
@@ -680,8 +684,8 @@ export default function AnalyticsPage() {
                     { x: 560, y: 28, val: "95.4%" }
                   ].map((pt, i) => (
                     <g key={i}>
-                      <circle cx={pt.x} cy={pt.y} r="4" fill="#10b981" stroke="#0f172a" strokeWidth="2" />
-                      <text x={pt.x - 12} y={pt.y - 8} fill="#f1f5f9" fontSize="9" fontWeight="bold" fontFamily="monospace">
+                      <circle cx={pt.x} cy={pt.y} r="4" fill="#10b981" stroke="currentColor" className="stroke-white dark:stroke-slate-900" strokeWidth="2" />
+                      <text x={pt.x - 12} y={pt.y - 8} fill="currentColor" className="fill-slate-800 dark:fill-slate-100 font-bold" fontSize="9" fontFamily="monospace">
                         {pt.val}
                       </text>
                     </g>

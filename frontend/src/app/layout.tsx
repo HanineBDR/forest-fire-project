@@ -35,6 +35,7 @@ export const metadata: Metadata = {
 
 import { LanguageProvider } from "@/context/LanguageContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 
@@ -44,8 +45,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("inkad_theme");if(t==="light"){document.documentElement.classList.remove("dark");document.documentElement.classList.add("light");document.documentElement.style.colorScheme="light";}else{document.documentElement.classList.add("dark");document.documentElement.classList.remove("light");document.documentElement.style.colorScheme="dark";}}catch(e){}})();`,
+          }}
+        />
         <link
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -61,12 +67,13 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-red-600 selection:text-white">
+      <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen antialiased selection:bg-red-600 selection:text-white transition-colors duration-150">
         <ServiceWorkerRegister />
         <LanguageProvider>
           <NotificationProvider>
-            {children}
-
+            <ThemeProvider>
+              {children}
+            </ThemeProvider>
           </NotificationProvider>
         </LanguageProvider>
       </body>

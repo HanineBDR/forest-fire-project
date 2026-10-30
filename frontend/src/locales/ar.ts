@@ -1081,4 +1081,9 @@ export const ar = {
   tooltip_export_excel: "تصدير جدول العمليات بصيغة Excel (.xlsx)",
   tooltip_export_pdf: "توليد تقرير استخباراتي عملياتي قابل للطباعة بصيغة PDF",
   tooltip_export_json: "تصدير تدفق البيانات الخام بصيغة JSON",
+  "theme_switch_light": "التبديل إلى الوضع الفاتح",
+  "theme_switch_dark": "التبديل إلى الوضع الداكن",
+  "tooltip_theme_toggle": "التبديل بين الوضع الفاتح والداكن",
+  "theme_mode_light": "الوضع الفاتح",
+  "theme_mode_dark": "الوضع الداكن (افتراضي)",
 };
