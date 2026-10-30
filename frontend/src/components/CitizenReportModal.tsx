@@ -944,3 +944,4 @@ export default function CitizenReportModal({
     </div>
   );
 }
+

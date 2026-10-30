@@ -27,3 +27,4 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ count: 0, reports: [] });
 }
+

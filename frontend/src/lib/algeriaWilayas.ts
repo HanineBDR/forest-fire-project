@@ -100,3 +100,4 @@ export function formatWilayaLabel(w: AlgeriaWilaya, lang: string = "fr"): string
   }
   return `${w.nameFr} (${w.code})`;
 }
+
