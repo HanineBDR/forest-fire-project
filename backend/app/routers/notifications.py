@@ -354,6 +354,7 @@ def get_alerts_timeline(limit: int = Query(50, ge=1, le=100)):
     notifs = execute_neon_sql("""
     SELECT 
         'notification' as type,
+        'notification' as item_type,
         id, alert_id, sender_role, recipient_role, title, message,
         risk_level, risk_score, massif, wilaya, created_at
     FROM notifications
@@ -364,18 +365,25 @@ def get_alerts_timeline(limit: int = Query(50, ge=1, le=100)):
     acks = execute_neon_sql("""
     SELECT 
         'acknowledgment' as type,
+        'acknowledgment' as item_type,
         id, alert_id, user_role, action, comment, target_role, created_at
     FROM alert_acknowledgments
     ORDER BY created_at DESC
     LIMIT $1
     """, [limit])
 
+    for n in notifs:
+        n["item_type"] = "notification"
+    for a in acks:
+        a["item_type"] = "acknowledgment"
+
     # Merge and sort
     timeline = sorted(notifs + acks, key=lambda x: str(x.get("created_at", "")), reverse=True)[:limit]
     return {
         "ok": True,
         "count": len(timeline),
-        "timeline": timeline
+        "timeline": timeline,
+        "data": timeline
     }
 
 @router.delete("/{id}")

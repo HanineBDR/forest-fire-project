@@ -9,10 +9,16 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50", 10);
     const timeline = await fetchTimelineFromDb(limit);
 
+    const normalized = timeline.map((item: any) => ({
+      ...item,
+      item_type: item.item_type || item.type || "notification",
+    }));
+
     return NextResponse.json({
       ok: true,
-      count: timeline.length,
-      data: timeline,
+      count: normalized.length,
+      data: normalized,
+      timeline: normalized,
     });
   } catch (error: any) {
     try {
@@ -22,7 +28,17 @@ export async function GET(req: NextRequest) {
       const res = await fetch(`${backendUrl}/api/notifications/timeline?limit=${limit}`, { cache: "no-store" });
       if (res.ok) {
         const json = await res.json();
-        return NextResponse.json(json);
+        const raw = Array.isArray(json.data) ? json.data : (Array.isArray(json.timeline) ? json.timeline : []);
+        const normalized = raw.map((item: any) => ({
+          ...item,
+          item_type: item.item_type || item.type || "notification",
+        }));
+        return NextResponse.json({
+          ok: true,
+          count: normalized.length,
+          data: normalized,
+          timeline: normalized,
+        });
       }
     } catch (proxyError) {
       // Fall through
@@ -31,7 +47,7 @@ export async function GET(req: NextRequest) {
       ok: true,
       count: 0,
       data: [],
+      timeline: [],
     });
   }
 }
-

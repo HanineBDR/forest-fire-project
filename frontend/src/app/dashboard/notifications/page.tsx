@@ -95,9 +95,12 @@ export default function NotificationsPage() {
       const res = await fetch("/api/notifications/timeline?limit=60");
       if (res.ok) {
         const json = await res.json();
-        if (json.ok && Array.isArray(json.data)) {
-          setTimelineItems(json.data);
-        }
+        const raw = Array.isArray(json.data) ? json.data : (Array.isArray(json.timeline) ? json.timeline : []);
+        const normalized = raw.map((item: any) => ({
+          ...item,
+          item_type: item.item_type || item.type || "notification",
+        }));
+        setTimelineItems(normalized);
       }
     } catch {
       // offline fallback
@@ -317,26 +320,31 @@ export default function NotificationsPage() {
 
       {/* Main Content Tabs: Timeline vs Notifications */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveTab("timeline")}
-              className={`h-10 px-4 text-xs font-semibold border-b-2 transition-colors ${
+              className={`h-10 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === "timeline"
-                  ? "border-red-500 text-white"
-                  : "border-transparent text-slate-400 hover:text-slate-200"
+                  ? "border-red-500 text-slate-900 dark:text-white"
+                  : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
-              {t("notifications_tab_timeline")}
+              <span>{t("notifications_tab_timeline")}</span>
+              {timelineItems.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-700 dark:text-slate-300 font-bold">
+                  {timelineItems.length}
+                </span>
+              )}
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("all")}
               className={`h-10 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === "all"
-                  ? "border-red-500 text-white"
-                  : "border-transparent text-slate-400 hover:text-slate-200"
+                  ? "border-red-500 text-slate-900 dark:text-white"
+                  : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               <span>{t("notifications_tab_alerts")}</span>
@@ -349,8 +357,8 @@ export default function NotificationsPage() {
               onClick={() => setActiveTab("unread")}
               className={`h-10 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === "unread"
-                  ? "border-red-500 text-white"
-                  : "border-transparent text-slate-400 hover:text-slate-200"
+                  ? "border-red-500 text-slate-900 dark:text-white"
+                  : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               <span>{t("notifications_tab_unread")}</span>
@@ -386,10 +394,10 @@ export default function NotificationsPage() {
                 {t("notifications_empty_timeline")}
               </div>
             ) : (
-              <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-800">
+              <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-300 dark:before:bg-slate-800">
                 {timelineItems.map((item, idx) => {
-                  const isNotif = item.item_type === "notification";
-                  const isAck = item.item_type === "acknowledgment";
+                  const isNotif = item.item_type === "notification" || (item as any).type === "notification";
+                  const isAck = item.item_type === "acknowledgment" || (item as any).type === "acknowledgment";
                   const isAi = isNotif && item.sender_role === "ai_model";
 
                   return (
@@ -399,7 +407,7 @@ export default function NotificationsPage() {
                     >
                       {/* Timeline Dot */}
                       <span
-                        className={`absolute -left-6 top-4 w-2.5 h-2.5 rounded-full border-2 border-slate-950 ${
+                        className={`absolute -left-6 top-4 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-950 ${
                           isAi
                             ? "bg-red-500"
                             : isAck
@@ -443,15 +451,15 @@ export default function NotificationsPage() {
                       </p>
 
                       {/* Metadata bar */}
-                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-400 border-t border-slate-800/60">
+                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800/60">
                         {item.massif && (
                           <span>
-                            {t("notifications_massif_label")} <strong className="text-slate-200">{getLocalizedMassifName(item.massif, language)}</strong>
+                            {t("notifications_massif_label")} <strong className="text-slate-800 dark:text-slate-200">{getLocalizedMassifName(item.massif, language)}</strong>
                           </span>
                         )}
                         {item.wilaya && (
                           <span>
-                            {t("notifications_wilaya_label")} <strong className="text-slate-200">{getLocalizedWilayaName(item.wilaya, language)}</strong>
+                            {t("notifications_wilaya_label")} <strong className="text-slate-800 dark:text-slate-200">{getLocalizedWilayaName(item.wilaya, language)}</strong>
                           </span>
                         )}
                         {item.risk_level && (
@@ -461,17 +469,17 @@ export default function NotificationsPage() {
                         )}
                         {item.sender_role && (
                           <span>
-                            {t("notifications_from_label")} <span className="text-slate-300">{getLocalizedRole(item.sender_role, language)}</span>
+                            {t("notifications_from_label")} <span className="text-slate-700 dark:text-slate-300">{getLocalizedRole(item.sender_role, language)}</span>
                           </span>
                         )}
                         {item.recipient_role && (
                           <span>
-                            {t("notifications_to_label")} <span className="text-slate-300">{getLocalizedRole(item.recipient_role, language)}</span>
+                            {t("notifications_to_label")} <span className="text-slate-700 dark:text-slate-300">{getLocalizedRole(item.recipient_role, language)}</span>
                           </span>
                         )}
                         {item.user_role && (
                           <span>
-                            {t("notifications_operator_label")} <span className="text-slate-300">{getLocalizedRole(item.user_role, language)}</span>
+                            {t("notifications_operator_label")} <span className="text-slate-700 dark:text-slate-300">{getLocalizedRole(item.user_role, language)}</span>
                           </span>
                         )}
                       </div>
@@ -482,20 +490,20 @@ export default function NotificationsPage() {
                           <button
                             type="button"
                             onClick={() => handleAcknowledge(item.alert_id!)}
-                            className="h-7 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-[11px] font-medium text-slate-200 transition-colors"
+                            className="h-7 px-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded text-[11px] font-medium text-slate-800 dark:text-slate-200 transition-colors"
                           >
                             {t("notifications_acknowledge_btn")}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleEscalate(item.alert_id!)}
-                            className="h-7 px-2.5 bg-red-950 hover:bg-red-900 border border-red-800 rounded text-[11px] font-semibold text-red-200 transition-colors"
+                            className="h-7 px-2.5 bg-red-100 hover:bg-red-200 dark:bg-red-950 dark:hover:bg-red-900 border border-red-300 dark:border-red-800 rounded text-[11px] font-semibold text-red-800 dark:text-red-200 transition-colors"
                           >
                             {t("notifications_escalate_btn")}
                           </button>
                           <Link
                             href="/dashboard/alerts"
-                            className="h-7 px-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-[11px] font-medium text-slate-300 flex items-center gap-1 transition-colors"
+                            className="h-7 px-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded text-[11px] font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1 transition-colors"
                           >
                             <span>{t("notifications_view_map")}</span>
                             <ArrowRight className="w-3 h-3" />
@@ -608,13 +616,13 @@ export default function NotificationsPage() {
 
                       <p className="text-slate-300 leading-relaxed">{translateNotificationMessage(n.message, language)}</p>
 
-                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-400 border-t border-slate-800/60">
+                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800/60">
                         <span>
-                          {t("notifications_from_label")} <strong className="text-slate-200">{getLocalizedRole(n.sender_role, language)}</strong>
+                          {t("notifications_from_label")} <strong className="text-slate-800 dark:text-slate-200">{getLocalizedRole(n.sender_role, language)}</strong>
                         </span>
                         <span>•</span>
                         <span>
-                          {t("notifications_to_label")} <strong className="text-slate-200">{getLocalizedRole(n.recipient_role, language)}</strong>
+                          {t("notifications_to_label")} <strong className="text-slate-800 dark:text-slate-200">{getLocalizedRole(n.recipient_role, language)}</strong>
                         </span>
                         {n.massif && (
                           <>
