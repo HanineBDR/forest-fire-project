@@ -25,7 +25,9 @@ import {
   AlertOctagon,
   FileText,
   Smartphone,
-  Send
+  Send,
+  Cpu,
+  Shield
 } from "lucide-react";
 import { getStoredUser } from "@/lib/auth";
 import { 
@@ -771,54 +773,152 @@ export default function AlertsPage() {
 
       {/* Full Audit & History Modal */}
       {modalAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <HistoryIcon className="w-5 h-5 text-ember-400" />
-                  <span>{t("audit_history_modal_title")} : {modalAlert.alert_id}</span>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in"
+          onClick={() => setModalAlert(null)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150"
+          >
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-900/90 flex items-start justify-between gap-3">
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-500/10 border border-amber-500/30 text-amber-300">
+                    <HistoryIcon className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{modalAlert.alert_id}</span>
+                  </span>
+                  <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                    {modalAlert.wilaya}
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                  {t("audit_history_modal_title") || "Operational Intervention Audit Log"}
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {getLocalizedAuditNote(modalAlert.forest_name, language)} ({modalAlert.wilaya}) · {language === "ar" ? "الإحداثيات الجغرافية (GPS)" : language === "en" ? "GPS Coordinates" : "Coordonnées GPS"}: {modalAlert.lat}°N, {modalAlert.lon}°E
-                </p>
+                <div className="flex items-center gap-2 text-xs text-slate-400 flex-wrap">
+                  <span className="flex items-center gap-1 text-slate-300 font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                    <span>{getLocalizedAuditNote(modalAlert.forest_name, language)}</span>
+                  </span>
+                  <span>•</span>
+                  <span className="font-mono text-[11px] text-slate-400" dir="ltr">
+                    GPS: {modalAlert.lat}°N, {modalAlert.lon}°E
+                  </span>
+                </div>
               </div>
-              <button onClick={() => setModalAlert(null)} className="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800">
+
+              <button 
+                onClick={() => setModalAlert(null)} 
+                className="text-slate-400 hover:text-white p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-colors shrink-0"
+                aria-label={t("close_modal") || "Close"}
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            {/* Modal Body - Modern Timeline */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1">
               {modalHistory.length === 0 ? (
-                <div className="text-xs text-slate-400 text-center py-6">{t("no_history_available")}</div>
-              ) : (
-                modalHistory.map((h, idx) => (
-                  <div key={h.id || idx} className="p-3.5 rounded-xl border border-slate-800 bg-slate-950 space-y-1 text-xs">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 font-mono">
-                        <span className="text-ember-400 font-bold">{getLocalizedStatusName(h.old_status, language)}</span>
-                        <span className="text-slate-500">→</span>
-                        <span className="text-emerald-400 font-bold">{getLocalizedStatusName(h.new_status, language)}</span>
-                      </div>
-                      <span className="text-slate-500 font-mono text-[11px]">
-                        {new Date(h.changed_at).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}
-                      </span>
-                    </div>
-                    <div className="text-slate-300 font-medium">{t("intervenant_label")} <span className="text-white">{getLocalizedOperatorName(h.changed_by, language)}</span></div>
-                    <div className="text-slate-400 text-[11px] bg-slate-900 p-2 rounded border border-slate-800 mt-1">
-                      {getLocalizedAuditNote(h.note, language)}
-                    </div>
+                <div className="text-center py-12 space-y-2">
+                  <div className="w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center mx-auto">
+                    <HistoryIcon className="w-5 h-5" />
                   </div>
-                ))
+                  <div className="text-xs text-slate-400 font-medium">
+                    {t("no_history_available") || "No intervention events recorded yet."}
+                  </div>
+                </div>
+              ) : (
+                <div className="relative border-l-2 rtl:border-l-0 rtl:border-r-2 border-slate-700/70 ml-3.5 rtl:ml-0 rtl:mr-3.5 space-y-6 py-1">
+                  {modalHistory.map((h, idx) => {
+                    const isAi = h.changed_by?.includes("IA") || h.changed_by?.includes("XGBoost") || h.changed_by?.includes("Système IA");
+                    const isCommander = h.changed_by?.includes("Commandant") || h.changed_by?.includes("Protection");
+                    const isField = h.changed_by?.includes("Garde") || h.changed_by?.includes("Forêt") || h.changed_by?.includes("Inspecteur");
+
+                    const nodeColor = isAi 
+                      ? "bg-violet-950 border-violet-500 text-violet-400" 
+                      : isCommander
+                      ? "bg-red-950 border-red-500 text-red-400"
+                      : isField
+                      ? "bg-emerald-950 border-emerald-500 text-emerald-400"
+                      : "bg-amber-950 border-amber-500 text-amber-400";
+
+                    return (
+                      <div key={h.id || idx} className="relative pl-6 rtl:pl-0 rtl:pr-6 group">
+                        {/* Timeline Node Icon */}
+                        <div className={`absolute -left-[17px] rtl:-left-auto rtl:-right-[17px] top-1.5 w-8 h-8 rounded-full border-2 ${nodeColor} flex items-center justify-center shadow-lg bg-slate-950`}>
+                          {isAi ? (
+                            <Cpu className="w-3.5 h-3.5" />
+                          ) : isCommander ? (
+                            <Truck className="w-3.5 h-3.5" />
+                          ) : isField ? (
+                            <Shield className="w-3.5 h-3.5" />
+                          ) : (
+                            <UserCheck className="w-3.5 h-3.5" />
+                          )}
+                        </div>
+
+                        {/* Card Content */}
+                        <div className="rounded-xl border border-slate-800/80 bg-slate-950/70 hover:border-slate-700 transition-colors p-3.5 space-y-2.5">
+                          {/* Top Row: Transition Pills & Timestamp */}
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="inline-flex items-center gap-1.5 text-xs font-semibold">
+                              <span className="px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-300 border border-slate-700/60 font-mono text-[11px]">
+                                {getLocalizedStatusName(h.old_status, language)}
+                              </span>
+                              <span className="text-slate-500 font-bold">→</span>
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 font-mono text-[11px] font-bold">
+                                {getLocalizedStatusName(h.new_status, language)}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono">
+                              <Clock className="w-3 h-3 text-slate-500" />
+                              <span>
+                                {new Date(h.changed_at).toLocaleString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit"
+                                })}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Operator Row */}
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="text-slate-400 font-medium">
+                              {t("intervenant_label") || (language === "ar" ? "المتدخل / الرتبة :" : "Operator / Rank:")}
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-200 font-semibold text-[11px]">
+                              {getLocalizedOperatorName(h.changed_by, language)}
+                            </span>
+                          </div>
+
+                          {/* Note Callout */}
+                          <div className="rounded-lg border-l-2 rtl:border-l-0 rtl:border-r-2 border-emerald-500/80 bg-slate-900/90 px-3 py-2 text-xs text-slate-200 leading-relaxed font-sans shadow-sm">
+                            {getLocalizedAuditNote(h.note, language)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-slate-800">
+            {/* Modal Footer */}
+            <div className="p-3.5 sm:p-4 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between text-xs">
+              <span className="text-[11px] text-slate-400 font-mono">
+                {modalHistory.length} {language === "ar" ? "إجراءات موثقة بالسجل العملياتي" : language === "en" ? "verified actions in operational log" : "actions vérifiées dans le registre"}
+              </span>
               <button
                 onClick={() => setModalAlert(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition border border-slate-700/80 shadow-sm"
               >
-                {t("close_modal")}
+                {t("close_modal") || (language === "ar" ? "إغلاق" : "Close")}
               </button>
             </div>
           </div>
