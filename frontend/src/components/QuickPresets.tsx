@@ -74,7 +74,7 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
 
   return (
     <section 
-      aria-label="Sélection rapide des massifs forestiers stratégiques"
+      aria-label={t("strategic_massifs_title")}
       className="bg-slate-900/95 border border-slate-800 rounded-xl p-4 shadow-sm"
     >
       {/* Header with Nielsen #6 Recognition Legend */}
@@ -90,7 +90,13 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
         <div className="flex items-center gap-2 text-xs">
           <div 
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/90 border border-slate-700/80 text-slate-300"
-            title="Le numéro indiqué en haut à droite de chaque carte correspond au matricule officiel de la Wilaya (ex: 15 = Tizi Ouzou, 06 = Béjaïa, 09 = Blida, 36 = El Tarf)"
+            title={
+              language === "ar"
+                ? "الرقم المشار إليه في أعلى اليمين يمثل الرمز الإداري للولاية (مثلاً: 15 = تيزي وزو، 06 = بجاية، 09 = البليدة)"
+                : language === "en"
+                ? "The number in the top right of each card corresponds to the official Wilaya code (e.g., 15 = Tizi Ouzou, 06 = Bejaia, 09 = Blida, 36 = El Tarf)"
+                : "Le numéro indiqué en haut à droite de chaque carte correspond au matricule officiel de la Wilaya (ex: 15 = Tizi Ouzou, 06 = Béjaïa, 09 = Blida, 36 = El Tarf)"
+            }
           >
             <Info className="w-3.5 h-3.5 text-red-400 shrink-0" aria-hidden="true" />
             <span className="text-slate-400">{t("legend_title")}</span>
@@ -118,7 +124,13 @@ export const QuickPresets: React.FC<QuickPresetsProps> = ({
               disabled={isLoading}
               onClick={() => onSelectRegion(reg)}
               aria-pressed={isSelected}
-              title={`${reg.name} — Wilaya de rattachement: ${reg.wilaya} (Coordonnées: ${reg.lat.toFixed(4)}°N, ${reg.lon.toFixed(4)}°E)`}
+              title={
+                language === "ar"
+                  ? `${reg.name} — الولاية: ${reg.wilaya} (الإحداثيات: ${reg.lat.toFixed(4)}°N, ${reg.lon.toFixed(4)}°E)`
+                  : language === "en"
+                  ? `${reg.name} — Host Wilaya: ${reg.wilaya} (Coordinates: ${reg.lat.toFixed(4)}°N, ${reg.lon.toFixed(4)}°E)`
+                  : `${reg.name} — Wilaya de rattachement: ${reg.wilaya} (Coordonnées: ${reg.lat.toFixed(4)}°N, ${reg.lon.toFixed(4)}°E)`
+              }
               className={`group flex flex-col justify-between text-left p-3.5 rounded-xl border text-xs transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 min-h-[78px] ${
                 isSelected
                   ? "bg-red-950/90 border-red-500 text-white font-semibold ring-1 ring-red-500/60 shadow-sm"

@@ -20,6 +20,10 @@ import {
   Radio,
   Plane,
   Cpu,
+  MoreHorizontal,
+  Menu,
+  X,
+  Camera,
 } from "lucide-react";
 import { getStoredUser, getStoredToken, setSession, logoutUser, getRoleBadgeInfo, getLocalizedUserName, AuthUser, DEMO_ACCOUNTS, UserRole } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
@@ -43,7 +47,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isReady, setIsReady] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { setActiveRole } = useNotifications();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -59,19 +67,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, []);
 
-  // Click outside to close profile/admin dropdown
+  // Click outside to close profile, role switcher, more menu, and mobile drawer
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target as Node)) {
+      const target = e.target as HTMLElement;
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(target)) {
         setIsProfileOpen(false);
       }
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(target)) {
         setIsRoleSwitcherOpen(false);
+      }
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(target)) {
+        setIsMoreOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
+        if (!target.closest('[data-mobile-menu-toggle="true"]')) {
+          setIsMobileMenuOpen(false);
+        }
       }
     }
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setIsProfileOpen(false);
+        setIsRoleSwitcherOpen(false);
+        setIsMoreOpen(false);
+        setIsMobileMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -81,6 +101,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  // Close menus on route change
+  useEffect(() => {
+    setIsProfileOpen(false);
+    setIsRoleSwitcherOpen(false);
+    setIsMoreOpen(false);
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   const handleSwitchRole = (acc: typeof DEMO_ACCOUNTS[0]) => {
     const mockUser: AuthUser = {
@@ -97,6 +125,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setActiveRole(mapped);
     setIsProfileOpen(false);
     setIsRoleSwitcherOpen(false);
+    setIsMoreOpen(false);
+    setIsMobileMenuOpen(false);
   };
 
   const handleLogout = async () => {
@@ -123,23 +153,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const cleanUserName = getLocalizedUserName(user.name, user.role, language);
   const isAdmin = user.role === "ADMIN";
 
-  // PRIMARY OPERATIONAL ITEMS (visible in main top bar)
+  // PRIMARY OPERATIONAL ITEMS (always visible on desktop nav)
   const primaryNavItems = [
     { href: "/dashboard", label: t("nav_tactical_map") || "Carte Tactique", icon: Map },
     { href: "/dashboard/alerts", label: t("nav_alerts") || "Alertes Actives", icon: AlertTriangle },
-    { href: "/dashboard/notifications", label: "Intercom & Alertes", icon: Radio },
-    { href: "/dashboard/drones", label: "Drones FLIR", icon: Plane, dataTour: "drones" },
-    { href: "/dashboard/iot", label: "Capteurs IoT", icon: Cpu, dataTour: "iot" },
     { href: "/analytics", label: t("nav_analytics") || "Analytics ML", icon: BarChart3 },
-    { href: "/dashboard/historique", label: t("nav_history") || "Historique", icon: History },
   ];
+
+  // SECONDARY ITEMS (collapsed into the "Plus" dropdown)
+  const secondaryMoreItems = [
+    { href: "/dashboard/notifications", label: t("nav_intercom_alerts"), icon: Radio },
+    { href: "/dashboard/drones", label: t("nav_drones_flir"), icon: Plane, dataTour: "drones" },
+    { href: "/dashboard/iot", label: t("nav_iot_sensors"), icon: Cpu, dataTour: "iot" },
+    { href: "/dashboard/historique", label: t("nav_history") || "History & Audit", icon: History },
+  ];
+
+  const isMoreActive = secondaryMoreItems.some(
+    (item) => pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history")
+  );
+  const moreLabel = t("nav_more");
 
   // SECONDARY / ADMINISTRATION ITEMS (in profile & settings menu)
   const secondaryNavItems = isAdmin
     ? [
-        { href: "/dashboard/admin/model-health", label: t("nav_model_health") || "Santé Modèle & API", icon: Activity },
-        { href: "/dashboard/admin/roadmap", label: t("nav_roadmap") || "Feuille de Route 2026", icon: Shield },
-        { href: "/dashboard/admin/users", label: t("nav_users") || "Gestion Comptes", icon: Users },
+        { href: "/dashboard/admin/model-health", label: t("nav_model_health") || "Model Health & API", icon: Activity },
+        { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera },
+        { href: "/dashboard/admin/users", label: t("nav_users") || "User Management", icon: Users },
       ]
     : [];
 
@@ -148,60 +187,60 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${isRTL ? "font-arabic" : ""}`}>
       {/* Top Security Header */}
-      <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60 w-full">
+        <div className="w-full px-3 sm:px-4 lg:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 flex-nowrap">
           
           {/* Left: Brand Logo & Role Badge */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link 
               href="/dashboard" 
               data-tour="brand"
-              className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded-lg p-1 transition-colors hover:bg-slate-800/60"
+              className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded-lg p-1 transition-colors hover:bg-slate-800/60 shrink-0"
             >
               <Image
                 src="/logo.png"
                 alt="IN9AD Logo"
                 width={36}
                 height={36}
-                className="w-9 h-9 shrink-0 select-none object-contain"
+                className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 select-none object-contain"
                 priority
               />
               <div>
-                <div className="text-base font-bold tracking-tight text-white flex items-center gap-1.5 leading-none">
+                <div className="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-1.5 leading-none">
                   <span>IN9AD</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono font-medium">
                     v3.0
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider font-medium mt-0.5">
+                <div className="hidden sm:block text-[10px] text-slate-400 uppercase tracking-wider font-medium mt-0.5">
                   {t("platform_sub") || "Système Opérationnel"}
                 </div>
               </div>
             </Link>
 
             {/* Interactive Command Panel Switcher */}
-            <div ref={roleDropdownRef} data-tour="roles" className="relative">
+            <div ref={roleDropdownRef} data-tour="roles" className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setIsRoleSwitcherOpen(!isRoleSwitcherOpen)}
                 aria-haspopup="menu"
                 aria-expanded={isRoleSwitcherOpen}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${badgeInfo.colorClass} hover:brightness-110`}
-                title="Cliquer pour changer de commandement opérationnel"
+                className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${badgeInfo.colorClass} hover:brightness-110`}
+                title={t("switch_command_title")}
               >
                 <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
-                <span>{cleanRoleText}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-150 ${isRoleSwitcherOpen ? "rotate-180" : ""}`} />
+                <span className="max-w-[110px] sm:max-w-[170px] truncate">{cleanRoleText}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isRoleSwitcherOpen ? "rotate-180" : ""}`} />
               </button>
 
               {isRoleSwitcherOpen && (
                 <div 
                   role="menu"
-                  className="absolute left-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-lg py-1.5 z-[2000] focus:outline-none"
+                  className="absolute start-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-lg py-1.5 z-[2100] shadow-2xl focus:outline-none"
                 >
                   <div className="px-3 py-1.5 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Accès Commandements</span>
-                    <span className="text-[10px] text-emerald-400 font-mono">1 Clic</span>
+                    <span>{t("command_panel_access")}</span>
+                    <span className="text-[10px] text-emerald-400 font-mono">{t("one_click_access")}</span>
                   </div>
                   <div className="p-1 space-y-1">
                     {DEMO_ACCOUNTS.map((acc) => {
@@ -239,62 +278,121 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          {/* Center: Primary Operational Navigation */}
-          <nav aria-label="Navigation principale" data-tour="nav" className="hidden md:flex items-center gap-1.5">
+          {/* Center: Primary Operational Navigation + Plus (More) Dropdown */}
+          <nav aria-label={t("nav_main_heading")} data-tour="nav" className="hidden md:flex items-center gap-1 lg:gap-1.5 min-w-0 flex-nowrap">
             {primaryNavItems.map((item) => {
               const Icon = item.icon;
-              const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
+              const active = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  data-tour={item.dataTour}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                  className={`flex items-center gap-1.5 lg:gap-2 px-2.5 lg:px-3 py-1.5 lg:py-2 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                     active
                       ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                  <Icon className={`w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
                   <span>{item.label}</span>
                 </Link>
               );
             })}
+
+            {/* "Plus" (More) Dropdown Menu */}
+            <div ref={moreDropdownRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setIsMoreOpen(!isMoreOpen)}
+                aria-haspopup="menu"
+                aria-expanded={isMoreOpen}
+                aria-label={t("nav_operational_tools")}
+                className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 lg:py-2 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                  isMoreOpen || isMoreActive
+                    ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
+                }`}
+                title={moreLabel}
+              >
+                <MoreHorizontal className={`w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0 ${isMoreActive ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                <span>{moreLabel}</span>
+                <ChevronDown className={`w-3 h-3 text-slate-400 shrink-0 transition-transform duration-150 ${isMoreOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+              </button>
+
+              {isMoreOpen && (
+                <div
+                  role="menu"
+                  aria-orientation="vertical"
+                  className="absolute start-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none animate-in fade-in slide-in-from-top-2 duration-150"
+                >
+                  <div className="px-3 py-1.5 border-b border-slate-800 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>{moreLabel} & {t("nav_operational_tools")}</span>
+                    <span className="text-[10px] text-slate-500 font-mono">4</span>
+                  </div>
+                  <div className="p-1 space-y-0.5">
+                    {secondaryMoreItems.map((item) => {
+                      const Icon = item.icon;
+                      const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          data-tour={item.dataTour}
+                          role="menuitem"
+                          onClick={() => setIsMoreOpen(false)}
+                          className={`flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors ${
+                            active
+                              ? "bg-slate-800 text-white font-semibold border border-slate-700"
+                              : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                            <span>{item.label}</span>
+                          </div>
+                          {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
 
-          {/* Right: Notification Bell + Language Selector + User Profile */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          {/* Right: Notification Bell + Language Selector + User Profile + Mobile Hamburger */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
             {/* Real-time Notification Bell */}
-            <div data-tour="bell"><NotificationBell /></div>
+            <div data-tour="bell" className="shrink-0"><NotificationBell /></div>
 
             {/* Standard Clean Language Selector */}
-            <LanguageSwitcher />
+            <div className="shrink-0"><LanguageSwitcher /></div>
 
             {/* Profile & Secondary Settings Dropdown */}
-            <div ref={profileDropdownRef} className="relative">
+            <div ref={profileDropdownRef} className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 aria-haspopup="menu"
                 aria-expanded={isProfileOpen}
-                aria-label="Menu du profil et administration"
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                aria-label={t("nav_system_supervision")}
+                className={`flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                   isProfileOpen || isSecondaryActive
                     ? "bg-slate-800 border-slate-700 text-white"
                     : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/70"
                 }`}
               >
-                <div className="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
+                <div className="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0">
                   <UserCheck className="w-3.5 h-3.5 text-slate-300" aria-hidden="true" />
                 </div>
-                <div className="hidden lg:block text-left">
-                  <div className="font-semibold text-xs leading-none truncate max-w-[130px]">{cleanUserName}</div>
-                  <div className="text-[10px] text-slate-400 font-mono truncate max-w-[130px] mt-0.5">
+                <div className="hidden xl:block text-left">
+                  <div className="font-semibold text-xs leading-none truncate max-w-[120px]">{cleanUserName}</div>
+                  <div className="text-[10px] text-slate-400 font-mono truncate max-w-[120px] mt-0.5">
                     {cleanRoleText}
                   </div>
                 </div>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-150 ${isProfileOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isProfileOpen ? "rotate-180" : ""}`} aria-hidden="true" />
               </button>
 
               {/* Dropdown Menu */}
@@ -302,7 +400,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div 
                   role="menu"
                   aria-orientation="vertical"
-                  className="absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.06)] py-1.5 z-[2000] focus:outline-none"
+                  className="absolute end-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none"
                 >
                   <div className="px-3.5 py-2.5 border-b border-slate-800">
                     <div className="font-semibold text-white truncate">{cleanUserName}</div>
@@ -383,7 +481,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
                     >
                       <Radio className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Intercom Opérationnel National</span>
+                      <span>{t("nav_intercom_national")}</span>
                     </Link>
                   </div>
 
@@ -396,14 +494,130 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/40 transition-colors text-left"
                     >
                       <LogOut className="w-3.5 h-3.5" />
-                      <span>{t("logout") || "Déconnexion"}</span>
+                      <span>{t("logout") || "Sign Out"}</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              type="button"
+              data-mobile-menu-toggle="true"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? t("mobile_menu_close") : t("mobile_menu_open")}
+              aria-expanded={isMobileMenuOpen}
+              className="md:hidden flex items-center justify-center p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5 text-red-400" aria-hidden="true" />
+              ) : (
+                <Menu className="w-5 h-5" aria-hidden="true" />
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {isMobileMenuOpen && (
+          <div
+            ref={mobileMenuRef}
+            className="md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-md px-4 py-3 space-y-3 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100vh-4rem)] overflow-y-auto"
+          >
+            <div>
+              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
+                {t("nav_main_heading")}
+              </div>
+              <div className="space-y-1">
+                {primaryNavItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                        active
+                          ? "bg-slate-800 text-white border border-slate-700"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="border-t border-slate-800/80 pt-2.5">
+              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
+                {moreLabel} & {t("nav_operational_tools")}
+              </div>
+              <div className="space-y-1">
+                {secondaryMoreItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history");
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                        active
+                          ? "bg-slate-800 text-white border border-slate-700"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {isAdmin && secondaryNavItems.length > 0 && (
+              <div className="border-t border-slate-800/80 pt-2.5">
+                <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
+                  {t("nav_system_supervision")}
+                </div>
+                <div className="space-y-1">
+                  {secondaryNavItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                          active
+                            ? "bg-slate-800 text-white border border-slate-700"
+                            : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} />
+                          <span>{item.label}</span>
+                        </div>
+                        {active && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Main Content Area */}

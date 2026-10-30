@@ -4,9 +4,16 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Bell, CheckCheck, Radio, ArrowRight, ShieldAlert, Send } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { ROLE_LABELS } from "@/lib/notifications";
+import {
+  ROLE_LABELS,
+  getLocalizedRole,
+  translateNotificationTitle,
+  translateNotificationMessage,
+} from "@/lib/notificationTypes";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function NotificationBell() {
+  const { t, language } = useLanguage();
   const {
     notifications,
     unreadCount,
@@ -41,14 +48,19 @@ export function NotificationBell() {
     };
   }, []);
 
+  const getLocalizedRoleLabel = (rId: string) => {
+    return getLocalizedRole(rId, language);
+  };
+
   return (
     <div ref={dropdownRef} className="relative">
       <button
         type="button"
+        id="notification-bell-btn"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        aria-label={`Notifications (${unreadCount} non lues)`}
+        aria-label={`${t("notif_center_title")} (${unreadCount})`}
         className={`relative flex items-center justify-center w-9 h-9 rounded-lg border text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
           isOpen
             ? "bg-slate-800 border-slate-700 text-white"
@@ -66,7 +78,7 @@ export function NotificationBell() {
       {isOpen && (
         <div
           role="dialog"
-          aria-label="Centre de notifications"
+          aria-label={t("notif_center_title")}
           className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.06)] z-[2000] overflow-hidden"
         >
           {/* Header */}
@@ -74,7 +86,7 @@ export function NotificationBell() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-xs font-bold text-white tracking-tight">
-                  Notifications Opérationnelles
+                  {t("notif_operational_title")}
                 </h3>
                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-slate-800 border border-slate-700 text-slate-300">
                   <span
@@ -86,7 +98,7 @@ export function NotificationBell() {
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Rôle: {ROLE_LABELS[activeRole] || activeRole}
+                {t("notif_role_label")} {getLocalizedRoleLabel(activeRole)}
               </p>
             </div>
 
@@ -97,18 +109,18 @@ export function NotificationBell() {
                 className="text-[11px] text-slate-400 hover:text-white flex items-center gap-1 transition-colors px-1.5 py-1 rounded hover:bg-slate-800"
               >
                 <CheckCheck className="w-3.5 h-3.5 text-slate-400" />
-                <span>Tout lire</span>
+                <span>{t("notif_mark_all_read")}</span>
               </button>
             )}
           </div>
 
           {/* Quick Role Switcher */}
           <div className="px-3 py-1.5 bg-slate-950/60 border-b border-slate-800/80 flex items-center gap-1.5 text-[11px]">
-            <span className="text-slate-400 shrink-0">Vue:</span>
+            <span className="text-slate-400 shrink-0">{t("notif_view_label")}</span>
             {[
-              { id: "protection_civile", label: "Protection Civile" },
-              { id: "mohafadat_ghabat", label: "Forêts" },
-              { id: "admin_centrale", label: "Admin" },
+              { id: "protection_civile", label: getLocalizedRoleLabel("protection_civile") },
+              { id: "mohafadat_ghabat", label: getLocalizedRoleLabel("mohafadat_ghabat") },
+              { id: "admin_centrale", label: getLocalizedRoleLabel("admin_centrale") },
             ].map((r) => (
               <button
                 key={r.id}
@@ -129,12 +141,12 @@ export function NotificationBell() {
           <div className="max-h-80 overflow-y-auto divide-y divide-slate-800/80">
             {notifications.length === 0 ? (
               <div className="p-6 text-center text-xs text-slate-400">
-                Aucune alerte opérationnelle récente.
+                {t("notif_empty_label")}
               </div>
             ) : (
               notifications.slice(0, 8).map((notif) => {
                 const isUnread = !notif.is_read;
-                const senderName = ROLE_LABELS[notif.sender_role] || notif.sender_role;
+                const senderName = getLocalizedRoleLabel(notif.sender_role);
 
                 return (
                   <div
@@ -150,16 +162,16 @@ export function NotificationBell() {
                             <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
                           )}
                           <span className="font-semibold text-slate-200 leading-snug">
-                            {notif.title}
+                            {translateNotificationTitle(notif.title, language)}
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-400 leading-relaxed">
-                          {notif.message}
+                          {translateNotificationMessage(notif.message, language)}
                         </p>
                         <div className="flex items-center gap-2 pt-0.5 text-[10px] text-slate-400">
-                          <span>Émetteur: {senderName}</span>
+                          <span>{t("notif_sender_label")} {senderName}</span>
                           <span>•</span>
-                          <span>{new Date(notif.created_at).toLocaleTimeString()}</span>
+                          <span>{new Date(notif.created_at).toLocaleTimeString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US")}</span>
                         </div>
                       </div>
 
@@ -167,7 +179,7 @@ export function NotificationBell() {
                         <button
                           type="button"
                           onClick={() => markAsRead(notif.id)}
-                          title="Marquer comme lu"
+                          title={t("notif_mark_read")}
                           className="shrink-0 p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800"
                         >
                           <CheckCheck className="w-3.5 h-3.5" />
@@ -187,10 +199,12 @@ export function NotificationBell() {
               onClick={() => setIsOpen(false)}
               className="text-slate-300 hover:text-white flex items-center gap-1.5 font-medium transition-colors p-1"
             >
-              <span>Centre d'alertes & intercom</span>
+              <span>{t("nav_intercom_alerts")}</span>
               <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
             </Link>
-            <span className="text-[10px] text-slate-400">58 wilayas connectées</span>
+            <span className="text-[10px] text-slate-400">
+              58 {language === "ar" ? "ولاية متصلة" : language === "en" ? "wilayas connected" : "wilayas connectées"}
+            </span>
           </div>
         </div>
       )}

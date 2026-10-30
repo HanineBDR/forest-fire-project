@@ -2,12 +2,15 @@
 
 import React from "react";
 import { Satellite, Radio, Shield, Compass } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export const MapSkeleton: React.FC = () => {
+  const { t } = useLanguage();
+
   return (
     <div 
       role="status" 
-      aria-label="Chargement du système cartographique tactique"
+      aria-label={t("loading_cartography")}
       className="relative w-full h-full min-h-[520px] rounded-xl bg-slate-950 border border-slate-800 flex flex-col items-center justify-center overflow-hidden p-6 select-none"
     >
       {/* Tactical Grid Background */}
@@ -36,15 +39,15 @@ export const MapSkeleton: React.FC = () => {
       <div className="relative z-10 text-center max-w-md space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs text-slate-300 font-mono">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span>IN9AD · Système Cartographique Opérationnel</span>
+          <span>{t("skeleton_title")}</span>
         </div>
 
         <h3 className="text-base font-bold text-white tracking-wide">
-          Chargement du flux cartographique & télémétrie
+          {t("skeleton_loading_stream")}
         </h3>
         
         <p className="text-xs text-slate-400 font-mono">
-          Calibration du corridor topographique Nord Algérie (Kabylie, Dahra, Aurès)
+          {t("skeleton_calibrating")}
         </p>
       </div>
 
@@ -53,7 +56,7 @@ export const MapSkeleton: React.FC = () => {
         <div className="bg-slate-900/80 border border-slate-800 p-2.5 rounded-lg flex items-center gap-2 text-slate-300">
           <Satellite className="w-4 h-4 text-emerald-400 shrink-0" />
           <div className="truncate">
-            <div className="text-[10px] text-slate-400">Flux Satellite</div>
+            <div className="text-[10px] text-slate-400">{t("skeleton_sat_stream")}</div>
             <div className="text-emerald-300 font-semibold truncate">NASA FIRMS</div>
           </div>
         </div>
@@ -61,15 +64,15 @@ export const MapSkeleton: React.FC = () => {
         <div className="bg-slate-900/80 border border-slate-800 p-2.5 rounded-lg flex items-center gap-2 text-slate-300">
           <Radio className="w-4 h-4 text-amber-400 shrink-0" />
           <div className="truncate">
-            <div className="text-[10px] text-slate-400">Réseau Terrestre</div>
-            <div className="text-amber-300 font-semibold truncate">Vigies DGF</div>
+            <div className="text-[10px] text-slate-400">{t("skeleton_ground_network")}</div>
+            <div className="text-amber-300 font-semibold truncate">{t("skeleton_dgf_vigies")}</div>
           </div>
         </div>
 
         <div className="bg-slate-900/80 border border-slate-800 p-2.5 rounded-lg flex items-center gap-2 text-slate-300">
           <Shield className="w-4 h-4 text-red-400 shrink-0" />
           <div className="truncate">
-            <div className="text-[10px] text-slate-400">Modèle Prédictif</div>
+            <div className="text-[10px] text-slate-400">{t("skeleton_predictive_model")}</div>
             <div className="text-red-300 font-semibold truncate">XGBoost v2.1</div>
           </div>
         </div>

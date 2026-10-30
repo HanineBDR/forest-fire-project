@@ -32,27 +32,47 @@ export const DEMO_ACCOUNTS = [
     email: "protection@in9ad.dz",
     password: "Protect123!",
     role: "CIVIL_PROTECTION" as UserRole,
-    label: "الحماية المدنية (Protection Civile)",
-    officer: "Commandant Protection Civile",
-    org: "Direction Générale de la Protection Civile (DGPC)"
+    label: "Civil Protection (CODIS)",
+    officer: "Civil Protection Commander",
+    org: "General Directorate of Civil Protection (DGPC)"
   },
   {
     email: "foret@in9ad.dz",
     password: "Foret123!",
     role: "FOREST_GUARD" as UserRole,
-    label: "محافظة الغابات (Conservation des Forêts)",
-    officer: "Inspecteur Principal des Forêts",
-    org: "Direction Générale des Forêts (DGF - Kabylie)"
+    label: "Forest Conservation (DGF)",
+    officer: "Chief Forest Inspector",
+    org: "General Directorate of Forests (DGF - Kabylie)"
   },
   {
     email: "admin@in9ad.dz",
     password: "Admin123!",
     role: "ADMIN" as UserRole,
-    label: "الإدارة المركزية (Super Admin)",
-    officer: "Direction Générale - Super Admin",
-    org: "Ministère de l'Intérieur / IN9AD Admin"
+    label: "Central Administration (Super Admin)",
+    officer: "General Directorate - Super Admin",
+    org: "Ministry of Interior / IN9AD Admin"
   }
 ];
+
+export function getLocalizedDemoAccount(account: typeof DEMO_ACCOUNTS[0], lang: string = "en") {
+  if (lang === "ar") {
+    return {
+      ...account,
+      label: account.role === "CIVIL_PROTECTION" ? "الحماية المدنية (CODIS)" : account.role === "FOREST_GUARD" ? "محافظة الغابات (DGF)" : "الإدارة المركزية (Super Admin)",
+      officer: account.role === "CIVIL_PROTECTION" ? "قائد الحماية المدنية" : account.role === "FOREST_GUARD" ? "المفتش الرئيسي للغابات" : "المديرية العامة - المشرف الرئيسي",
+      org: account.role === "CIVIL_PROTECTION" ? "المديرية العامة للحماية المدنية (DGPC)" : account.role === "FOREST_GUARD" ? "المديرية العامة للغابات (DGF)" : "وزارة الداخلية / إدارة إنقاذ"
+    };
+  }
+  if (lang === "fr") {
+    return {
+      ...account,
+      label: account.role === "CIVIL_PROTECTION" ? "Protection Civile (CODIS)" : account.role === "FOREST_GUARD" ? "Conservation des Forêts (DGF)" : "Administration Centrale (Super Admin)",
+      officer: account.role === "CIVIL_PROTECTION" ? "Commandant Protection Civile" : account.role === "FOREST_GUARD" ? "Inspecteur Principal des Forêts" : "Direction Générale - Super Admin",
+      org: account.role === "CIVIL_PROTECTION" ? "Direction Générale de la Protection Civile (DGPC)" : account.role === "FOREST_GUARD" ? "Direction Générale des Forêts (DGF - Kabylie)" : "Ministère de l'Intérieur / IN9AD Admin"
+    };
+  }
+  return account;
+}
 
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;

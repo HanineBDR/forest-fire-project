@@ -250,7 +250,7 @@ function DashboardMapInner() {
       {/* Tactical Status Ribbon */}
       <div 
         role="status" 
-        aria-label="Statut du système opérationnel"
+        aria-label={t("operational_watch_active")}
         className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/80 text-xs"
       >
         <div className="flex items-center gap-3 flex-wrap">
@@ -367,7 +367,7 @@ export default function DashboardMapPage() {
       fallback={
         <div className="w-full h-screen flex flex-col items-center justify-center space-y-3 bg-slate-950 text-slate-400">
           <div className="w-8 h-8 rounded-full border-2 border-red-500 border-t-transparent animate-spin"></div>
-          <span className="text-xs font-mono">Chargement du Système Cartographique Opérationnel…</span>
+          <span className="text-xs font-mono">Loading Operational Cartography System…</span>
         </div>
       }
     >

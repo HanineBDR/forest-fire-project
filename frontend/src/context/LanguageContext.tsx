@@ -7,12 +7,12 @@ import { ar } from "@/locales/ar";
 
 export type Language = "fr" | "en" | "ar";
 
-type TranslationKey = keyof typeof fr;
+export type TranslationKey = keyof typeof en | keyof typeof fr;
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
+  t: (key: TranslationKey | string, params?: Record<string, string | number>) => string;
   isRTL: boolean;
 }
 
@@ -23,14 +23,14 @@ const translations: Record<Language, Record<string, string>> = {
 };
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: "fr",
+  language: "en",
   setLanguage: () => {},
   t: (key) => key,
   isRTL: false,
 });
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>("fr");
+  const [language, setLanguageState] = useState<Language>("en");
 
   useEffect(() => {
     try {
@@ -39,10 +39,12 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setLanguageState(savedLang);
         applyDocumentDirection(savedLang);
       } else {
-        applyDocumentDirection("fr");
+        setLanguageState("en");
+        applyDocumentDirection("en");
       }
     } catch {
-      applyDocumentDirection("fr");
+      setLanguageState("en");
+      applyDocumentDirection("en");
     }
   }, []);
 
@@ -69,9 +71,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     applyDocumentDirection(lang);
   };
 
-  const t = (key: TranslationKey, params?: Record<string, string | number>): string => {
-    const dict = translations[language] || translations.fr;
-    let text = dict[key] || translations.fr[key] || key;
+  const t = (key: TranslationKey | string, params?: Record<string, string | number>): string => {
+    const dict = translations[language] || translations.en;
+    let text = dict[key] || translations.en[key as keyof typeof en] || translations.fr[key as keyof typeof fr] || key;
 
     if (params) {
       Object.entries(params).forEach(([paramKey, paramVal]) => {

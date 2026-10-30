@@ -4,8 +4,9 @@ import { createPanelIntercomAlert } from "@/lib/notifications";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  let body: any = null;
   try {
-    const body = await req.json();
+    body = await req.json();
     const {
       from_role,
       to_role,
@@ -43,6 +44,20 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, data: result }, { status: 201 });
   } catch (error: any) {
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const res = await fetch(`${backendUrl}/api/notifications/alert-panel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return NextResponse.json(json, { status: 201 });
+      }
+    } catch (proxyError) {
+      // Fall through
+    }
     return NextResponse.json(
       { ok: false, error: error?.message || "Failed to dispatch panel alert" },
       { status: 500 }

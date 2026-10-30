@@ -2,8 +2,15 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { getStoredUser } from "@/lib/auth";
-import { getNeonRealtimeConfig } from "@/lib/neon";
-import { NotificationRecord, AlertAcknowledgmentRecord } from "@/lib/notifications";
+import {
+  getNeonRealtimeConfig,
+  type NotificationRecord,
+  type AlertAcknowledgmentRecord,
+  translateNotificationTitle,
+  translateNotificationMessage,
+  translateNotificationRisk,
+} from "@/lib/notificationTypes";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ToastNotification {
   id: string;
@@ -107,6 +114,7 @@ function playToneAlert() {
 }
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const { language } = useLanguage();
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [activeRole, setActiveRole] = useState<string>("protection_civile");
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -468,12 +476,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <h2 className="text-xs font-bold uppercase tracking-wider text-red-400">
-                  {activeToast.title}
+                  {translateNotificationTitle(activeToast.title, language)}
                 </h2>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">{activeToast.message}</p>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                {translateNotificationMessage(activeToast.message, language)}
+              </p>
               <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-400">
-                <span>Niveau: {activeToast.risk_level}</span>
+                <span>{language === "ar" ? "المستوى" : language === "en" ? "Level" : "Niveau"}: {translateNotificationRisk(activeToast.risk_level, language)}</span>
                 <span>•</span>
                 <span>{activeToast.created_at}</span>
               </div>
@@ -481,10 +491,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             <button
               type="button"
               onClick={dismissToast}
-              aria-label="Fermer la notification"
+              aria-label={language === "ar" ? "إغلاق الإشعار" : language === "en" ? "Dismiss notification" : "Fermer la notification"}
               className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded border border-slate-700 hover:bg-slate-800 transition-colors"
             >
-              Fermer
+              {language === "ar" ? "إغلاق" : language === "en" ? "Close" : "Fermer"}
             </button>
           </div>
         </aside>

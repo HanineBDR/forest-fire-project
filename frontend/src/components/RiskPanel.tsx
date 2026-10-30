@@ -133,7 +133,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
           ? [
               {
                 label: language === "ar" ? "هبوب رياح الشهيلي الصحراوية" : language === "en" ? "Saharan Sirocco Flare" : "Effet Sirocco saharien",
-                valueText: "Sud-Est",
+                valueText: language === "ar" ? "جنوب-شرق" : language === "en" ? "South-East" : "Sud-Est",
                 impactPct: 25,
                 isHazard: true,
               },
@@ -230,7 +230,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
 
       {/* FEATURE 2: EXPLAINABILITY - WHY THIS RISK? (Green/Red Horizontal Contribution Bars) */}
       <section 
-        aria-label="Facteurs contributifs du risque incendie"
+        aria-label={t("explainability_title")}
         className="bg-slate-950/60 p-3 rounded-lg border border-slate-800 space-y-2 relative"
       >
         <div className="flex items-center justify-between">
@@ -243,7 +243,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
             onClick={() => setShowExplainTooltip(!showExplainTooltip)}
             className="text-slate-400 hover:text-slate-200 p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
             title={t("explainability_tooltip")}
-            aria-label="Explication des facteurs de risque"
+            aria-label={t("explainability_tooltip")}
           >
             <HelpCircle className="w-3.5 h-3.5" />
           </button>
@@ -333,19 +333,19 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
 
       {/* Canadian Forest Fire Weather Index (FWI) Components */}
       <div className="grid grid-cols-4 gap-2">
-        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40 text-center" title="Indice d'inflammabilité de l'humus et des feuilles mortes (Fine Fuel Moisture Code)">
+        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40 text-center" title={t("fwi_ffmc_desc")}>
           <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">FFMC</span>
           <span className="text-sm font-mono tabular-nums font-bold text-amber-400">{fwi_metrics.ffmc}</span>
         </div>
-        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40 text-center" title="Indice de vitesse initiale de propagation du feu (Initial Spread Index)">
+        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40 text-center" title={t("fwi_isi_desc")}>
           <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">ISI</span>
           <span className="text-sm font-mono tabular-nums font-bold text-amber-400">{fwi_metrics.isi}</span>
         </div>
-        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40 text-center" title="Indice de combustible lourd disponible (Buildup Index)">
+        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40 text-center" title={t("fwi_bui_desc")}>
           <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">BUI</span>
           <span className="text-sm font-mono tabular-nums font-bold text-amber-400">{fwi_metrics.bui}</span>
         </div>
-        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40 text-center" title="Indice Global Météo-Forêt unifié (Fire Weather Index)">
+        <div className="bg-slate-800/40 p-2 rounded-lg border border-slate-700/40 text-center" title={t("fwi_fwi_desc")}>
           <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">FWI</span>
           <span className="text-sm font-mono tabular-nums font-bold text-amber-400">{fwi_metrics.fwi}</span>
         </div>

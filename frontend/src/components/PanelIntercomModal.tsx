@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { Send, Shield, AlertTriangle, Radio, X } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { ROLE_LABELS } from "@/lib/notifications";
+import { ROLE_LABELS } from "@/lib/notificationTypes";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PanelIntercomModalProps {
   initialMassif?: string;
@@ -18,14 +19,15 @@ export function PanelIntercomModal({
   initialWilaya = "Tizi Ouzou",
   initialAlertId,
   buttonClassName,
-  buttonLabel = "Alerter autre panel",
+  buttonLabel,
 }: PanelIntercomModalProps) {
+  const { t } = useLanguage();
   const { activeRole, alertPanel } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [targetRole, setTargetRole] = useState<string>("protection_civile");
   const [massif, setMassif] = useState(initialMassif);
   const [wilaya, setWilaya] = useState(initialWilaya);
-  const [urgency, setUrgency] = useState<string>("Très Elevé");
+  const [urgency, setUrgency] = useState<string>("critical");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
@@ -36,6 +38,9 @@ export function PanelIntercomModal({
 
     setIsSubmitting(true);
     try {
+      const riskScore = urgency === "critical" ? 90.0 : urgency === "high" ? 75.0 : 50.0;
+      const riskLevel = urgency === "critical" ? "Très Elevé" : urgency === "high" ? "Elevé" : "Modéré";
+
       const ok = await alertPanel({
         from_role: activeRole,
         to_role: targetRole,
@@ -43,12 +48,12 @@ export function PanelIntercomModal({
         message: message.trim(),
         massif,
         wilaya,
-        risk_level: urgency,
-        risk_score: urgency === "Très Elevé" ? 90.0 : 75.0,
+        risk_level: riskLevel,
+        risk_score: riskScore,
       });
 
       if (ok) {
-        setSuccessNotice("Message opérationnel transmis en temps réel.");
+        setSuccessNotice(t("intercom_success"));
         setTimeout(() => {
           setSuccessNotice(null);
           setIsOpen(false);
@@ -59,6 +64,8 @@ export function PanelIntercomModal({
       setIsSubmitting(false);
     }
   };
+
+  const effectiveButtonLabel = buttonLabel || t("intercom_alert_panel");
 
   return (
     <>
@@ -71,14 +78,14 @@ export function PanelIntercomModal({
         }
       >
         <Radio className="w-4 h-4 text-white" aria-hidden="true" />
-        <span>{buttonLabel}</span>
+        <span>{effectiveButtonLabel}</span>
       </button>
 
       {isOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Alerter un autre commandement opérationnel"
+          aria-label={t("intercom_modal_aria")}
           className="fixed inset-0 z-[2500] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs"
         >
           <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.06)] overflow-hidden">
@@ -87,13 +94,13 @@ export function PanelIntercomModal({
               <div className="flex items-center gap-2">
                 <Radio className="w-4 h-4 text-red-400" aria-hidden="true" />
                 <h3 className="text-sm font-bold text-white tracking-tight">
-                  Intercom Opérationnel National
+                  {t("intercom_modal_title")}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                aria-label="Fermer"
+                aria-label={t("close")}
                 className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -106,7 +113,7 @@ export function PanelIntercomModal({
                 {/* Emitter Role */}
                 <div>
                   <label className="block text-slate-400 font-medium mb-1">
-                    Émetteur (Votre rôle)
+                    {t("intercom_emitter")}
                   </label>
                   <div className="h-9 px-3 bg-slate-800/80 border border-slate-700 rounded-lg flex items-center text-slate-200">
                     {ROLE_LABELS[activeRole] || activeRole}
@@ -116,17 +123,17 @@ export function PanelIntercomModal({
                 {/* Target Role */}
                 <div>
                   <label className="block text-slate-400 font-medium mb-1">
-                    Destinataire ciblé
+                    {t("intercom_target")}
                   </label>
                   <select
                     value={targetRole}
                     onChange={(e) => setTargetRole(e.target.value)}
                     className="w-full h-9 px-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                   >
-                    <option value="protection_civile">Protection Civile (CODIS)</option>
-                    <option value="mohafadat_ghabat">Conservation des Forêts (DGF)</option>
-                    <option value="admin_centrale">Administration Centrale</option>
-                    <option value="all">Tous les Commandements (Diffusion générale)</option>
+                    <option value="protection_civile">{t("role_protection_civile")}</option>
+                    <option value="mohafadat_ghabat">{t("role_dgf")}</option>
+                    <option value="admin_centrale">{t("role_admin_centrale")}</option>
+                    <option value="all">{t("role_all_broadcast")}</option>
                   </select>
                 </div>
               </div>
@@ -134,7 +141,7 @@ export function PanelIntercomModal({
               {/* Massif and Wilaya */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">Massif forestier</label>
+                  <label className="block text-slate-400 font-medium mb-1">{t("intercom_massif")}</label>
                   <input
                     type="text"
                     value={massif}
@@ -145,7 +152,7 @@ export function PanelIntercomModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">Wilaya</label>
+                  <label className="block text-slate-400 font-medium mb-1">{t("intercom_wilaya")}</label>
                   <input
                     type="text"
                     value={wilaya}
@@ -159,20 +166,24 @@ export function PanelIntercomModal({
 
               {/* Urgency */}
               <div>
-                <label className="block text-slate-400 font-medium mb-1">Niveau d'urgence</label>
+                <label className="block text-slate-400 font-medium mb-1">{t("intercom_urgency")}</label>
                 <div className="grid grid-cols-3 gap-2">
-                  {["Modéré", "Elevé", "Très Elevé"].map((lvl) => (
+                  {[
+                    { key: "moderate", label: t("intercom_urgency_moderate") },
+                    { key: "high", label: t("intercom_urgency_high") },
+                    { key: "critical", label: t("intercom_urgency_critical") },
+                  ].map(({ key, label }) => (
                     <button
-                      key={lvl}
+                      key={key}
                       type="button"
-                      onClick={() => setUrgency(lvl)}
+                      onClick={() => setUrgency(key)}
                       className={`h-8 rounded-lg border text-xs font-semibold transition-colors ${
-                        urgency === lvl
+                        urgency === key
                           ? "bg-red-600 border-red-500 text-white"
                           : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
                       }`}
                     >
-                      {lvl}
+                      {label}
                     </button>
                   ))}
                 </div>
@@ -181,13 +192,13 @@ export function PanelIntercomModal({
               {/* Message */}
               <div>
                 <label className="block text-slate-400 font-medium mb-1">
-                  Message ou signalement opérationnel
+                  {t("intercom_message_label")}
                 </label>
                 <textarea
                   rows={3}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="ex. Départ de feu observé sur le flanc Nord. Vigie 4 signale fumée active. Colonnes mobiles requises."
+                  placeholder={t("intercom_message_placeholder")}
                   className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 leading-relaxed"
                   required
                 />
@@ -206,7 +217,7 @@ export function PanelIntercomModal({
                   onClick={() => setIsOpen(false)}
                   className="h-9 px-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 font-medium transition-colors"
                 >
-                  Annuler
+                  {t("cancel")}
                 </button>
                 <button
                   type="submit"
@@ -214,7 +225,7 @@ export function PanelIntercomModal({
                   className="flex items-center gap-2 h-9 px-4 bg-red-600 hover:bg-red-500 disabled:opacity-50 border border-red-500 rounded-lg text-white font-semibold transition-colors"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{isSubmitting ? "Transmission..." : "Émettre l'alerte"}</span>
+                  <span>{isSubmitting ? t("intercom_transmitting") : t("intercom_send")}</span>
                 </button>
               </div>
             </form>
@@ -224,4 +235,3 @@ export function PanelIntercomModal({
     </>
   );
 }
-

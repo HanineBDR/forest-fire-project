@@ -44,37 +44,37 @@ import { PanelIntercomModal } from "@/components/PanelIntercomModal";
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string; border: string }> = {
   DETECTED: {
-    label: "Détecté (IA)",
+    label: "Detected (AI)",
     color: "text-red-400",
     bg: "bg-red-950/80",
     border: "border-red-800"
   },
   PRISE_EN_COMPTE: {
-    label: "Prise en Compte (CODIS)",
+    label: "Acknowledged (CODIS)",
     color: "text-amber-400",
     bg: "bg-amber-950/80",
     border: "border-amber-800"
   },
   UNITES_DEPLOYEES: {
-    label: "Unités Déployées (Terrain)",
+    label: "Units Deployed (Field)",
     color: "text-emerald-400",
     bg: "bg-emerald-950/80",
     border: "border-emerald-800"
   },
   MAITRISE: {
-    label: "Feu Maîtrisé / Circonscrit",
+    label: "Fire Controlled / Contained",
     color: "text-blue-400",
     bg: "bg-blue-950/80",
     border: "border-blue-800"
   },
   ETEINT: {
-    label: "Éteint & Sécurisé",
+    label: "Extinguished & Secured",
     color: "text-slate-400",
     bg: "bg-slate-900",
     border: "border-slate-800"
   },
   FAUSSE_ALERTE: {
-    label: "Fausse Alerte Validée",
+    label: "False Alarm Confirmed",
     color: "text-slate-500",
     bg: "bg-slate-900",
     border: "border-slate-800"
@@ -183,7 +183,7 @@ export default function AlertsPage() {
       );
       setAlerts(data);
       setLastRefreshTime(new Date());
-      setRelativeTime("À l'instant");
+      setRelativeTime(t("just_now"));
 
       // Auto-load history for Yakouren or expanded alerts
       for (const a of data) {
@@ -346,14 +346,14 @@ export default function AlertsPage() {
       setHistoryCache((prev) => ({ ...prev, [alertId]: freshHist }));
 
       setToast({
-        title: "Statut Opérationnel Modifié",
-        message: `${alertId}: nouveau statut "${STATUS_LABELS[newStatus]?.label || newStatus}" enregistré dans le registre d'audit.`,
+        title: language === "ar" ? "تم تعديل الحالة العملياتية" : language === "en" ? "Operational Status Updated" : "Statut Opérationnel Modifié",
+        message: `${alertId}: ${getLocalizedStatusLabel(newStatus)}`,
         type: "success"
       });
     } catch (err: any) {
       setToast({
-        title: "Erreur de mise à jour",
-        message: err.message || "Action non autorisée.",
+        title: language === "ar" ? "خطأ في التحديث" : language === "en" ? "Update Error" : "Erreur de mise à jour",
+        message: err.message || (language === "ar" ? "إجراء غير مصرح به." : language === "en" ? "Action not authorized." : "Action non autorisée."),
         type: "critical"
       });
     } finally {
@@ -572,7 +572,7 @@ export default function AlertsPage() {
                         <button
                           onClick={() => setActiveDropdown(isDropdownOpen ? null : alert.alert_id)}
                           className={`px-3 py-1 rounded-md text-xs font-bold border transition-all flex items-center gap-1.5 ${statusMeta.bg} ${statusMeta.color} ${statusMeta.border} hover:brightness-110`}
-                          title={canModifyStatus ? "Cliquez pour changer le statut opérationnel" : "Statut d'intervention"}
+                          title={canModifyStatus ? (language === "ar" ? "انقر لتغيير الحالة العملياتية" : language === "en" ? "Click to change operational status" : "Cliquez pour changer le statut opérationnel") : (language === "ar" ? "حالة التدخل" : language === "en" ? "Intervention status" : "Statut d'intervention")}
                         >
                           <span>{t("status_label_prefix")} {getLocalizedStatusLabel(alert.status)}</span>
                           <ChevronDown className="w-3.5 h-3.5 opacity-70" />
@@ -697,7 +697,7 @@ export default function AlertsPage() {
                     <button
                       onClick={() => setSelectedAlertForPdf(alert)}
                       className="w-full py-2 px-3 rounded-lg border border-red-800/80 bg-red-950/70 hover:bg-red-900 text-red-200 text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
-                      title="Télécharger le Procès-Verbal officiel d'alerte incendie (PDF)"
+                      title={language === "ar" ? "تحميل المحضر الرسمي لإنذار الحريق (PDF)" : language === "en" ? "Download official wildfire alert report (PDF)" : "Télécharger le Procès-Verbal officiel d'alerte incendie (PDF)"}
                     >
                       <FileText className="w-3.5 h-3.5 text-red-400" />
                       <span>{t("export_pv")}</span>
@@ -716,7 +716,7 @@ export default function AlertsPage() {
                       <button
                         onClick={() => openSMSModalForAlert(alert)}
                         className="w-full py-2 px-3 rounded-lg border border-red-700 bg-red-950/80 hover:bg-red-900 text-red-200 text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
-                        title="Diffuser une alerte SMS géociblée (Mobilis / Algérie Télécom)"
+                        title={language === "ar" ? "بث إنذار SMS محدد جغرافياً (موبيليس / اتصالات الجزائر)" : language === "en" ? "Broadcast geotargeted SMS alert (Mobilis / Algérie Télécom)" : "Diffuser une alerte SMS géociblée (Mobilis / Algérie Télécom)"}
                       >
                         <Smartphone className="w-3.5 h-3.5 text-red-400" />
                         <span>{t("broadcast_sms")}</span>

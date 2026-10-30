@@ -15,10 +15,23 @@ export async function GET(req: NextRequest) {
       data: timeline,
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to fetch timeline" },
-      { status: 500 }
-    );
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const { searchParams } = new URL(req.url);
+      const limit = parseInt(searchParams.get("limit") || "50", 10);
+      const res = await fetch(`${backendUrl}/api/notifications/timeline?limit=${limit}`, { cache: "no-store" });
+      if (res.ok) {
+        const json = await res.json();
+        return NextResponse.json(json);
+      }
+    } catch (proxyError) {
+      // Fall through
+    }
+    return NextResponse.json({
+      ok: true,
+      count: 0,
+      data: [],
+    });
   }
 }
 

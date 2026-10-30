@@ -20,7 +20,7 @@ export const PdfLanguageModal: React.FC<PdfLanguageModalProps> = ({
   documentTitle,
 }) => {
   const { language: currentLang } = useLanguage();
-  const [selectedLang, setSelectedLang] = useState<Language>(currentLang || "fr");
+  const [selectedLang, setSelectedLang] = useState<Language>(currentLang || "en");
 
   if (!isOpen) return null;
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { FileSpreadsheet, FileText, FileJson, Table, Loader2 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   exportToCSV,
   exportToJSON,
@@ -27,6 +28,7 @@ export const ExportBar: React.FC<ExportBarProps> = ({
   filters = {},
   className = "",
 }) => {
+  const { t } = useLanguage();
   const [loadingType, setLoadingType] = useState<string | null>(null);
 
   const handleExport = async (type: "csv" | "pdf" | "excel" | "json") => {
@@ -64,14 +66,14 @@ export const ExportBar: React.FC<ExportBarProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
           <h3 className="text-sm font-bold text-pine-800 font-sans">
-            Export operational dossiers & telemetry
+            {t("export_dossiers_title")}
           </h3>
           <p className="text-[12px] text-pine-800/60 font-sans">
-            Download verified datasets for Algerian Civil Protection (DPC) & Forest Conservation (DGF).
+            {t("export_dossiers_sub")}
           </p>
         </div>
         <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-pine-800/10 text-pine-800 self-start sm:self-auto">
-          {data.length} records ready
+          {data.length} {t("export_records_ready")}
         </span>
       </div>
 
@@ -88,7 +90,7 @@ export const ExportBar: React.FC<ExportBarProps> = ({
           ) : (
             <Table className="w-4 h-4 text-[#F5F1E8]" />
           )}
-          <span>Export CSV</span>
+          <span>{t("export_csv")}</span>
         </button>
 
         {/* PDF */}
@@ -103,7 +105,7 @@ export const ExportBar: React.FC<ExportBarProps> = ({
           ) : (
             <FileText className="w-4 h-4 text-[#F5F1E8]" />
           )}
-          <span>Export PDF</span>
+          <span>{t("export_pdf")}</span>
         </button>
 
         {/* Excel */}
@@ -118,7 +120,7 @@ export const ExportBar: React.FC<ExportBarProps> = ({
           ) : (
             <FileSpreadsheet className="w-4 h-4 text-[#F5F1E8]" />
           )}
-          <span>Export Excel</span>
+          <span>{t("export_excel")}</span>
         </button>
 
         {/* JSON */}
@@ -133,7 +135,7 @@ export const ExportBar: React.FC<ExportBarProps> = ({
           ) : (
             <FileJson className="w-4 h-4 text-[#F5F1E8]" />
           )}
-          <span>Export JSON</span>
+          <span>{t("export_json")}</span>
         </button>
       </div>
     </div>

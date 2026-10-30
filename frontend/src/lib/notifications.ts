@@ -4,42 +4,10 @@
  */
 
 import { getNeonSql } from "@/lib/neon";
-
-export interface NotificationRecord {
-  id: number;
-  alert_id?: string | null;
-  sender_role: "ai_model" | "protection_civile" | "admin_centrale" | "mohafadat_ghabat" | string;
-  recipient_role: "protection_civile" | "admin_centrale" | "mohafadat_ghabat" | "all" | string;
-  recipient_user_id?: string | null;
-  title: string;
-  message: string;
-  risk_level: string;
-  risk_score?: number | null;
-  massif?: string | null;
-  wilaya?: string | null;
-  lat?: number | null;
-  lon?: number | null;
-  is_read: boolean;
-  created_at: string;
-}
-
-export interface AlertAcknowledgmentRecord {
-  id: number;
-  alert_id: string;
-  user_role: string;
-  action: "acknowledged" | "escalated" | "resolved" | "alerted_other" | string;
-  comment?: string | null;
-  target_role?: string | null;
-  created_at: string;
-}
-
-export const ROLE_LABELS: Record<string, string> = {
-  protection_civile: "Protection Civile (CODIS)",
-  admin_centrale: "Administration Centrale",
-  mohafadat_ghabat: "Conservation des Forêts (DGF)",
-  ai_model: "Système IA IN9AD",
-  all: "Tous les Commandements",
-};
+import type { NotificationRecord, AlertAcknowledgmentRecord } from "./notificationTypes";
+export type { NotificationRecord, AlertAcknowledgmentRecord };
+import { ROLE_LABELS } from "./notificationTypes";
+export { ROLE_LABELS };
 
 /**
  * Creates an alert in alerts table and dispatches 3 notifications
@@ -109,22 +77,22 @@ export async function createAlertAndNotifications(params: {
   const panels = [
     {
       role: "protection_civile",
-      action: "Alerte Opérationnelle: Mobiliser les colonnes mobiles et pré-positionner les moyens d'intervention.",
+      action: "Operational Alert: Mobilize mobile columns and pre-position intervention assets.",
     },
     {
       role: "admin_centrale",
-      action: "Alerte Stratégique: Risque feu de forêt élevé. Coordination inter-wilayas activée.",
+      action: "Strategic Alert: High wildfire risk. Inter-wilaya coordination activated.",
     },
     {
       role: "mohafadat_ghabat",
-      action: "Alerte Terrain: Surveillance accrue des vigies DGF et rondes de patrouille requises.",
+      action: "Field Alert: Increased surveillance of DGF watchtowers and patrol rounds required.",
     },
   ];
 
   const createdNotifications: any[] = [];
   for (const p of panels) {
-    const title = `Risque ${norm_level} détecté à ${massif} (${wilaya})`;
-    const message = `Le modèle IA (XGBoost + FWI) signale un danger de ${risk_score.toFixed(1)}% (${temp}°C, ${humidity}% HR, ${wind} km/h). ${p.action}`;
+    const title = `Risk ${norm_level} detected at ${massif} (${wilaya})`;
+    const message = `AI model (XGBoost + FWI) signals a hazard of ${risk_score.toFixed(1)}% (${temp}°C, ${humidity}% RH, ${wind} km/h). ${p.action}`;
 
     const [notif] = await sql`
       INSERT INTO notifications (
@@ -381,13 +349,13 @@ export async function createAcknowledgmentInDb(params: {
   );
 
   const actionTitles: Record<string, string> = {
-    acknowledged: `${userLabel} a pris en charge l'alerte ${params.alert_id}`,
-    escalated: `${userLabel} a escaladé l'alerte ${params.alert_id}`,
-    resolved: `${userLabel} signale l'alerte ${params.alert_id} comme maîtrisée`,
+    acknowledged: `${userLabel} acknowledged alert ${params.alert_id}`,
+    escalated: `${userLabel} escalated alert ${params.alert_id}`,
+    resolved: `${userLabel} marked alert ${params.alert_id} as contained`,
   };
 
-  const title = actionTitles[params.action] || `Mise à jour sur l'alerte ${params.alert_id}`;
-  const message = params.comment || `Statut mis à jour par ${userLabel}: ${params.action}.`;
+  const title = actionTitles[params.action] || `Update on alert ${params.alert_id}`;
+  const message = params.comment || `Status updated by ${userLabel}: ${params.action}.`;
 
   for (const r of otherRoles) {
     await sql`

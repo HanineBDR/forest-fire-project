@@ -65,7 +65,7 @@ export const Map: React.FC<MapProps> = ({
   windDirection = 180.0,
   initialFocus = null,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -381,20 +381,20 @@ export const Map: React.FC<MapProps> = ({
           <div style="font-family: sans-serif; min-width: 260px; color: #f8fafc; font-size: 11px;">
             <div style="border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 6px;">
               <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: ${isWarning ? '#f59e0b' : '#34d399'}; font-weight: bold;">
-                Direction Générale des Forêts · Poste de Vigie
+                ${t("dgf_tower_header")}
               </span>
               <div style="font-size: 13px; font-weight: bold; color: #ffffff;">${v.name}</div>
-              <div style="color: #94a3b8; font-size: 10px;">${v.wilaya} · Altitude : <b>${v.elevation_m}m</b></div>
+              <div style="color: #94a3b8; font-size: 10px;">${v.wilaya} · ${t("dgf_altitude")} <b>${v.elevation_m}m</b></div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;">
-              <div><b>Statut :</b> <span style="color: ${isWarning ? '#f59e0b' : '#34d399'}; font-weight: bold;">${v.status_label}</span></div>
-              <div><b>Guetteur :</b> ${v.observer}</div>
-              <div><b>Couverture optique :</b> ${v.line_of_sight}</div>
+              <div><b>${t("dgf_status")}</b> <span style="color: ${isWarning ? '#f59e0b' : '#34d399'}; font-weight: bold;">${v.status_label}</span></div>
+              <div><b>${t("dgf_observer")}</b> ${v.observer}</div>
+              <div><b>${t("dgf_optical_coverage")}</b> ${v.line_of_sight}</div>
               <div style="background: rgba(15,23,42,0.8); padding: 4px 6px; border-radius: 4px; border: 1px solid #334155;">
-                <div style="color: #38bdf8; font-weight: bold; font-size: 10px;">Télémétrie Capteurs Terrestres :</div>
-                <div>Temp : <b>${v.temp_sensor}°C</b> · Humidité : <b>${v.humidity_sensor}%</b> · Vent : <b>${v.wind_sensor} km/h</b></div>
+                <div style="color: #38bdf8; font-weight: bold; font-size: 10px;">${t("dgf_telemetry_title")}</div>
+                <div>${t("dgf_temp")} : <b>${v.temp_sensor}°C</b> · ${t("dgf_humidity")} : <b>${v.humidity_sensor}%</b> · ${t("dgf_wind")} : <b>${v.wind_sensor} km/h</b></div>
               </div>
-              <div style="color: #cbd5e1; font-size: 10px;"><b>Liaison Radio :</b> ${v.radio_channel}</div>
+              <div style="color: #cbd5e1; font-size: 10px;"><b>${t("dgf_radio_link")}</b> ${v.radio_channel}</div>
             </div>
           </div>
         `, { className: "bg-slate-900 border border-slate-700 text-white rounded-xl" });
@@ -402,7 +402,7 @@ export const Map: React.FC<MapProps> = ({
         group.addLayer(marker);
       });
     });
-  }, [dgfVigies, showDgfVigies, viewScope]);
+  }, [dgfVigies, showDgfVigies, viewScope, language, t]);
 
   // ROADMAP IDEA 3: Render Sirocco Mountain Pass Channels
   useEffect(() => {
@@ -425,7 +425,7 @@ export const Map: React.FC<MapProps> = ({
           <div style="font-family: sans-serif; font-size: 11px;">
             <div style="color: #f59e0b; font-weight: bold;">🌪️ ${c.name}</div>
             <div style="color: #ffffff; font-weight: bold;">${c.multiplier_label}</div>
-            <div style="color: #cbd5e1; font-size: 10px;">Axe : ${c.wind_axis}</div>
+            <div style="color: #cbd5e1; font-size: 10px;">${t("sirocco_corridor_axis")} ${c.wind_axis}</div>
           </div>
         `, { sticky: true, className: "bg-amber-950 text-white border border-amber-700 rounded p-1 text-xs" });
 
@@ -446,7 +446,7 @@ export const Map: React.FC<MapProps> = ({
         group.addLayer(L.marker(midPoint, { icon: corridorBadge }));
       });
     });
-  }, [siroccoCorridors, showSiroccoCorridors, viewScope]);
+  }, [siroccoCorridors, showSiroccoCorridors, viewScope, language, t]);
 
   // ROADMAP IDEA 4: Render FLIR Thermal Drone Patrols
   useEffect(() => {
@@ -466,7 +466,7 @@ export const Map: React.FC<MapProps> = ({
             fillColor: "#7c3aed",
             fillOpacity: 0.08,
           });
-          orbit.bindTooltip(`Circuit de Surveillance : ${d.mission_name}`, { sticky: true });
+          orbit.bindTooltip(`${t("drone_patrol_circuit")} ${d.mission_name}`, { sticky: true });
           group.addLayer(orbit);
         }
 
@@ -488,20 +488,20 @@ export const Map: React.FC<MapProps> = ({
           <div style="font-family: sans-serif; min-width: 270px; color: #f8fafc; font-size: 11px;">
             <div style="border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 6px;">
               <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: #a78bfa; font-weight: bold;">
-                Patrouille Aérienne Infrarouge (UAV Recon)
+                ${t("drone_recon_header")}
               </span>
               <div style="font-size: 13px; font-weight: bold; color: #ffffff;">${d.drone_id}</div>
               <div style="color: #94a3b8; font-size: 10px;">${d.model}</div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px;">
-              <div><b>Mission :</b> ${d.mission_name}</div>
-              <div><b>Statut Vol :</b> <span style="color: #34d399; font-weight: bold;">${d.status_label}</span></div>
+              <div><b>${t("drone_mission")}</b> ${d.mission_name}</div>
+              <div><b>${t("drone_flight_status")}</b> <span style="color: #34d399; font-weight: bold;">${d.status_label}</span></div>
               <div style="background: rgba(15,23,42,0.8); padding: 5px 8px; border-radius: 6px; border: 1px solid #334155; margin: 4px 0;">
-                <div style="color: #a78bfa; font-weight: bold; font-size: 10px;">Télémétrie Avionique & Capteur :</div>
-                <div>Altitude : <b>${d.altitude_m_agl}m AGL</b> · Vitesse : <b>${d.speed_kmh} km/h</b></div>
-                <div>Batterie : <b>${d.battery_pct}% (${d.flight_time_remaining})</b></div>
-                <div>Caméra : <b>${d.thermal_sensor}</b></div>
-                <div>Liaison Vidéo : <b>${d.video_link}</b></div>
+                <div style="color: #a78bfa; font-weight: bold; font-size: 10px;">${t("drone_telemetry_title")}</div>
+                <div>${t("drone_altitude")} <b>${d.altitude_m_agl}m AGL</b> · ${t("drone_speed")} <b>${d.speed_kmh} km/h</b></div>
+                <div>${t("drone_battery")} <b>${d.battery_pct}% (${d.flight_time_remaining})</b></div>
+                <div>${t("drone_camera")} <b>${d.thermal_sensor}</b></div>
+                <div>${t("drone_video_link")} <b>${d.video_link}</b></div>
               </div>
             </div>
           </div>
@@ -510,7 +510,7 @@ export const Map: React.FC<MapProps> = ({
         group.addLayer(marker);
       });
     });
-  }, [dronePatrols, showDronePatrols, viewScope]);
+  }, [dronePatrols, showDronePatrols, viewScope, language, t]);
 
   // FEATURE 4: Render Fine-Grained 6h Simulation Playback Polygon
   useEffect(() => {
@@ -551,13 +551,13 @@ export const Map: React.FC<MapProps> = ({
       });
 
       activePoly.bindTooltip(
-        `<b>Front d'incendie simulé : ${activeStep.hour_label}</b><br/>Surface détruite : <b>${activeStep.burned_area_hectares} ha</b>`,
+        `<b>${t("sim_active_front")} ${activeStep.hour_label}</b><br/>${t("sim_burned_surface")} <b>${activeStep.burned_area_hectares} ha</b>`,
         { permanent: false, sticky: true, className: "bg-red-950 text-white text-xs border border-red-700 px-2 py-1 rounded" }
       );
 
       group.addLayer(activePoly);
     });
-  }, [simulation6hData, currentSimStep]);
+  }, [simulation6hData, currentSimStep, language, t]);
 
   // FEATURE 5: Canvas Wind Particle Flow Overlay
   useEffect(() => {
@@ -639,7 +639,7 @@ export const Map: React.FC<MapProps> = ({
       } catch {}
       setDownloadingZone(null);
       setShowOfflineMenu(false);
-      setOfflineToast(`Carte ${zoneLabel} mise en cache (${size}) - Consultable hors-ligne via PWA.`);
+      setOfflineToast(t("offline_download_ready", { zone: zoneLabel, size }));
       setTimeout(() => setOfflineToast(null), 5000);
     }, 1200);
   };
@@ -751,7 +751,7 @@ export const Map: React.FC<MapProps> = ({
         {/* 3 Map Base Layer Types: Satellite, Dark, Street (OSM) */}
         <div 
           role="radiogroup"
-          aria-label="Fond de carte"
+          aria-label={t("map_base_layer_label")}
           className="flex items-center gap-0.5 p-0.5 bg-slate-950 rounded-md border border-slate-800 text-xs"
         >
           <button
@@ -764,7 +764,7 @@ export const Map: React.FC<MapProps> = ({
                 ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
                 : "text-slate-400 hover:text-slate-200"
             }`}
-            title="Fond satellite haute résolution (Esri World Imagery)"
+            title={t("map_satellite_title")}
           >
             <Satellite className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
             <span>{t("map_satellite")}</span>
@@ -780,7 +780,7 @@ export const Map: React.FC<MapProps> = ({
                 ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
                 : "text-slate-400 hover:text-slate-200"
             }`}
-            title="Fond sombre tactique nocturne (Dark Mode)"
+            title={t("map_dark_title")}
           >
             <Layers className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
             <span>{t("map_dark")}</span>
@@ -796,7 +796,7 @@ export const Map: React.FC<MapProps> = ({
                 ? "bg-slate-800 text-white border border-slate-700 shadow-sm" 
                 : "text-slate-400 hover:text-slate-200"
             }`}
-            title="Fond cartographique topographique / routier (OpenStreetMap)"
+            title={t("map_osm_title")}
           >
             <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
             <span>{t("map_streets")}</span>
@@ -814,7 +814,7 @@ export const Map: React.FC<MapProps> = ({
               ? "bg-slate-800 border-slate-600 text-white shadow-sm"
               : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
           }`}
-          title="Afficher/masquer les particules de vent Open-Meteo"
+          title={t("toggle_wind_title")}
         >
           <Wind className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
           <span>{t("layer_wind")}</span>
@@ -843,7 +843,7 @@ export const Map: React.FC<MapProps> = ({
               ? "bg-slate-800 border-slate-600 text-white shadow-sm"
               : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
           }`}
-          title="Afficher/masquer les 6 postes de vigie DGF interconnectés"
+          title={t("toggle_vigies_title")}
         >
           <Radio className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
           <span>{t("layer_vigies")}</span>
@@ -872,7 +872,7 @@ export const Map: React.FC<MapProps> = ({
               ? "bg-slate-800 border-slate-600 text-white shadow-sm"
               : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
           }`}
-          title="Afficher/masquer les couloirs aérologiques de Sirocco"
+          title={t("toggle_sirocco_title")}
         >
           <Wind className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
           <span>{t("layer_sirocco")}</span>
@@ -901,7 +901,7 @@ export const Map: React.FC<MapProps> = ({
               ? "bg-slate-800 border-slate-600 text-white shadow-sm"
               : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
           }`}
-          title="Afficher/masquer la télémétrie des patrouilles de drones thermiques"
+          title={t("toggle_drones_title")}
         >
           <Plane className="w-3.5 h-3.5 text-violet-400 shrink-0" aria-hidden="true" />
           <span>{t("layer_drones")}</span>
@@ -939,7 +939,7 @@ export const Map: React.FC<MapProps> = ({
                   type="button"
                   onClick={() => setShowOfflineMenu(false)} 
                   className="text-slate-400 hover:text-white p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                  aria-label="Fermer le menu hors-ligne"
+                  aria-label={t("offline_close_menu")}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -952,8 +952,8 @@ export const Map: React.FC<MapProps> = ({
                 className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
               >
                 <div>
-                  <div className="font-semibold text-white">Zone Yakouren (Tizi Ouzou)</div>
-                  <div className="text-[10px] text-slate-400">Forêt domaniale & col d&apos;Ighil Bouchene</div>
+                  <div className="font-semibold text-white">{t("offline_zone1_title")}</div>
+                  <div className="text-[10px] text-slate-400">{t("offline_zone1_sub")}</div>
                 </div>
                 <span className="font-mono text-emerald-400 text-[10px]">~45 Mo</span>
               </button>
@@ -965,8 +965,8 @@ export const Map: React.FC<MapProps> = ({
                 className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
               >
                 <div>
-                  <div className="font-semibold text-white">Zone Akfadou (Bejaia)</div>
-                  <div className="text-[10px] text-slate-400">Crête forestière & réserve intégrale</div>
+                  <div className="font-semibold text-white">{t("offline_zone2_title")}</div>
+                  <div className="text-[10px] text-slate-400">{t("offline_zone2_sub")}</div>
                 </div>
                 <span className="font-mono text-emerald-400 text-[10px]">~58 Mo</span>
               </button>
@@ -978,8 +978,8 @@ export const Map: React.FC<MapProps> = ({
                 className="w-full text-left p-2 rounded hover:bg-slate-800 transition-colors duration-150 text-slate-300 hover:text-white flex justify-between items-center"
               >
                 <div>
-                  <div className="font-semibold text-white">Tout le corridor Kabylie</div>
-                  <div className="text-[10px] text-slate-400">Tizi Ouzou + Bejaia + Bouira</div>
+                  <div className="font-semibold text-white">{t("offline_zone3_title")}</div>
+                  <div className="text-[10px] text-slate-400">{t("offline_zone3_sub")}</div>
                 </div>
                 <span className="font-mono text-emerald-400 text-[10px]">~125 Mo</span>
               </button>
@@ -987,7 +987,7 @@ export const Map: React.FC<MapProps> = ({
               {downloadingZone && (
                 <div className="p-2 text-center text-emerald-400 font-semibold flex items-center justify-center gap-2">
                   <div className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-                  <span>Téléchargement et mise en cache...</span>
+                  <span>{t("offline_downloading_caching")}</span>
                 </div>
               )}
             </div>

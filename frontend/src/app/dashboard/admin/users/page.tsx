@@ -268,7 +268,17 @@ export default function UsersManagementPage() {
                     </td>
 
                     <td className="py-3 px-4 text-slate-300">
-                      {u.organization || "N/A"}
+                      {language === "ar"
+                        ? u.organization_ar || u.organization || "N/A"
+                        : language === "en"
+                        ? (u.organization?.includes("Intérieur")
+                            ? "Ministry of Interior / IN9AD Admin"
+                            : u.organization?.includes("Protection Civile")
+                            ? "General Directorate of Civil Protection (DGPC)"
+                            : u.organization?.includes("Forêts")
+                            ? "General Directorate of Forests (DGF - Kabylie)"
+                            : u.organization || "N/A")
+                        : u.organization || "N/A"}
                     </td>
 
                     <td className="py-3 px-4 text-right">
@@ -280,9 +290,9 @@ export default function UsersManagementPage() {
                         <button
                           type="button"
                           onClick={() => handleDeleteUser(u.email)}
-                          aria-label={`Révoquer l'accès pour ${u.name}`}
+                          aria-label={`Revoke access for ${u.name}`}
                           className="p-1.5 rounded-md hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-transparent hover:border-red-900 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                          title="Révoquer cet accès"
+                          title="Revoke access"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -303,13 +313,13 @@ export default function UsersManagementPage() {
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-red-500 shrink-0" aria-hidden="true" />
-                <span>Créer un Compte Opérationnel</span>
+                <span>{t("users_modal_create_title")}</span>
               </h2>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 className="text-slate-400 hover:text-white p-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                aria-label="Fermer la boîte de dialogue"
+                aria-label={t("close")}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -317,7 +327,7 @@ export default function UsersManagementPage() {
 
             <form onSubmit={handleCreateUser} className="space-y-3.5">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">Nom & Titre de l'Officier</label>
+                <label className="text-xs font-semibold text-slate-300 block">{t("users_officer_name_label")}</label>
                 <input
                   type="text"
                   value={newName}
@@ -329,7 +339,7 @@ export default function UsersManagementPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">E-mail Professionnel</label>
+                <label className="text-xs font-semibold text-slate-300 block">{t("users_officer_email_label")}</label>
                 <input
                   type="email"
                   value={newEmail}
@@ -341,7 +351,7 @@ export default function UsersManagementPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">Mot de passe provisoire</label>
+                <label className="text-xs font-semibold text-slate-300 block">{t("users_temp_password_label")}</label>
                 <input
                   type="password"
                   value={newPassword}
@@ -354,20 +364,20 @@ export default function UsersManagementPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">Corps / Rôle Attribué</label>
+                <label className="text-xs font-semibold text-slate-300 block">{t("users_role_label")}</label>
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as UserRole)}
                   className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-xs text-slate-100 focus:outline-none focus:border-slate-600"
                 >
-                  <option value="CIVIL_PROTECTION">الحماية المدنية (Protection Civile)</option>
-                  <option value="FOREST_GUARD">محافظة الغابات (Conservation des Forêts)</option>
-                  <option value="ADMIN">الإدارة المركزية (Super Admin)</option>
+                  <option value="CIVIL_PROTECTION">{t("role_protection_civile")}</option>
+                  <option value="FOREST_GUARD">{t("role_dgf")}</option>
+                  <option value="ADMIN">{t("role_admin_centrale")}</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">Unité / Affectation</label>
+                <label className="text-xs font-semibold text-slate-300 block">{t("users_unit_label")}</label>
                 <input
                   type="text"
                   value={newOrg}
@@ -383,14 +393,14 @@ export default function UsersManagementPage() {
                   onClick={() => setIsModalOpen(false)}
                   className="px-3 py-2 rounded bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 transition"
                 >
-                  Annuler
+                  {t("users_cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 text-white text-xs font-medium transition"
                 >
-                  {loading ? "Création en cours…" : "Créer le compte"}
+                  {loading ? t("users_creating") : t("users_submit_create")}
                 </button>
               </div>
             </form>

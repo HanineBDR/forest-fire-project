@@ -18,6 +18,7 @@ import {
   ChevronRight,
   HelpCircle,
 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface StepDef {
   target: string;
@@ -27,94 +28,8 @@ interface StepDef {
   preferredPlacement?: "top" | "bottom";
 }
 
-const ALL_STEPS: StepDef[] = [
-  {
-    target: '[data-tour="brand"]',
-    icon: Shield,
-    title: "IN9AD : Système national de veille",
-    desc: "Centre opérationnel institutionnel pour la prédiction et la surveillance des feux de forêts en Algérie du Nord.",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="analytics"]',
-    icon: BarChart3,
-    title: "Analytics et performance du modèle IA",
-    desc: "Consultez l'évaluation scientifique du modèle XGBoost : matrice de confusion, courbe ROC et précision opérationnelle à 95.4%.",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="security-portal"]',
-    icon: Lock,
-    title: "Portail sécurisé des commandements",
-    desc: "Accédez à la console tactique réservée aux officiers opérationnels et aux centres de coordination.",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="roles"]',
-    icon: Users,
-    title: "Accès direct aux 3 commandements",
-    desc: "Basculez instantanément entre la Protection Civile (14), la Conservation des Forêts et l'Administration Centrale.",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="bell"]',
-    icon: Bell,
-    title: "Alertes et diffusion temps réel",
-    desc: "Cloche d'urgence : signale les détections de risque élevé par l'IA et les messages d'intercom entre panels opérationnels.",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="massifs"]',
-    icon: Trees,
-    title: "11 massifs stratégiques surveillés",
-    desc: "Sélectionnez en un clic les massifs prioritaires (Yakouren, Akfadou, Djurdjura, Chréa...) pour centrer la carte et actualiser la météo.",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="map"]',
-    icon: Map,
-    title: "Cartographie tactique interactive",
-    desc: "Visualisez les détections thermiques NASA FIRMS, les postes de vigie DGF et la simulation de propagation par vent.",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="simulation"]',
-    icon: Activity,
-    title: "Simulateur de propagation à 6 heures",
-    desc: "Contrôlez la ligne de temps pour projeter l'évolution spatiale du feu d'heure en heure selon les vecteurs de vent.",
-    preferredPlacement: "top",
-  },
-  {
-    target: '[data-tour="risk-panel"]',
-    icon: BarChart3,
-    title: "Calculateur de risque IA et FWI",
-    desc: "Évaluez le risque d'incendie en temps réel et testez des scénarios en modifiant température, vent et humidité.",
-    preferredPlacement: "top",
-  },
-  {
-    target: '[data-tour="nav"]',
-    icon: Radio,
-    title: "Navigation opérationnelle",
-    desc: "Basculez entre la carte tactique, les alertes actives, le centre d'intercom et l'historique d'intervention.",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="drones"]',
-    icon: Plane,
-    title: "Unité Drones FLIR : Surveillance aérienne",
-    desc: "Vecteur aéroporté d'inspection thermique infrarouge (DJI Matrice 300 RTK + FLIR). Détecte les foyers résiduels et patrouille entre les massifs (Phase 2).",
-    preferredPlacement: "bottom",
-  },
-  {
-    target: '[data-tour="iot"]',
-    icon: Cpu,
-    title: "Réseau IoT : Vigies et Ingestion ML",
-    desc: "Réseau LoRaWAN mesurant en direct température, humidité, vent et CO2 sur les 11 massifs pour alimenter le modèle prédictif XGBoost.",
-    preferredPlacement: "bottom",
-  },
-];
-
 export const OnboardingGuide: React.FC = () => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -130,12 +45,99 @@ export const OnboardingGuide: React.FC = () => {
     arrowLeft: 40,
   });
 
+  const allSteps: StepDef[] = useMemo(() => [
+    {
+      target: '[data-tour="brand"]',
+      icon: Shield,
+      title: t("tour_step_brand_title"),
+      desc: t("tour_step_brand_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="analytics"]',
+      icon: BarChart3,
+      title: t("tour_step_analytics_title"),
+      desc: t("tour_step_analytics_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="security-portal"]',
+      icon: Lock,
+      title: t("tour_step_security_title"),
+      desc: t("tour_step_security_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="roles"]',
+      icon: Users,
+      title: t("tour_step_roles_title"),
+      desc: t("tour_step_roles_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="bell"]',
+      icon: Bell,
+      title: t("tour_step_bell_title"),
+      desc: t("tour_step_bell_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="massifs"]',
+      icon: Trees,
+      title: t("tour_step_massifs_title"),
+      desc: t("tour_step_massifs_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="map"]',
+      icon: Map,
+      title: t("tour_step_map_title"),
+      desc: t("tour_step_map_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="simulation"]',
+      icon: Activity,
+      title: t("tour_step_simulation_title"),
+      desc: t("tour_step_simulation_desc"),
+      preferredPlacement: "top",
+    },
+    {
+      target: '[data-tour="risk-panel"]',
+      icon: BarChart3,
+      title: t("tour_step_risk_title"),
+      desc: t("tour_step_risk_desc"),
+      preferredPlacement: "top",
+    },
+    {
+      target: '[data-tour="nav"]',
+      icon: Radio,
+      title: t("tour_step_nav_title"),
+      desc: t("tour_step_nav_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="drones"]',
+      icon: Plane,
+      title: t("tour_step_drones_title"),
+      desc: t("tour_step_drones_desc"),
+      preferredPlacement: "bottom",
+    },
+    {
+      target: '[data-tour="iot"]',
+      icon: Cpu,
+      title: t("tour_step_iot_title"),
+      desc: t("tour_step_iot_desc"),
+      preferredPlacement: "bottom",
+    },
+  ], [t]);
+
   // Filter available steps present in current DOM
   const availableSteps = useMemo(() => {
-    if (typeof window === "undefined") return ALL_STEPS;
-    const matched = ALL_STEPS.filter((step) => Boolean(document.querySelector(step.target)));
-    return matched.length > 0 ? matched : ALL_STEPS;
-  }, [isOpen, stepIndex]);
+    if (typeof window === "undefined") return allSteps;
+    const matched = allSteps.filter((step) => Boolean(document.querySelector(step.target)));
+    return matched.length > 0 ? matched : allSteps;
+  }, [allSteps, isOpen, stepIndex]);
 
   // Automatic launch for first-time visitors
   useEffect(() => {
@@ -268,11 +270,11 @@ export const OnboardingGuide: React.FC = () => {
         <button
           type="button"
           onClick={handleRestart}
-          title="Consulter le guide de navigation"
+          title={t("tour_open_guide_tooltip")}
           className="fixed bottom-4 right-4 z-[2000] flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-300 hover:text-white text-xs font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
         >
           <HelpCircle className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-          <span>Guide</span>
+          <span>{t("tour_guide_btn")}</span>
         </button>
       )}
 
@@ -303,7 +305,7 @@ export const OnboardingGuide: React.FC = () => {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Guide de navigation IN9AD"
+            aria-label={t("tour_guide_title")}
             className="fixed z-[2900] w-[calc(100vw-32px)] max-w-[360px] bg-slate-900 border border-[#0A4D3C] rounded-lg p-4 text-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-all duration-150"
             style={
               targetRect
@@ -341,13 +343,13 @@ export const OnboardingGuide: React.FC = () => {
             {/* Header: step count + close button */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <span className="text-[11px] font-mono font-semibold text-emerald-400 uppercase tracking-wider">
-                Étape {stepIndex + 1} sur {availableSteps.length}
+                {t("tour_step_counter", { current: stepIndex + 1, total: availableSteps.length })}
               </span>
               <button
                 type="button"
                 onClick={handleClose}
                 className="text-slate-400 hover:text-white transition-colors p-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                aria-label="Fermer le guide"
+                aria-label={t("close")}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -373,7 +375,7 @@ export const OnboardingGuide: React.FC = () => {
                   key={i}
                   type="button"
                   onClick={() => setStepIndex(i)}
-                  aria-label={`Aller à l'étape ${i + 1}`}
+                  aria-label={`${t("tour_next")} ${i + 1}`}
                   className={`h-1.5 rounded-full transition-all duration-150 ${
                     i === stepIndex ? "w-5 bg-emerald-400" : "w-1.5 bg-slate-700 hover:bg-slate-500"
                   }`}
@@ -388,7 +390,7 @@ export const OnboardingGuide: React.FC = () => {
                 onClick={handleClose}
                 className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
               >
-                Passer
+                {t("tour_skip")}
               </button>
 
               <div className="flex items-center gap-2">
@@ -399,7 +401,7 @@ export const OnboardingGuide: React.FC = () => {
                     className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
-                    <span>Précédent</span>
+                    <span>{t("tour_previous")}</span>
                   </button>
                 )}
 
@@ -408,7 +410,7 @@ export const OnboardingGuide: React.FC = () => {
                   onClick={handleNext}
                   className="flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold rounded bg-[#0A4D3C] hover:bg-[#0c5d49] text-emerald-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
-                  <span>{isLast ? "Terminer" : "Suivant"}</span>
+                  <span>{isLast ? t("tour_finish") : t("tour_next")}</span>
                   {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
                 </button>
               </div>

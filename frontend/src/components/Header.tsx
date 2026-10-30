@@ -8,7 +8,7 @@ import { ShieldAlert, Satellite, Wind, Layers, PhoneCall, BarChart3, ChevronDown
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NotificationBell } from "@/components/NotificationBell";
-import { DEMO_ACCOUNTS, setSession, AuthUser } from "@/lib/auth";
+import { DEMO_ACCOUNTS, getLocalizedDemoAccount, setSession, AuthUser } from "@/lib/auth";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
   const [isPanelsOpen, setIsPanelsOpen] = useState(false);
   const panelsRef = useRef<HTMLDivElement>(null);
@@ -126,9 +126,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
                 aria-haspopup="menu"
                 aria-expanded={isPanelsOpen}
                 data-tour="roles"
-                aria-label="Accès direct aux 3 commandements"
+                aria-label={t("command_panel_access")}
                 className="px-1.5 py-1 text-red-300 hover:text-white hover:bg-red-900/80 border-l border-red-800 transition-colors"
-                title="Choisir un commandement opérationnel"
+                title={t("switch_command_title")}
               >
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isPanelsOpen ? "rotate-180" : ""}`} />
               </button>
@@ -140,32 +140,35 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
                 className="absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-lg py-1.5 z-[2500] focus:outline-none"
               >
                 <div className="px-3 py-1.5 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>Accès Direct aux Commandements</span>
-                  <span className="text-[10px] text-emerald-400 font-mono">1 Clic</span>
+                  <span>{t("command_panel_access")}</span>
+                  <span className="text-[10px] text-emerald-400 font-mono">{t("one_click_access")}</span>
                 </div>
                 <div className="p-1 space-y-1">
-                  {DEMO_ACCOUNTS.map((acc) => (
-                    <button
-                      key={acc.role}
-                      type="button"
-                      onClick={() => handleEnterPanel(acc)}
-                      className="w-full text-left p-2 rounded-md hover:bg-slate-800/80 transition-colors flex items-center justify-between group"
-                    >
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-200 group-hover:text-white">
-                          <span className={`w-2 h-2 rounded-full shrink-0 ${
-                            acc.role === "CIVIL_PROTECTION" ? "bg-red-500" :
-                            acc.role === "FOREST_GUARD" ? "bg-emerald-500" : "bg-blue-500"
-                          }`} />
-                          <span>{acc.label}</span>
+                  {DEMO_ACCOUNTS.map((rawAcc) => {
+                    const acc = getLocalizedDemoAccount(rawAcc, language);
+                    return (
+                      <button
+                        key={acc.role}
+                        type="button"
+                        onClick={() => handleEnterPanel(acc)}
+                        className="w-full text-left p-2 rounded-md hover:bg-slate-800/80 transition-colors flex items-center justify-between group"
+                      >
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2 text-xs font-semibold text-slate-200 group-hover:text-white">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${
+                              acc.role === "CIVIL_PROTECTION" ? "bg-red-500" :
+                              acc.role === "FOREST_GUARD" ? "bg-emerald-500" : "bg-blue-500"
+                            }`} />
+                            <span>{acc.label}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 pl-4 font-mono truncate max-w-[210px]">
+                            {acc.officer}
+                          </div>
                         </div>
-                        <div className="text-[10px] text-slate-400 pl-4 font-mono truncate max-w-[210px]">
-                          {acc.officer}
-                        </div>
-                      </div>
-                      <span className="text-[10px] text-slate-400 font-mono group-hover:text-slate-200">Entrer</span>
-                    </button>
-                  ))}
+                        <span className="text-[10px] text-slate-400 font-mono group-hover:text-slate-200">{t("enter_btn")}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -174,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }
           {/* Emergency Alert Hotline */}
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-red-950/50 border border-red-700/60 rounded-lg text-red-200 font-semibold">
             <PhoneCall className="w-3.5 h-3.5 text-red-400" aria-hidden="true" />
-            <span>Protection Civile: 14</span>
+            <span>{t("emergency_hotline")}</span>
           </div>
 
           {/* Real-time Notification Bell with unread badge & live popover */}
