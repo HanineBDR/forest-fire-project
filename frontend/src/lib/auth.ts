@@ -10,6 +10,8 @@ export interface AuthUser {
   email: string;
   name: string;
   role: UserRole;
+  phone?: string;
+  avatar?: string;
   organization?: string;
   organization_ar?: string;
   created_at?: string;
@@ -169,6 +171,19 @@ export function setSession(token: string, user: AuthUser) {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=86400; SameSite=Lax`;
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("in9ad_user_updated", { detail: user }));
+  }
+}
+
+export function updateStoredUser(updated: Partial<AuthUser>): AuthUser | null {
+  if (typeof window === "undefined") return null;
+  const current = getStoredUser();
+  if (!current) return null;
+  const merged: AuthUser = { ...current, ...updated };
+  localStorage.setItem(USER_KEY, JSON.stringify(merged));
+  window.dispatchEvent(new CustomEvent("in9ad_user_updated", { detail: merged }));
+  return merged;
 }
 
 export function clearSession() {
@@ -279,4 +294,3 @@ export function getLocalizedUserName(name: string, role?: UserRole, lang?: strin
   }
   return name;
 }
-

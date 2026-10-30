@@ -1,7 +1,7 @@
 """
 IN9AD - Authentication Service & RBAC Security Engine
 Handles password hashing, JWT generation/validation, role-based authorization,
-and persistent user management.
+persistent user management, avatar validation, and self-profile updates.
 """
 
 import os
@@ -42,6 +42,8 @@ DEMO_USERS = [
         "role": ROLE_ADMIN,
         "organization": "Ministère de l'Intérieur / IN9AD Admin",
         "organization_ar": "الإدارة المركزية",
+        "phone": "+213 21 00 11 22",
+        "avatar": None,
         "created_at": "2024-01-15T08:00:00Z"
     },
     {
@@ -51,6 +53,8 @@ DEMO_USERS = [
         "role": ROLE_CIVIL_PROTECTION,
         "organization": "Direction Générale de la Protection Civile (DGPC)",
         "organization_ar": "الحماية المدنية",
+        "phone": "+213 550 14 14 14",
+        "avatar": None,
         "created_at": "2024-02-01T09:30:00Z"
     },
     {
@@ -60,6 +64,8 @@ DEMO_USERS = [
         "role": ROLE_FOREST_GUARD,
         "organization": "Direction Générale des Forêts (DGF - Kabylie)",
         "organization_ar": "محافظة الغابات",
+        "phone": "+213 555 77 88 99",
+        "avatar": None,
         "created_at": "2024-02-15T10:15:00Z"
     }
 ]
@@ -132,6 +138,18 @@ def save_all_users(users_db: Dict[str, Any]):
         json.dump(users_db, f, indent=2)
 
 
+def validate_avatar_data(avatar_data: Optional[str]):
+    """Validates avatar size (max 2MB)."""
+    if not avatar_data:
+        return
+    # Base64 data URLs: approx 2.8MB raw text corresponds to 2MB binary payload
+    if len(avatar_data) > 2800000:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="L'image d'avatar dépasse la taille maximale autorisée de 2 Mo."
+        )
+
+
 def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
     """Validates email and password, returning sanitized user info."""
     users = get_all_users()
@@ -153,6 +171,8 @@ def create_access_token(user: Dict[str, Any], expires_delta: Optional[timedelta]
         "role": user.get("role", ROLE_CIVIL_PROTECTION),
         "name": user.get("name"),
         "org": user.get("organization"),
+        "avatar": user.get("avatar"),
+        "phone": user.get("phone"),
         "exp": expire,
         "iat": datetime.utcnow()
     }
@@ -205,7 +225,7 @@ def get_current_user(
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required. Please log in with an authorized IN9AD account (admin@in9ad.dz, protection@in9ad.dz, foret@in9ad.dz).",
+            detail="Authentication required. Please log in with an authorized IN9AD account.",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
@@ -242,12 +262,16 @@ def create_user(
     password: str,
     name: str,
     role: str,
-    organization: Optional[str] = None
+    organization: Optional[str] = None,
+    phone: Optional[str] = None,
+    avatar: Optional[str] = None
 ) -> Dict[str, Any]:
     """Creates a new official user account (Admin only)."""
     email_clean = email.strip().lower()
     if role not in VALID_ROLES:
         raise ValueError(f"Invalid role. Must be one of: {', '.join(VALID_ROLES)}")
+
+    validate_avatar_data(avatar)
 
     users = get_all_users()
     if email_clean in users:
@@ -263,6 +287,8 @@ def create_user(
             "الحماية المدنية" if role == ROLE_CIVIL_PROTECTION
             else ("محافظة الغابات" if role == ROLE_FOREST_GUARD else "الإدارة المركزية")
         ),
+        "phone": phone,
+        "avatar": avatar,
         "created_at": datetime.utcnow().isoformat() + "Z",
         "password_hash": hash_password(password)
     }
@@ -272,6 +298,90 @@ def create_user(
     return {k: v for k, v in new_user.items() if k != "password_hash"}
 
 
+def update_user_profile(
+    email: str,
+    name: Optional[str] = None,
+    phone: Optional[str] = None,
+    password: Optional[str] = None,
+    avatar: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Updates the authenticated user's own profile.
+    CRITICAL: Email is strictly locked and cannot be changed.
+    """
+    email_clean = email.strip().lower()
+    users = get_all_users()
+    user = users.get(email_clean)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+
+    validate_avatar_data(avatar)
+
+    if name is not None and name.strip():
+        user["name"] = name.strip()
+    if phone is not None:
+        user["phone"] = phone.strip()
+    if avatar is not None:
+        user["avatar"] = avatar
+    if password is not None and len(password.strip()) >= 6:
+        user["password_hash"] = hash_password(password.strip())
+
+    user["updated_at"] = datetime.utcnow().isoformat() + "Z"
+    users[email_clean] = user
+    save_all_users(users)
+    return {k: v for k, v in user.items() if k != "password_hash"}
+
+
+def admin_update_user(
+    email: str,
+    name: Optional[str] = None,
+    role: Optional[str] = None,
+    phone: Optional[str] = None,
+    organization: Optional[str] = None,
+    password: Optional[str] = None,
+    avatar: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Updates any user account (Admin only).
+    CRITICAL: Email is locked/immutable. Super Admin cannot be demoted.
+    """
+    email_clean = email.strip().lower()
+    users = get_all_users()
+    user = users.get(email_clean)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+
+    validate_avatar_data(avatar)
+
+    if email_clean == "admin@in9ad.dz" and role is not None and role != ROLE_ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot alter Super Admin primary role."
+        )
+
+    if name is not None and name.strip():
+        user["name"] = name.strip()
+    if role is not None and role in VALID_ROLES:
+        user["role"] = role
+        user["organization_ar"] = (
+            "الحماية المدنية" if role == ROLE_CIVIL_PROTECTION
+            else ("محافظة الغابات" if role == ROLE_FOREST_GUARD else "الإدارة المركزية")
+        )
+    if phone is not None:
+        user["phone"] = phone.strip()
+    if organization is not None:
+        user["organization"] = organization.strip()
+    if avatar is not None:
+        user["avatar"] = avatar
+    if password is not None and len(password.strip()) >= 6:
+        user["password_hash"] = hash_password(password.strip())
+
+    user["updated_at"] = datetime.utcnow().isoformat() + "Z"
+    users[email_clean] = user
+    save_all_users(users)
+    return {k: v for k, v in user.items() if k != "password_hash"}
+
+
 def list_users() -> List[Dict[str, Any]]:
     """Returns list of all registered users without hashes."""
     users = get_all_users()
@@ -279,10 +389,17 @@ def list_users() -> List[Dict[str, Any]]:
 
 
 def delete_user(email: str) -> bool:
-    """Deletes user (demo accounts protected)."""
+    """
+    Deletes user (Admin only).
+    CRITICAL: The primary Super Admin account (admin@in9ad.dz) CANNOT be deleted. Returns 403.
+    Other Admin accounts CAN be deleted.
+    """
     email_clean = email.strip().lower()
-    if email_clean in ["admin@in9ad.dz", "protection@in9ad.dz", "foret@in9ad.dz"]:
-        raise ValueError("Cannot delete permanent demo benchmark accounts.")
+    if email_clean == "admin@in9ad.dz":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The primary Super Admin account (admin@in9ad.dz) cannot be deleted."
+        )
 
     users = get_all_users()
     if email_clean in users:
@@ -303,7 +420,6 @@ def enforce_rate_limit(client_id: str, max_per_min: int = MAX_REQUESTS_PER_MINUT
     if client_id not in RATE_LIMIT_STORE:
         RATE_LIMIT_STORE[client_id] = []
 
-    # Filter out requests older than 1 minute
     recent = [t for t in RATE_LIMIT_STORE[client_id] if t >= window_start]
     if len(recent) >= max_per_min:
         logger.warning(f"Rate limit exceeded for client: {client_id} ({len(recent)} req/min)")

@@ -1232,3 +1232,93 @@ export async function fetchDronePatrols(): Promise<DronePatrol[]> {
   }
   return [];
 }
+
+
+export interface UpdateProfilePayload {
+  name?: string;
+  phone?: string;
+  password?: string;
+  avatar?: string;
+}
+
+export async function updateMyProfile(payload: UpdateProfilePayload): Promise<any> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail || "Erreur de mise à jour du profil");
+  }
+  return await res.json();
+}
+
+export interface AdminUpdateUserPayload {
+  name?: string;
+  role?: string;
+  phone?: string;
+  organization?: string;
+  password?: string;
+  avatar?: string;
+}
+
+export async function adminUpdateUser(email: string, payload: AdminUpdateUserPayload): Promise<any> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const res = await fetch(`${API_BASE}/auth/users/${encodeURIComponent(email.trim().toLowerCase())}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail || "Erreur de mise à jour utilisateur");
+  }
+  return await res.json();
+}
+
+export async function adminDeleteUser(email: string): Promise<any> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("in9ad_auth_token") : null;
+  const res = await fetch(`${API_BASE}/auth/users/${encodeURIComponent(email.trim().toLowerCase())}`, {
+    method: "DELETE",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail || "Erreur de révocation du compte");
+  }
+  return await res.json();
+}
+
+export interface EmailReportPayload {
+  recipient_email: string;
+  alert_id?: string;
+  forest_name?: string;
+  wilaya?: string;
+  severity?: string;
+  risk_score?: number;
+  message: string;
+  lat?: number;
+  lon?: number;
+  sender_role?: string;
+}
+
+export async function sendEmailReport(payload: EmailReportPayload): Promise<any> {
+  const res = await fetch("/api/notifications/email-report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.error || err?.detail || "Failed to dispatch email incident report");
+  }
+  return await res.json();
+}

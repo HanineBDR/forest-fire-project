@@ -16,6 +16,7 @@ import {
   BarChart3,
   ChevronDown,
   UserCheck,
+  User,
   Settings,
   Radio,
   Plane,
@@ -71,6 +72,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setUser(u);
     setIsReady(true);
   }, [router]);
+
+  // Synchronize dynamic user updates (e.g., after avatar or profile edit)
+  useEffect(() => {
+    const handleUserUpdate = (e: any) => {
+      if (e.detail) {
+        setUser(e.detail);
+      } else {
+        const u = getStoredUser();
+        if (u) setUser(u);
+      }
+    };
+    window.addEventListener("in9ad_user_updated", handleUserUpdate);
+    return () => window.removeEventListener("in9ad_user_updated", handleUserUpdate);
+  }, []);
 
   // Check for unauthorized access flash toast
   useEffect(() => {
@@ -222,7 +237,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${isRTL ? "font-arabic" : ""}`}>
       {/* Top Security Header */}
-      <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60 w-full">
+      <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60 w-full overflow-x-clip">
         {/* Unauthorized Flash Toast */}
         {unauthToast && (
           <div className="fixed top-20 right-4 z-[2000] p-4 bg-red-950/95 border border-red-700 text-red-200 rounded-xl shadow-2xl flex items-start gap-3 max-w-md animate-fadeIn">
@@ -257,7 +272,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     v3.0
                   </span>
                 </div>
-                <div className="hidden sm:block text-[10px] text-slate-400 uppercase tracking-wider font-medium mt-0.5">
+                <div className="hidden xl:block text-[10px] text-slate-400 uppercase tracking-wider font-medium mt-0.5">
                   {t("platform_sub") || "Système Opérationnel"}
                 </div>
               </div>
@@ -274,7 +289,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 title={t("switch_command_title")}
               >
                 <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
-                <span className="max-w-[110px] sm:max-w-[170px] truncate">{cleanRoleText}</span>
+                <span className="max-w-[100px] sm:max-w-[130px] xl:max-w-[170px] truncate">{cleanRoleText}</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-150 ${isRoleSwitcherOpen ? "rotate-180" : ""}`} />
               </button>
 
@@ -324,7 +339,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* Center: Primary Operational Navigation + Plus (More) Dropdown */}
-          <nav aria-label={t("nav_main_heading")} data-tour="nav" className="hidden md:flex items-center gap-1 lg:gap-1.5 min-w-0 flex-nowrap">
+          <nav aria-label={t("nav_main_heading")} data-tour="nav" className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0 flex-nowrap">
             {primaryNavItems.map((item) => {
               const Icon = item.icon;
               const active = pathname === item.href;
@@ -333,13 +348,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-1.5 lg:gap-2 px-2.5 lg:px-3 py-1.5 lg:py-2 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                  className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                     active
                       ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -353,14 +368,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 aria-haspopup="menu"
                 aria-expanded={isMoreOpen}
                 aria-label={t("nav_operational_tools")}
-                className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 lg:py-2 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                className={`flex items-center gap-1 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                   isMoreOpen || isMoreActive
                     ? "bg-slate-800 text-white border border-slate-700 shadow-sm ring-1 ring-slate-700/60"
                     : "text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent"
                 }`}
                 title={moreLabel}
               >
-                <MoreHorizontal className={`w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0 ${isMoreActive ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
+                <MoreHorizontal className={`w-3.5 h-3.5 shrink-0 ${isMoreActive ? "text-red-400" : "text-slate-400"}`} aria-hidden="true" />
                 <span>{moreLabel}</span>
                 <ChevronDown className={`w-3 h-3 text-slate-400 shrink-0 transition-transform duration-150 ${isMoreOpen ? "rotate-180" : ""}`} aria-hidden="true" />
               </button>
@@ -407,7 +422,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Right: Notification Bell + Language Selector + User Profile + Mobile Hamburger */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Real-time Notification Bell */}
             <div data-tour="bell" className="shrink-0"><NotificationBell /></div>
 
@@ -423,13 +438,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 aria-expanded={isProfileOpen}
                 aria-label={t("nav_system_supervision")}
                 className={`flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-                  isProfileOpen || isSecondaryActive
+                  isProfileOpen || isSecondaryActive || pathname === "/dashboard/profile"
                     ? "bg-slate-800 border-slate-700 text-white"
                     : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/70"
                 }`}
               >
-                <div className="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0">
-                  <UserCheck className="w-3.5 h-3.5 text-slate-300" aria-hidden="true" />
+                <div className="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={cleanUserName} className="w-full h-full object-cover" />
+                  ) : (
+                    <UserCheck className="w-3.5 h-3.5 text-slate-300" aria-hidden="true" />
+                  )}
                 </div>
                 <div className="hidden xl:block text-left">
                   <div className="font-semibold text-xs leading-none truncate max-w-[120px]">{cleanUserName}</div>
@@ -447,13 +466,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   aria-orientation="vertical"
                   className="absolute end-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-lg shadow-2xl py-1.5 z-[2100] focus:outline-none"
                 >
-                  <div className="px-3.5 py-2.5 border-b border-slate-800">
-                    <div className="font-semibold text-white truncate">{cleanUserName}</div>
-                    <div className="text-[11px] text-slate-400 truncate mt-0.5">{user.email}</div>
-                    <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold border bg-slate-800/80 border-slate-700 text-amber-300">
-                      <Lock className="w-3 h-3 text-amber-400 shrink-0" aria-hidden="true" />
-                      <span>{cleanRoleText}</span>
+                  <div className="px-3.5 py-2.5 border-b border-slate-800 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={cleanUserName} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-5 h-5 text-slate-400" />
+                      )}
                     </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-white truncate text-xs">{cleanUserName}</div>
+                      <div className="text-[10px] text-slate-400 truncate mt-0.5">{user.email}</div>
+                      <div className="mt-1 inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[9px] font-semibold border bg-slate-800/80 border-slate-700 text-amber-300">
+                        <Lock className="w-2.5 h-2.5 text-amber-400 shrink-0" aria-hidden="true" />
+                        <span>{cleanRoleText}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* My Profile Link */}
+                  <div className="py-1 border-b border-slate-800">
+                    <Link
+                      href="/dashboard/profile"
+                      role="menuitem"
+                      onClick={() => setIsProfileOpen(false)}
+                      className={`flex items-center gap-2.5 px-3.5 py-2 text-xs transition-colors ${
+                        pathname === "/dashboard/profile"
+                          ? "bg-slate-800 text-white font-semibold"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                      }`}
+                    >
+                      <Settings className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{t("nav_my_profile") || "My Profile"}</span>
+                    </Link>
                   </div>
 
                   {/* Quick Role Switch in Profile Dropdown */}
@@ -553,7 +598,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? t("mobile_menu_close") : t("mobile_menu_open")}
               aria-expanded={isMobileMenuOpen}
-              className="md:hidden flex items-center justify-center p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0"
+              className="lg:hidden flex items-center justify-center p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 shrink-0"
             >
               {isMobileMenuOpen ? (
                 <X className="w-5 h-5 text-red-400" aria-hidden="true" />
@@ -568,8 +613,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {isMobileMenuOpen && (
           <div
             ref={mobileMenuRef}
-            className="md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-md px-4 py-3 space-y-3 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100vh-4rem)] overflow-y-auto"
+            className="lg:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-md px-4 py-3 space-y-3 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
+            {/* User Profile Card Mobile */}
+            <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={cleanUserName} className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-4 h-4 text-slate-400" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-white truncate">{cleanUserName}</div>
+                  <div className="text-[10px] text-slate-400 truncate">{user.email}</div>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/profile"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-medium border border-slate-700"
+              >
+                {t("nav_my_profile") || "Profile"}
+              </Link>
+            </div>
+
             <div>
               <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
                 {t("nav_main_heading")}
@@ -661,6 +730,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
               </div>
             )}
+
+            <div className="border-t border-slate-800/80 pt-2.5">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold text-red-400 hover:bg-red-950/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <LogOut className="w-4 h-4" />
+                  <span>{t("logout") || "Sign Out"}</span>
+                </div>
+              </button>
+            </div>
           </div>
         )}
       </header>
