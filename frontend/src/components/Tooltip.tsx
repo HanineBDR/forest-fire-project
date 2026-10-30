@@ -10,6 +10,7 @@ export interface TooltipProps {
   children: React.ReactElement;
   position?: TooltipPosition;
   delay?: number;
+  delayDuration?: number;
   disabled?: boolean;
   className?: string;
 }
@@ -18,10 +19,12 @@ export const Tooltip: React.FC<TooltipProps> = ({
   content,
   children,
   position = "top",
-  delay = 300,
+  delay,
+  delayDuration,
   disabled = false,
   className = "",
 }) => {
+  const effectiveDelay = delayDuration !== undefined ? delayDuration : (delay !== undefined ? delay : 40);
   const [isVisible, setIsVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [coords, setCoords] = useState<{
@@ -118,8 +121,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
     clearTimer();
     timerRef.current = setTimeout(() => {
       setIsVisible(true);
-    }, delay);
-  }, [clearTimer, delay, disabled, content]);
+    }, effectiveDelay);
+  }, [clearTimer, effectiveDelay, disabled, content]);
 
   const hide = useCallback(() => {
     clearTimer();
@@ -190,7 +193,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
             ref={tooltipRef}
             id={id}
             role="tooltip"
-            className={`fixed z-[2700] pointer-events-none transition-opacity duration-150 ease-out animate-in fade-in-0 zoom-in-95 ${className}`}
+            className={`fixed z-[2700] pointer-events-none transition-opacity duration-75 ease-out animate-in fade-in-50 ${className}`}
             style={{
               top: `${coords.top}px`,
               left: `${coords.left}px`,
@@ -219,3 +222,4 @@ export const Tooltip: React.FC<TooltipProps> = ({
     </>
   );
 };
+

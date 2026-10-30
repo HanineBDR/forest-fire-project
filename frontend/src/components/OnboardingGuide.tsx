@@ -651,42 +651,8 @@ export const OnboardingGuide: React.FC = () => {
     return () => observer.disconnect();
   }, [currentStep, updateTargetPosition]);
 
-  // SMART MENU STATE DETECTION: If target is "nav-more" but the menu is ALREADY OPEN, automatically advance to Step 2
-  useEffect(() => {
-    if (!currentStep || stepIndex !== 0) return;
-
-    if (currentStep.target === '[data-tour="nav-more"]') {
-      const openMenu = document.querySelector('[role="menu"]');
-      if (openMenu) {
-        const timer = setTimeout(() => {
-          handleNext();
-        }, 200);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [currentStep, stepIndex]);
-
-  // Navigation handlers
-  const handleNext = useCallback(() => {
-    if (stepIndex < currentStepList.length - 1) {
-      setStepIndex((prev) => prev + 1);
-    } else {
-      finishTutorial();
-    }
-  }, [stepIndex, currentStepList]);
-
-  const handlePrev = useCallback(() => {
-    if (stepIndex > 0) {
-      setStepIndex((prev) => prev - 1);
-    }
-  }, [stepIndex]);
-
-  const handleSkip = useCallback(() => {
-    setActiveTutorial(null);
-    setIsFullTourActive(false);
-    setStepIndex(0);
-    dismissToast();
-  }, [dismissToast]);
+  // Guard against rapid duplicate step advances
+  const isAdvancingRef = useRef(false);
 
   const finishTutorial = useCallback(() => {
     const completedName = activeTutorial 
@@ -712,6 +678,70 @@ export const OnboardingGuide: React.FC = () => {
     });
   }, [activeTutorial, isFullTourActive, t, recordTutorialCompletion, recordFullTourCompletion, showToast]);
 
+  // Advance step, with option to programmatically trigger target action
+  const advanceStep = useCallback((autoTriggerTarget: boolean = false) => {
+    if (isAdvancingRef.current) return;
+    isAdvancingRef.current = true;
+
+    if (autoTriggerTarget && currentStep) {
+      let targetEl = document.querySelector(currentStep.target) as HTMLElement | null;
+      if ((!targetEl || targetEl.offsetParent === null) && currentStep.fallbackTarget) {
+        targetEl = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
+      }
+      if (targetEl) {
+        try {
+          targetEl.click();
+        } catch (err) {
+          console.warn("Auto-trigger target click error", err);
+        }
+      }
+    }
+
+    if (stepIndex < currentStepList.length - 1) {
+      setStepIndex((prev) => prev + 1);
+    } else {
+      finishTutorial();
+    }
+
+    setTimeout(() => {
+      isAdvancingRef.current = false;
+    }, 350);
+  }, [currentStep, stepIndex, currentStepList, finishTutorial]);
+
+  // SMART MENU STATE DETECTION: If target is "nav-more" but the menu is ALREADY OPEN, automatically advance to Step 2
+  useEffect(() => {
+    if (!currentStep || stepIndex !== 0) return;
+
+    if (currentStep.target === '[data-tour="nav-more"]') {
+      const openMenu = document.querySelector('[role="menu"]');
+      if (openMenu) {
+        const timer = setTimeout(() => {
+          advanceStep(false);
+        }, 200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentStep, stepIndex, advanceStep]);
+
+  // Navigation handlers
+  const handleNext = useCallback(() => {
+    // Clicking "Next Step" automatically triggers the target button's action (Nielsen Heuristic #1)
+    advanceStep(true);
+  }, [advanceStep]);
+
+  const handlePrev = useCallback(() => {
+    if (stepIndex > 0) {
+      setStepIndex((prev) => prev - 1);
+    }
+  }, [stepIndex]);
+
+  const handleSkip = useCallback(() => {
+    setActiveTutorial(null);
+    setIsFullTourActive(false);
+    setStepIndex(0);
+    dismissToast();
+  }, [dismissToast]);
+
   // Wrong Click Handling: Show friendly red toast and trigger shake
   const handleWrongClick = useCallback((e?: React.MouseEvent) => {
     if (e) {
@@ -729,45 +759,43 @@ export const OnboardingGuide: React.FC = () => {
     });
   }, [showToast, t]);
 
-  // ROBUST CLICK DETECTION VIA CAPTURE PHASE:
-  // Detects when the user interacts with the real target element and advances smoothly
+  // DIRECT ELEMENT TARGETING & CLICK ATTACHMENT:
+  // Elevates the active element with z-index and pointer-events: auto, and attaches a direct click listener
   useEffect(() => {
-    const isRunnerActive = (activeTutorial !== null || isFullTourActive) && currentStep !== null;
-    if (!isRunnerActive || !currentStep) return;
+    const isRunner = (activeTutorial !== null || isFullTourActive) && currentStep !== null;
+    if (!isRunner || !currentStep) return;
 
-    const handleGlobalClickCapture = (e: MouseEvent) => {
-      // 1. Clicks inside the floating panel should execute normally
-      if (panelRef.current && (panelRef.current === e.target || panelRef.current.contains(e.target as Node))) {
-        return;
-      }
+    let targetEl = document.querySelector(currentStep.target) as HTMLElement | null;
+    if ((!targetEl || targetEl.offsetParent === null) && currentStep.fallbackTarget) {
+      targetEl = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
+    }
 
-      // 2. Locate target element in DOM
-      let targetEl = document.querySelector(currentStep.target) as HTMLElement | null;
-      if ((!targetEl || targetEl.offsetParent === null) && currentStep.fallbackTarget) {
-        targetEl = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
-      }
+    if (!targetEl) return;
 
-      // 3. User clicked the highlighted target element!
-      if (targetEl && (targetEl === e.target || targetEl.contains(e.target as Node))) {
-        // Native interaction executes, then advance tour step
-        setTimeout(() => {
-          handleNext();
-        }, 180);
-        return;
-      }
+    const originalZIndex = targetEl.style.zIndex;
+    const originalPosition = targetEl.style.position;
+    const originalPointerEvents = targetEl.style.pointerEvents;
 
-      // 4. If current target is an item inside "More", but user clicked the "More" toggle button to open it:
-      const moreBtn = document.querySelector('[data-tour="nav-more"]');
-      if (moreBtn && (moreBtn === e.target || moreBtn.contains(e.target as Node))) {
-        return; // Allow menu to open
-      }
+    targetEl.style.position = targetEl.style.position || "relative";
+    targetEl.style.zIndex = "2850";
+    targetEl.style.pointerEvents = "auto";
+
+    const onTargetClick = () => {
+      if (isAdvancingRef.current) return;
+      setTimeout(() => {
+        advanceStep(false);
+      }, 100);
     };
 
-    window.addEventListener("click", handleGlobalClickCapture, true); // CAPTURE!
+    targetEl.addEventListener("click", onTargetClick, { capture: true });
+
     return () => {
-      window.removeEventListener("click", handleGlobalClickCapture, true);
+      targetEl.removeEventListener("click", onTargetClick, { capture: true });
+      targetEl.style.zIndex = originalZIndex;
+      targetEl.style.position = originalPosition;
+      targetEl.style.pointerEvents = originalPointerEvents;
     };
-  }, [activeTutorial, isFullTourActive, currentStep, handleNext]);
+  }, [activeTutorial, isFullTourActive, currentStep, stepIndex, advanceStep]);
 
   // Start specific task tutorial
   const startTutorial = (tut: TutorialDef) => {
@@ -1090,43 +1118,39 @@ export const OnboardingGuide: React.FC = () => {
       {/* 2. 4-PANEL SPOTLIGHT OVERLAY WITH ZERO-OBSTRUCTION CUTOUT   */}
       {/* ============================================================ */}
       {isRunnerActive && targetRect && (
-        <div className="fixed inset-0 z-[2800] pointer-events-auto" style={{ width: "100vw", height: "100vh" }}>
+        <div className="fixed inset-0 z-[2800] pointer-events-none select-none" style={{ width: "100vw", height: "100vh" }}>
           {/* Top dark backdrop */}
           <div
-            className="absolute top-0 left-0 w-full bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 cursor-not-allowed"
+            className="absolute top-0 left-0 w-full bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 pointer-events-none"
             style={{ height: Math.max(0, targetRect.top - 6) }}
-            onClick={handleWrongClick}
           />
           {/* Bottom dark backdrop */}
           <div
-            className="absolute left-0 w-full bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 cursor-not-allowed"
+            className="absolute left-0 w-full bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 pointer-events-none"
             style={{
               top: targetRect.bottom + 6,
               height: Math.max(0, (typeof window !== "undefined" ? window.innerHeight : 800) - (targetRect.bottom + 6)),
             }}
-            onClick={handleWrongClick}
           />
           {/* Left dark backdrop */}
           <div
-            className="absolute bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 cursor-not-allowed"
+            className="absolute bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 pointer-events-none"
             style={{
               top: Math.max(0, targetRect.top - 6),
               left: 0,
               width: Math.max(0, targetRect.left - 6),
               height: targetRect.height + 12,
             }}
-            onClick={handleWrongClick}
           />
           {/* Right dark backdrop */}
           <div
-            className="absolute bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 cursor-not-allowed"
+            className="absolute bg-slate-950/80 backdrop-blur-[2px] transition-all duration-150 pointer-events-none"
             style={{
               top: Math.max(0, targetRect.top - 6),
               left: targetRect.right + 6,
               width: Math.max(0, (typeof window !== "undefined" ? window.innerWidth : 1200) - (targetRect.right + 6)),
               height: targetRect.height + 12,
             }}
-            onClick={handleWrongClick}
           />
 
           {/* Pulsing glowing focus ring directly framing target (pointer-events-none so real element receives click) */}
