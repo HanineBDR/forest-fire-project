@@ -25,26 +25,30 @@ import {
   X,
   Camera,
 } from "lucide-react";
-import { getStoredUser, getStoredToken, setSession, logoutUser, getRoleBadgeInfo, getLocalizedUserName, AuthUser, DEMO_ACCOUNTS, UserRole } from "@/lib/auth";
+import { 
+  getStoredUser, 
+  getStoredToken, 
+  setSession, 
+  logoutUser, 
+  getRoleBadgeInfo, 
+  getLocalizedUserName, 
+  AuthUser, 
+  DEMO_ACCOUNTS, 
+  UserRole,
+  ROLE_PERMISSIONS,
+  hasPermission
+} from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useNotifications } from "@/contexts/NotificationContext";
 
-const DEFAULT_ADMIN: AuthUser = {
-  id: "usr-admin",
-  email: "admin@in9ad.dz",
-  name: "Direction Générale - Super Admin",
-  role: "ADMIN",
-  organization: "Ministère de l'Intérieur / IN9AD Admin",
-  organization_ar: "الإدارة",
-};
-
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<AuthUser>(DEFAULT_ADMIN);
-  const [isReady, setIsReady] = useState(true);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [unauthToast, setUnauthToast] = useState<{ title: string; desc: string } | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -55,17 +59,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { setActiveRole } = useNotifications();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
+  // Enforce authentication: if no valid token or user, redirect immediately to /login
   useEffect(() => {
     const u = getStoredUser();
     const token = getStoredToken();
 
     if (!u || !token) {
-      setSession("demo-token-ADMIN-auto", DEFAULT_ADMIN);
-      setUser(DEFAULT_ADMIN);
-    } else {
-      setUser(u);
+      router.replace("/login");
+      return;
     }
-  }, []);
+    setUser(u);
+    setIsReady(true);
+  }, [router]);
+
+  // Check for unauthorized access flash toast
+  useEffect(() => {
+    try {
+      const storedToast = sessionStorage.getItem("in9ad_auth_toast");
+      if (storedToast) {
+        setUnauthToast(JSON.parse(storedToast));
+        sessionStorage.removeItem("in9ad_auth_toast");
+        const timer = setTimeout(() => setUnauthToast(null), 5000);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // ignore
+    }
+  }, [pathname]);
 
   // Click outside to close profile, role switcher, more menu, and mobile drawer
   useEffect(() => {
@@ -127,11 +147,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setIsRoleSwitcherOpen(false);
     setIsMoreOpen(false);
     setIsMobileMenuOpen(false);
+
+    if (pathname === "/analytics" && acc.role !== "ADMIN") {
+      router.replace("/dashboard");
+    } else if (pathname.startsWith("/dashboard/admin/model-health") && acc.role !== "ADMIN") {
+      router.replace("/dashboard");
+    } else if (pathname.startsWith("/dashboard/admin/users") && acc.role !== "ADMIN") {
+      router.replace("/dashboard");
+    } else if (pathname.startsWith("/dashboard/admin/roadmap") && acc.role === "FOREST_GUARD") {
+      router.replace("/dashboard");
+    }
   };
 
   const handleLogout = async () => {
     await logoutUser();
-    router.push("/login");
+    router.replace("/login");
   };
 
   const { t, isRTL, language } = useLanguage();
@@ -152,21 +182,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const cleanRoleText = badgeInfo.text.replace(/^[🔒\s]+Secure\s+access\s*-\s*/i, "").trim() || fallbackRole;
   const cleanUserName = getLocalizedUserName(user.name, user.role, language);
   const isAdmin = user.role === "ADMIN";
+  const permissions = user ? ROLE_PERMISSIONS[user.role] : null;
 
-  // PRIMARY OPERATIONAL ITEMS (always visible on desktop nav)
+  // PRIMARY OPERATIONAL ITEMS (always visible on desktop nav, filtered by role)
   const primaryNavItems = [
-    { href: "/dashboard", label: t("nav_tactical_map") || "Carte Tactique", icon: Map },
-    { href: "/dashboard/alerts", label: t("nav_alerts") || "Alertes Actives", icon: AlertTriangle },
-    { href: "/analytics", label: t("nav_analytics") || "Analytics ML", icon: BarChart3 },
-  ];
+    { href: "/dashboard", label: t("nav_tactical_map") || "Carte Tactique", icon: Map, show: true },
+    { href: "/dashboard/alerts", label: t("nav_alerts") || "Alertes Actives", icon: AlertTriangle, show: true },
+    { href: "/analytics", label: t("nav_analytics") || "Analytics ML", icon: BarChart3, show: permissions?.canViewAnalytics ?? false },
+  ].filter((item) => item.show);
 
-  // SECONDARY ITEMS (collapsed into the "Plus" dropdown)
+  // SECONDARY ITEMS (collapsed into the "Plus" dropdown, filtered by role)
   const secondaryMoreItems = [
-    { href: "/dashboard/notifications", label: t("nav_intercom_alerts"), icon: Radio },
-    { href: "/dashboard/drones", label: t("nav_drones_flir"), icon: Plane, dataTour: "drones" },
-    { href: "/dashboard/iot", label: t("nav_iot_sensors"), icon: Cpu, dataTour: "iot" },
-    { href: "/dashboard/historique", label: t("nav_history") || "History & Audit", icon: History },
-  ];
+    { href: "/dashboard/notifications", label: t("nav_intercom_alerts"), icon: Radio, show: true },
+    { href: "/dashboard/drones", label: t("nav_drones_flir"), icon: Plane, dataTour: "drones", show: permissions?.canAccessDrones ?? false },
+    { href: "/dashboard/iot", label: t("nav_iot_sensors"), icon: Cpu, dataTour: "iot", show: permissions?.canAccessIoT ?? false },
+    { href: "/dashboard/historique", label: t("nav_history") || "History & Audit", icon: History, show: permissions?.canAccessHistory ?? true },
+  ].filter((item) => item.show);
 
   const isMoreActive = secondaryMoreItems.some(
     (item) => pathname === item.href || (item.href === "/dashboard/historique" && pathname === "/dashboard/history")
@@ -180,6 +211,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera },
         { href: "/dashboard/admin/users", label: t("nav_users") || "User Management", icon: Users },
       ]
+    : user?.role === "CIVIL_PROTECTION"
+    ? [
+        { href: "/dashboard/admin/roadmap", label: t("nav_community_reports") || "Citizen Reports", icon: Camera },
+      ]
     : [];
 
   const isSecondaryActive = secondaryNavItems.some(item => pathname === item.href);
@@ -188,6 +223,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${isRTL ? "font-arabic" : ""}`}>
       {/* Top Security Header */}
       <header className="sticky top-0 z-[1500] bg-slate-900 border-b border-slate-800 shadow-md shadow-slate-950/60 w-full">
+        {/* Unauthorized Flash Toast */}
+        {unauthToast && (
+          <div className="fixed top-20 right-4 z-[2000] p-4 bg-red-950/95 border border-red-700 text-red-200 rounded-xl shadow-2xl flex items-start gap-3 max-w-md animate-fadeIn">
+            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <div className="font-bold text-sm text-white">{unauthToast.title}</div>
+              <div className="text-xs text-red-300 mt-0.5 leading-relaxed">{unauthToast.desc}</div>
+            </div>
+          </div>
+        )}
         <div className="w-full px-3 sm:px-4 lg:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 flex-nowrap">
           
           {/* Left: Brand Logo & Role Badge */}
@@ -414,8 +459,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {/* Quick Role Switch in Profile Dropdown */}
                   <div className="py-1 border-b border-slate-800">
                     <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                      <span>Changer de rôle</span>
-                      <span className="text-[9px] text-emerald-400 font-mono">Instantané</span>
+                      <span>{t("switch_command_title") || "Changer de rôle"}</span>
+                      <span className="text-[9px] text-emerald-400 font-mono">{t("one_click_access") || "Instantané"}</span>
                     </div>
                     {DEMO_ACCOUNTS.map((acc) => {
                       const isCurrent = user.role === acc.role;
@@ -437,7 +482,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             }`} />
                             <span className="truncate">{acc.label}</span>
                           </div>
-                          {isCurrent && <span className="text-[10px] text-emerald-400 font-mono">Actif</span>}
+                          {isCurrent && <span className="text-[10px] text-emerald-400 font-mono">{language === "ar" ? "نشط" : language === "en" ? "Active" : "Actif"}</span>}
                         </button>
                       );
                     })}
@@ -447,7 +492,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {secondaryNavItems.length > 0 && (
                     <div className="py-1 border-b border-slate-800">
                       <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                        Supervision Système
+                        {t("nav_system_supervision")}
                       </div>
                       {secondaryNavItems.map((item) => {
                         const Icon = item.icon;
@@ -585,7 +630,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
 
-            {isAdmin && secondaryNavItems.length > 0 && (
+            {secondaryNavItems.length > 0 && (
               <div className="border-t border-slate-800/80 pt-2.5">
                 <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 pb-1.5">
                   {t("nav_system_supervision")}

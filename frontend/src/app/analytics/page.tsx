@@ -46,6 +46,7 @@ import {
 } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { RoleGate } from "@/components/RoleGate";
 
 
 function formatNumber(n: number | null | undefined): string {
@@ -208,7 +209,8 @@ export default function AnalyticsPage() {
   }, [apiBase, burnTimeline]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-ember-500/30">
+    <RoleGate allowedRoles={["ADMIN"]} redirectTo="/dashboard" showToast={true}>
+      <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-ember-500/30">
       {/* Toast Notification */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 max-w-md p-4 rounded-xl border border-slate-700 bg-slate-900/95 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-3">
@@ -1023,6 +1025,7 @@ export default function AnalyticsPage() {
           </div>
         </section>
       </main>
-    </div>
+      </div>
+    </RoleGate>
   );
 }

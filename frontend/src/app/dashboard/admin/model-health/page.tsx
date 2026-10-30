@@ -22,6 +22,7 @@ import {
 import { getStoredUser, getStoredToken } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
 import { getLocalizedAuditNote } from "@/lib/i18nAudit";
+import { RoleGate } from "@/components/RoleGate";
 
 interface HealthCheck {
   service: string;
@@ -246,7 +247,8 @@ export default function ModelHealthPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+    <RoleGate allowedRoles={["ADMIN"]} redirectTo="/dashboard" showToast={true}>
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -631,6 +633,7 @@ export default function ModelHealthPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </RoleGate>
   );
 }

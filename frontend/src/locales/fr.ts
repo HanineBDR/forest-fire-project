@@ -748,6 +748,11 @@ export const fr = {
   community_modal_err_desc: "Veuillez saisir une description de l'observation.",
   community_modal_success: "Rapport validé par l'IA et transmis avec succès à la file d'attente CODIS.",
   community_modal_btn_cancel: "Annuler",
-  community_modal_btn_submit: "Valider & Soumettre le Rapport"
+  community_modal_btn_submit: "Valider & Soumettre le Rapport",
+
+  // RBAC & Access Control
+  unauthorized_access_title: "Accès Restreint",
+  unauthorized_access_desc: "Votre profil opérationnel n'est pas accrédité pour consulter cette section.",
+  redirecting_to_login: "Redirection vers le portail d'accès sécurisé..."
 };
 

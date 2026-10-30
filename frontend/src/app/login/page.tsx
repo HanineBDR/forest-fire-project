@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Shield, KeyRound, AlertCircle, CheckCircle2, Lock, ArrowRight, Building2, UserCheck } from "lucide-react";
-import { loginUser, DEMO_ACCOUNTS, UserRole } from "@/lib/auth";
+import { loginUser, DEMO_ACCOUNTS, UserRole, getStoredToken, getStoredUser } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -18,6 +18,15 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDemo, setSelectedDemo] = useState<string | null>(null);
 
+  // If already authenticated, redirect to /dashboard
+  React.useEffect(() => {
+    const token = getStoredToken();
+    const user = getStoredUser();
+    if (token && user) {
+      router.replace("/dashboard");
+    }
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -29,12 +38,8 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const res = await loginUser(email, password);
-      if (res.role === "ADMIN") {
-        router.push("/dashboard/admin/model-health");
-      } else {
-        router.push("/dashboard");
-      }
+      await loginUser(email, password);
+      router.replace("/dashboard");
     } catch (err: any) {
       setError(err.message || (language === "ar" ? "بيانات الاعتماد غير صالحة." : language === "en" ? "Invalid credentials." : "Identifiants invalides."));
     } finally {
@@ -50,12 +55,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await loginUser(account.email, account.password);
-      if (res.role === "ADMIN") {
-        router.push("/dashboard/admin/model-health");
-      } else {
-        router.push("/dashboard");
-      }
+      await loginUser(account.email, account.password);
+      router.replace("/dashboard");
     } catch (err: any) {
       setError(err.message || (language === "ar" ? "خطأ في تسجيل الدخول." : language === "en" ? "Connection error." : "Erreur de connexion."));
     } finally {

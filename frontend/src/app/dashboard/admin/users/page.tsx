@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { getStoredUser, getStoredToken, getLocalizedUserName, AuthUser, UserRole } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
+import { RoleGate } from "@/components/RoleGate";
 
 interface ManagedUser {
   id: string;
@@ -181,7 +182,8 @@ export default function UsersManagementPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+    <RoleGate allowedRoles={["ADMIN"]} redirectTo="/dashboard" showToast={true}>
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -407,6 +409,7 @@ export default function UsersManagementPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </RoleGate>
   );
 }

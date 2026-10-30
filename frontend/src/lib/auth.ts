@@ -22,6 +22,75 @@ export interface LoginResponse {
   user: AuthUser;
 }
 
+export interface RolePermissions {
+  canViewAnalytics: boolean;        // ML Analytics (/analytics) -> ADMIN only
+  canManageUsers: boolean;          // User Management -> ADMIN only
+  canViewModelHealth: boolean;       // System/API health -> ADMIN only
+  canVerifyCitizenReports: boolean;  // Citizen Reports Queue -> ADMIN & CIVIL_PROTECTION
+  canAccessDrones: boolean;         // Thermal Drones -> CIVIL_PROTECTION & ADMIN
+  canAccessIoT: boolean;            // Forest Watchtowers -> FOREST_GUARD & ADMIN
+  canDispatchAlerts: boolean;       // Alert Dispatch -> CIVIL_PROTECTION & ADMIN
+  canAccessHistory: boolean;        // Audit log -> ALL
+}
+
+export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
+  ADMIN: {
+    canViewAnalytics: true,
+    canManageUsers: true,
+    canViewModelHealth: true,
+    canVerifyCitizenReports: true,
+    canAccessDrones: true,
+    canAccessIoT: true,
+    canDispatchAlerts: true,
+    canAccessHistory: true,
+  },
+  CIVIL_PROTECTION: {
+    canViewAnalytics: false, // Hidden: Field tactical operations only
+    canManageUsers: false,
+    canViewModelHealth: false,
+    canVerifyCitizenReports: true,
+    canAccessDrones: true,
+    canAccessIoT: false,
+    canDispatchAlerts: true,
+    canAccessHistory: true,
+  },
+  FOREST_GUARD: {
+    canViewAnalytics: false, // Hidden: Forest watchtower vigilance only
+    canManageUsers: false,
+    canViewModelHealth: false,
+    canVerifyCitizenReports: false,
+    canAccessDrones: false,
+    canAccessIoT: true,
+    canDispatchAlerts: false,
+    canAccessHistory: true,
+  },
+};
+
+export function hasPermission(role: UserRole | undefined, permission: keyof RolePermissions): boolean {
+  if (!role) return false;
+  const p = ROLE_PERMISSIONS[role];
+  return p ? !!p[permission] : false;
+}
+
+export function canAccessRoute(role: UserRole | undefined, pathname: string): boolean {
+  if (!role) return false;
+  if (role === "ADMIN") return true;
+
+  if (pathname === "/analytics") return false;
+  if (pathname.startsWith("/dashboard/admin/model-health")) return false;
+  if (pathname.startsWith("/dashboard/admin/users")) return false;
+  if (pathname.startsWith("/dashboard/admin/roadmap")) {
+    return role === "CIVIL_PROTECTION";
+  }
+  if (pathname === "/dashboard/drones") {
+    return ROLE_PERMISSIONS[role].canAccessDrones;
+  }
+  if (pathname === "/dashboard/iot") {
+    return ROLE_PERMISSIONS[role].canAccessIoT;
+  }
+  return true;
+}
+
 const TOKEN_KEY = "in9ad_auth_token";
 const USER_KEY = "in9ad_auth_user";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";

@@ -748,6 +748,11 @@ export const ar = {
   community_modal_err_desc: "يرجى كتابة وصف للملاحظة الميدانية.",
   community_modal_success: "تم التحقق من البلاغ بنجاح عبر الذكاء الاصطناعي وإرساله إلى طابور مركز عمليات CODIS.",
   community_modal_btn_cancel: "إلغاء",
-  community_modal_btn_submit: "التحقق وإرسال البلاغ"
+  community_modal_btn_submit: "التحقق وإرسال البلاغ",
+
+  // RBAC & Access Control
+  unauthorized_access_title: "تم تقييد الوصول",
+  unauthorized_access_desc: "صفتك العملياتية لا تملك الصلاحية للوصول إلى هذا القسم.",
+  redirecting_to_login: "جاري التحويل إلى بوابة الدخول الآمنة..."
 };
 

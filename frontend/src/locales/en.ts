@@ -748,6 +748,11 @@ export const en = {
   community_modal_err_desc: "Please provide a description of the observation.",
   community_modal_success: "Report validated by AI and transmitted successfully to the CODIS dispatch queue.",
   community_modal_btn_cancel: "Cancel",
-  community_modal_btn_submit: "Validate & Submit Report"
+  community_modal_btn_submit: "Validate & Submit Report",
+
+  // RBAC & Access Control
+  unauthorized_access_title: "Access Restricted",
+  unauthorized_access_desc: "Your operational profile does not have authorization to view this section.",
+  redirecting_to_login: "Redirecting to secure login..."
 };
 
