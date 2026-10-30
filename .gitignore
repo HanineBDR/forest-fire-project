@@ -57,3 +57,5 @@ wheels/
 Thumbs.db
 backend/reports/*.pdf
 .neon
+
+*.db

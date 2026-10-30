@@ -249,7 +249,8 @@ function DashboardMapInner() {
     <div className="p-4 sm:p-6 max-w-[1720px] mx-auto space-y-4">
       {/* Tactical Status Ribbon */}
       <div 
-        role="status" 
+        role="status"
+        data-tour="status-bar" 
         aria-label={t("operational_watch_active")}
         className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border border-slate-800 bg-slate-900/80 text-xs"
       >

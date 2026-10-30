@@ -25,6 +25,7 @@ import {
   X,
   Camera,
   MoreHorizontal,
+  HelpCircle,
 } from "lucide-react";
 import { 
   getStoredUser, 
@@ -173,6 +174,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     } else if (pathname.startsWith("/dashboard/admin/roadmap") && acc.role === "FOREST_GUARD") {
       router.replace("/dashboard");
     }
+  };
+
+  const handleStartTour = () => {
+    window.dispatchEvent(new CustomEvent("inkad_start_tour", { detail: { role: user?.role } }));
   };
 
   const handleLogout = async () => {
@@ -419,8 +424,20 @@ alt="INKAD Logo"
             )}
           </nav>
 
-          {/* Right: Notification Bell + Language Selector + User Profile + Mobile Hamburger */}
+          {/* Right: Help Button + Notification Bell + Language Selector + User Profile + Mobile Hamburger */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Interactive Guide / Help Button */}
+            <button
+              type="button"
+              data-tour="help-btn"
+              onClick={handleStartTour}
+              aria-label={t("tour_open_guide_tooltip") || "Start Interactive Guide"}
+              title={t("tour_open_guide_tooltip") || "Start Interactive Guide"}
+              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-slate-800 bg-slate-900/90 text-slate-400 hover:text-emerald-400 hover:border-emerald-700/60 hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 shrink-0"
+            >
+              <HelpCircle className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+            </button>
+
             {/* Real-time Notification Bell */}
             <div data-tour="bell" className="shrink-0"><NotificationBell /></div>
 
@@ -428,7 +445,7 @@ alt="INKAD Logo"
             <div className="shrink-0"><LanguageSwitcher /></div>
 
             {/* Profile & Secondary Settings Dropdown */}
-            <div ref={profileDropdownRef} className="relative shrink-0">
+            <div ref={profileDropdownRef} data-tour="profile" className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -497,6 +514,18 @@ alt="INKAD Logo"
                       <Settings className="w-3.5 h-3.5 text-slate-400" />
                       <span>{t("nav_my_profile") || "My Profile"}</span>
                     </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        handleStartTour();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors text-left"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{t("tour_open_guide_tooltip") || "Interactive Guide"}</span>
+                    </button>
                   </div>
 
                   {/* Quick Role Switch in Profile Dropdown */}
