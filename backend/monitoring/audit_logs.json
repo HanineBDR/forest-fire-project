@@ -1,7 +1,7 @@
 [
   {
-    "id": "aud-74608b7e",
-    "timestamp": "2026-10-30T15:49:53.542189Z",
+    "id": "aud-377ec57e",
+    "timestamp": "2026-10-31T00:22:08.724365Z",
     "user_email": "protection@inkad.dz",
     "user_name": "Commandant Protection Civile",
     "user_role": "CIVIL_PROTECTION",
@@ -10,10 +10,10 @@
     "lon": 4.435,
     "wilaya": "Tizi Ouzou",
     "temp": 38.0,
-    "humidity": 20.0,
-    "wind": 30.0,
-    "risk_score": 90.2,
+    "humidity": 18.0,
+    "wind": 35.0,
+    "risk_score": 92.1,
     "risk_level": "Very High",
-    "latency_ms": 20.84
+    "latency_ms": 85.8
   }
 ]
