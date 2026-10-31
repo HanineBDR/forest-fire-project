@@ -48,7 +48,7 @@ def simulate_fire_spread(
     # Each cell represents ~150 meters of terrain
     grid_size = 61
     origin_r, origin_c = grid_size // 2, grid_size // 2
-    cell_size_m = 150.0
+    cell_size_m = 260.0
 
     # Grid states: 0 = unburned, 1 = burning front, 2 = burned out
     grid = np.zeros((grid_size, grid_size), dtype=np.int8)
@@ -71,7 +71,7 @@ def simulate_fire_spread(
     # Base spread rate driven by risk score and wind speed
     # Average Mediterranean wildfire spreads between 200m/h (moderate) to 1800m/h (extreme Sirocco)
     normalized_risk = max(0.1, min(1.0, risk_score / 100.0))
-    base_spread = (180.0 + (wind_speed * 18.0) + (normalized_risk * 450.0))
+    base_spread = (350.0 + (wind_speed * 28.0) + (normalized_risk * 650.0))
 
     # ROADMAP IDEA 3: Sirocco Mountain Pass Aerological Coupling
     sirocco_corridor = _detect_sirocco_corridor(center_lat, center_lon, wind_direction)

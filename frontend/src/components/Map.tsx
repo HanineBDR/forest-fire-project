@@ -295,8 +295,8 @@ export const Map: React.FC<MapProps> = ({
       const pulseIcon = L.divIcon({
         className: "pulse-fire-pin",
         html: "",
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+        iconSize: [48, 48],
+        iconAnchor: [24, 24],
       });
 
       const marker = L.marker([selectedLocation.lat, selectedLocation.lon], {
@@ -320,10 +320,10 @@ export const Map: React.FC<MapProps> = ({
       const timesteps = prediction?.simulation?.timesteps;
       if (timesteps && timesteps.length > 0) {
         const colors = [
-          { stroke: "#facc15", fill: "#facc15", opacity: 0.45 }, // 1h (Yellow)
-          { stroke: "#fb923c", fill: "#f97316", opacity: 0.35 }, // 3h (Orange)
-          { stroke: "#ef4444", fill: "#dc2626", opacity: 0.30 }, // 6h (Red)
-          { stroke: "#7f1d1d", fill: "#991b1b", opacity: 0.25 }, // 12h (Dark Crimson)
+          { stroke: "#ef4444", fill: "#dc2626", opacity: 0.45 }, // 1h (Vibrant Red)
+          { stroke: "#e11d48", fill: "#be123c", opacity: 0.40 }, // 3h (Crimson Red)
+          { stroke: "#b91c1c", fill: "#991b1b", opacity: 0.35 }, // 6h (Deep Fire Red)
+          { stroke: "#881337", fill: "#4c0519", opacity: 0.30 }, // 12h (Dark Emergency Red)
         ];
 
         timesteps.forEach((step: any, idx: number) => {
@@ -331,11 +331,11 @@ export const Map: React.FC<MapProps> = ({
           const c = colors[idx] || colors[colors.length - 1];
 
           const polygon = L.polygon(step.polygon, {
-            color: c.stroke,
-            weight: idx === activeHorizonIndex ? 2.5 : 1.2,
-            opacity: 0.9,
-            fillColor: c.fill,
-            fillOpacity: idx === activeHorizonIndex ? 0.5 : c.opacity,
+            color: "#ef4444",
+            weight: idx === activeHorizonIndex ? 3.5 : 2.0,
+            opacity: 0.95,
+            fillColor: "#dc2626",
+            fillOpacity: idx === activeHorizonIndex ? 0.50 : 0.35,
             dashArray: idx === activeHorizonIndex ? undefined : "3, 5",
           });
 
@@ -628,11 +628,11 @@ export const Map: React.FC<MapProps> = ({
         const past = simulation6hData.steps[i];
         if (past && past.polygon) {
           const trailPoly = L.polygon(past.polygon, {
-            color: "#f97316",
-            weight: 1,
-            opacity: 0.35,
-            fillColor: "#ea580c",
-            fillOpacity: 0.15,
+            color: "#f87171",
+            weight: 1.5,
+            opacity: 0.45,
+            fillColor: "#ef4444",
+            fillOpacity: 0.20,
             dashArray: "3, 3",
           });
           group.addLayer(trailPoly);

@@ -390,8 +390,8 @@ function simulateOfflineFirePropagation(
 ): SimulationResult {
   const spreadAzimuth = (windDirection + 180.0) % 360.0;
   const spreadRad = (spreadAzimuth * Math.PI) / 180.0;
-  const baseRos = Math.max(80.0, (riskScore / 100.0) * 650.0);
-  const windMult = 1.0 + Math.pow(windSpeed / 25.0, 1.4);
+  const baseRos = Math.max(380.0, 220.0 + (riskScore / 100.0) * 750.0);
+  const windMult = 1.0 + Math.pow(Math.max(12.0, windSpeed) / 20.0, 1.3);
   const headRos = baseRos * windMult;
 
   const lbRatio = Math.min(5.0, Math.max(1.0, 1.0 + 0.18 * Math.pow(windSpeed, 0.8)));

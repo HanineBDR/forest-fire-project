@@ -228,9 +228,9 @@
 .pulse-fire-pin::before {
   content: '';
   position: absolute;
-  width: 32px;
-  height: 32px;
-  background-color: rgba(210, 106, 58, 0.35);
+  width: 48px;
+  height: 48px;
+  background-color: rgba(239, 68, 68, 0.45);
   border-radius: 50%;
   animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
@@ -238,11 +238,12 @@
 .pulse-fire-pin::after {
   content: '';
   position: absolute;
-  width: 14px;
-  height: 14px;
-  background-color: #D26A3A;
-  border: 2px solid #ffffff;
+  width: 18px;
+  height: 18px;
+  background-color: #ef4444;
+  border: 3px solid #ffffff;
   border-radius: 50%;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.95);
 }
 
 @keyframes radar-ping {
@@ -266,9 +267,10 @@
 .firms-hotspot-pin .inner-dot {
   width: 10px;
   height: 10px;
-  background-color: #D26A3A;
+  background-color: #ef4444;
   border: 2px solid #fff;
   border-radius: 50%;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
 }
 
 /* Scrollbars - editorial style */

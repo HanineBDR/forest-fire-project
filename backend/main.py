@@ -952,7 +952,7 @@ def api_simulate_fire_spread(payload: SimulationRequest):
 
     # Generate 12 fine-grained 30-min steps
     steps = []
-    base_radius_deg = 0.0025 + (payload.wind_speed / 2000.0) * (payload.risk_score / 100.0)
+    base_radius_deg = 0.0075 + (payload.wind_speed / 1200.0) * 0.004 + (max(20.0, payload.risk_score) / 100.0) * 0.006
 
     for i in range(1, 13):
         progress = i / 12.0
