@@ -6,11 +6,15 @@
 [![Demo Video](https://img.shields.io/badge/Video-Walkthrough%20Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/3fW05QkjQ4U?si=a1Rbiv8YM0O5JouB)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/HanineBDR/forest-fire-project)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![Pitch Deck](https://img.shields.io/badge/Pitch%20Deck-Google%20Slides-4285F4?style=for-the-badge&logo=google-slides)](https://docs.google.com/presentation/d/1PnqerdngM21NCWH3GcfZ-bahzzAJHUFoaLMczE9iRiU/present)
+[![Landing Page](https://img.shields.io/badge/Landing%20Page-Canva%20Site-00C4CC?style=for-the-badge&logo=canva)](https://jocelyneenolann.my.canva.site/inkad)
 
 - **Live demo:** [FINAL URL](https://in9ad.vercel.app)
 - **Demo video:** [VIDEO URL](https://youtu.be/3fW05QkjQ4U?si=a1Rbiv8YM0O5JouB)
 - **Repository:** [https://github.com/HanineBDR/forest-fire-project](https://github.com/HanineBDR/forest-fire-project)
-
+- **Pitch deck:** https://docs.google.[STRIPPED 71 bytes]
+- **Interactive landing page:** https://jocelyneenolann.my.canva.site/inkad
+- 
 ---
 
 ### Platform Preview
