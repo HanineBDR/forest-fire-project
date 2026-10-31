@@ -58,7 +58,7 @@ You can explore the complete operational workflow in four clicks:
 - [4. The Problem](#4-the-problem)
 - [5. The Solution & Target Users](#5-the-solution--target-users)
 - [6. Feature Breakdown](#6-feature-breakdown)
-- [7. How It Works (Architecture & Sequence)](#7-how-it-works-architecture--sequence)
+- [7. How It Works (Architecture, Sequence & Use Cases)](#7-how-it-works-architecture-sequence--use-cases)
 - [8. What is Real vs. Simulated](#8-what-is-real-vs-simulated)
 - [9. Machine Learning & Methodology](#9-machine-learning--methodology)
 - [10. Tech Stack & Exact Versions](#10-tech-stack--exact-versions)
@@ -124,7 +124,7 @@ INKAD provides a zero-hardware early warning, fire spread projection, and cross-
 
 ---
 
-## 7. How It Works (Architecture & Sequence)
+## 7. How It Works (Architecture, Sequence & Use Cases)
 
 ### System Architecture
 
@@ -209,6 +209,108 @@ sequenceDiagram
     end
     Ops->>Ops: Pre-positions field units and triggers siren alert
 ```
+
+### System Use Case Diagram (Actors & Capabilities)
+
+```mermaid
+flowchart LR
+    %% Actors
+    subgraph Actors ["Institutional & Public Actors"]
+        CP["👨‍🚒 Civil Protection (CODIS)"]
+        DGF["🌲 Forest Conservation (DGF)"]
+        ADMIN["🏛️ General Directorate (Super Admin)"]
+        CITIZEN["👥 Citizen / General Public"]
+        EXT_WEATHER["☁️ Open-Meteo & NASA FIRMS"]
+        EXT_SMS["📱 Telecom Gateway (Mobilis/AT)"]
+    end
+
+    %% System Boundary
+    subgraph INKAD ["INKAD Wildfire Early Warning & Simulation Platform"]
+        
+        %% Module 1: AI Tactical Mapping & Simulation
+        subgraph Mod1 ["1. AI Tactical Command & Simulation"]
+            UC1(["UC-01: View Multi-Layer Map (Satellite / Dark / OSM)"])
+            UC2(["UC-02: Run XGBoost Wildfire Risk Prediction"])
+            UC3(["UC-03: Simulate 6h Huygens/Cellular Fire Spread"])
+            UC4(["UC-04: Inspect SHAP/Gini AI Risk Explainability"])
+            UC5(["UC-05: Download Offline Cartography for Remote Zones"])
+        end
+
+        %% Module 2: Crisis & Alert Lifecycle Operations
+        subgraph Mod2 ["2. Crisis Response & Early Warning"]
+            UC6(["UC-06: Monitor Real-time Predictive Alerts"])
+            UC7(["UC-07: Update Incident Lifecycle (Ack / Deploy / Contained)"])
+            UC8(["UC-08: Broadcast Geotargeted Emergency SMS"])
+            UC9(["UC-09: Inter-Agency Intercom & Cross-Panel Alert"])
+            UC10(["UC-10: Export Official PDF Incident PV & Zone Briefings"])
+        end
+
+        %% Module 3: Terrestrial & Aerial Reconnaissance
+        subgraph Mod3 ["3. Terrestrial & Drone Surveillance (DGF)"]
+            UC11(["UC-11: Monitor DGF Watchtower Weather Telemetry"])
+            UC12(["UC-12: Track FLIR Thermal Drone Patrol Circuits"])
+            UC13(["UC-13: Monitor Sirocco Pass Aerological Corridors"])
+            UC14(["UC-14: Submit Citizen Smoke / Hazard Report"])
+            UC15(["UC-15: Validate & Audit Community Reports Queue"])
+        end
+
+        %% Module 4: Platform Governance & ML Health
+        subgraph Mod4 ["4. Governance & AI Accountability (Admin)"]
+            UC16(["UC-16: RBAC User Management (Block / Assign Roles)"])
+            UC17(["UC-17: Monitor Model Drift (PSI / KS / F1-Score) & Retrain"])
+            UC18(["UC-18: Audit Trail Journal (Timeline & CSV Export)"])
+            UC19(["UC-19: Track 4-Phase Strategic Rollout Roadmap"])
+        end
+
+    end
+
+    %% Actor Connections
+    CP --> UC1
+    CP --> UC2
+    CP --> UC3
+    CP --> UC4
+    CP --> UC6
+    CP --> UC7
+    CP --> UC8
+    CP --> UC9
+    CP --> UC10
+
+    DGF --> UC1
+    DGF --> UC5
+    DGF --> UC11
+    DGF --> UC12
+    DGF --> UC13
+    DGF --> UC15
+    DGF --> UC9
+
+    ADMIN --> UC16
+    ADMIN --> UC17
+    ADMIN --> UC18
+    ADMIN --> UC19
+    ADMIN --> UC6
+    ADMIN --> UC10
+
+    CITIZEN --> UC14
+    UC8 -.->|"Deliver SMS"| CITIZEN
+
+    %% External Systems Connections
+    EXT_WEATHER -.->|"Weather & Thermal Stream"| UC2
+    EXT_WEATHER -.->|"Satellite Hotspots"| UC1
+    UC8 -.->|"API Dispatch"| EXT_SMS
+
+    %% Includes & Extends
+    UC2 -.->|"<<include>>"| UC3
+    UC2 -.->|"<<include>>"| UC4
+    UC7 -.->|"<<extend>>"| UC8
+    UC7 -.->|"<<extend>>"| UC10
+```
+
+| Actor | Scope & Institutional Responsibility | Key Use Cases |
+| :--- | :--- | :--- |
+| **Civil Protection (CODIS)** | First tactical responders for active wildfires, evacuation corridors, and incident suppression. | **UC-01 to UC-10**: Tactical mapping, predictive risk calculation, 6-hour spread simulation, alert lifecycle management, emergency SMS broadcast, official PDF report generation. |
+| **Forest Conservation (DGF)** | Forestry agents managing territorial surveillance, lookout vigies, and thermal drones. | **UC-11 to UC-15**: DGF watchtower sensors, FLIR drone patrols, Sirocco corridor aerology, offline map caching, citizen report validation. |
+| **General Directorate (Super Admin)** | Institutional oversight, model governance, audit compliance, and platform security. | **UC-16 to UC-19**: Institutional user administration (RBAC), AI model health and drift monitoring (PSI, KS statistic), decision audit logs, national roadmap tracking. |
+| **Citizen / General Public** | Ground community detection and public warning reception. | **UC-14**: Submits photo-verified fire/smoke hazard reports. Receives localized emergency SMS alerts. |
 
 ---
 
