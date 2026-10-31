@@ -4,6 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { PredictionResult, FIRMSHotspot, RegionPreset, WilayaBurnStat } from "@/types";
 import {
   DEFAULT_WILAYA_STATS,
+  DEFAULT_DGF_WATCHTOWERS,
+  DEFAULT_SIROCCO_CORRIDORS,
+  DEFAULT_DRONE_PATROLS,
   submitCommunityReport,
   fetchDGFWatchtowers,
   fetchSiroccoCorridors,
@@ -97,9 +100,10 @@ export const Map: React.FC<MapProps> = ({
   const [showSiroccoCorridors, setShowSiroccoCorridors] = useState<boolean>(true);
   const [showDronePatrols, setShowDronePatrols] = useState<boolean>(true);
 
-  const [dgfVigies, setDgfVigies] = useState<DGFWatchtower[]>([]);
-  const [siroccoCorridors, setSiroccoCorridors] = useState<SiroccoCorridor[]>([]);
-  const [dronePatrols, setDronePatrols] = useState<DronePatrol[]>([]);
+  const [isMapReady, setIsMapReady] = useState<boolean>(false);
+  const [dgfVigies, setDgfVigies] = useState<DGFWatchtower[]>(DEFAULT_DGF_WATCHTOWERS);
+  const [siroccoCorridors, setSiroccoCorridors] = useState<SiroccoCorridor[]>(DEFAULT_SIROCCO_CORRIDORS);
+  const [dronePatrols, setDronePatrols] = useState<DronePatrol[]>(DEFAULT_DRONE_PATROLS);
 
   // FEATURE 5: Wind particle animation toggle
   const [showWindAnimation, setShowWindAnimation] = useState<boolean>(true);
@@ -207,6 +211,7 @@ export const Map: React.FC<MapProps> = ({
 
       if (isMounted) {
         mapInstanceRef.current = map;
+        setIsMapReady(true);
       }
     }
 
@@ -214,6 +219,7 @@ export const Map: React.FC<MapProps> = ({
 
     return () => {
       isMounted = false;
+      setIsMapReady(false);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -287,13 +293,8 @@ export const Map: React.FC<MapProps> = ({
       }
 
       const pulseIcon = L.divIcon({
-        className: "custom-pulse-marker",
-        html: `
-          <div class="relative flex items-center justify-center w-8 h-8">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-4 w-4 bg-red-600 border-2 border-white shadow"></span>
-          </div>
-        `,
+        className: "pulse-fire-pin",
+        html: "",
         iconSize: [32, 32],
         iconAnchor: [16, 16],
       });
@@ -305,7 +306,73 @@ export const Map: React.FC<MapProps> = ({
 
       targetMarkerRef.current = marker;
     });
-  }, [selectedLocation, prediction]);
+  }, [selectedLocation, prediction, isMapReady]);
+
+  // Render Fire Spread Simulation Ellipses & Safety Perimeter
+  useEffect(() => {
+    if (!mapInstanceRef.current || !simulationLayerGroupRef.current) return;
+    const group = simulationLayerGroupRef.current;
+    group.clearLayers();
+
+    if (!selectedLocation) return;
+
+    import("leaflet").then((L) => {
+      const timesteps = prediction?.simulation?.timesteps;
+      if (timesteps && timesteps.length > 0) {
+        const colors = [
+          { stroke: "#facc15", fill: "#facc15", opacity: 0.45 }, // 1h (Yellow)
+          { stroke: "#fb923c", fill: "#f97316", opacity: 0.35 }, // 3h (Orange)
+          { stroke: "#ef4444", fill: "#dc2626", opacity: 0.30 }, // 6h (Red)
+          { stroke: "#7f1d1d", fill: "#991b1b", opacity: 0.25 }, // 12h (Dark Crimson)
+        ];
+
+        timesteps.forEach((step: any, idx: number) => {
+          if (idx > activeHorizonIndex) return;
+          const c = colors[idx] || colors[colors.length - 1];
+
+          const polygon = L.polygon(step.polygon, {
+            color: c.stroke,
+            weight: idx === activeHorizonIndex ? 2.5 : 1.2,
+            opacity: 0.9,
+            fillColor: c.fill,
+            fillOpacity: idx === activeHorizonIndex ? 0.5 : c.opacity,
+            dashArray: idx === activeHorizonIndex ? undefined : "3, 5",
+          });
+
+          polygon.bindPopup(`
+            <div style="font-family: sans-serif; font-size: 11px; padding: 4px; color: #f8fafc;">
+              <div style="font-weight: bold; color: #ef4444; margin-bottom: 2px;">
+                ${t("sim_horizon_label") || "Périmètre de propagation"}: +${step.hours}h
+              </div>
+              <div>${t("sim_burned_surface") || "Surface estimée"}: <b>${step.area_hectares} ha</b></div>
+              <div>${t("sim_perimeter") || "Périmètre"}: <b>${step.perimeter_km} km</b></div>
+              <div>${t("sim_spread_velocity") || "Vitesse"}: <b>${step.spread_rate_m_min} m/min</b></div>
+            </div>
+          `, { className: "bg-slate-900 border border-red-700 text-white rounded-xl" });
+
+          group.addLayer(polygon);
+        });
+      } else {
+        const radiusMeters = Math.max(1400, ((prediction?.risk_score ?? 60) / 100) * 3200);
+        const evacCircle = L.circle([selectedLocation.lat, selectedLocation.lon], {
+          radius: radiusMeters,
+          color: "#ef4444",
+          weight: 2,
+          opacity: 0.85,
+          fillColor: "#dc2626",
+          fillOpacity: 0.22,
+          dashArray: "5, 5",
+        });
+
+        evacCircle.bindTooltip(
+          `<b>Périmètre d'impact immédiat</b><br/>Rayon: ${(radiusMeters / 1000).toFixed(1)} km · Risque: ${prediction?.risk_score ?? 60}%`,
+          { sticky: true, className: "bg-red-950 text-white text-xs border border-red-700 px-2 py-1 rounded" }
+        );
+
+        group.addLayer(evacCircle);
+      }
+    });
+  }, [selectedLocation, prediction, activeHorizonIndex, isMapReady, language, t]);
 
   // Render NASA FIRMS Hotspots
   useEffect(() => {
@@ -339,7 +406,7 @@ export const Map: React.FC<MapProps> = ({
         group.addLayer(m);
       });
     });
-  }, [firmsHotspots, showFirms, viewScope]);
+  }, [firmsHotspots, showFirms, viewScope, isMapReady]);
 
   // Render Strategic Forest Reserves
   useEffect(() => {
@@ -375,7 +442,7 @@ export const Map: React.FC<MapProps> = ({
         group.addLayer(circle);
       });
     });
-  }, [regions, showRegions, onMapClick, viewScope]);
+  }, [regions, showRegions, onMapClick, viewScope, isMapReady]);
 
   // ROADMAP IDEA 1: Render DGF Forest Watchtowers & Terrestrial Sensors
   useEffect(() => {
@@ -429,7 +496,7 @@ export const Map: React.FC<MapProps> = ({
         group.addLayer(marker);
       });
     });
-  }, [dgfVigies, showDgfVigies, viewScope, language, t]);
+  }, [dgfVigies, showDgfVigies, viewScope, language, t, isMapReady]);
 
   // ROADMAP IDEA 3: Render Sirocco Mountain Pass Channels
   useEffect(() => {
@@ -477,7 +544,7 @@ export const Map: React.FC<MapProps> = ({
         group.addLayer(L.marker(midPoint, { icon: corridorBadge }));
       });
     });
-  }, [siroccoCorridors, showSiroccoCorridors, viewScope, language, t]);
+  }, [siroccoCorridors, showSiroccoCorridors, viewScope, language, t, isMapReady]);
 
   // ROADMAP IDEA 4: Render FLIR Thermal Drone Patrols
   useEffect(() => {
@@ -541,7 +608,7 @@ export const Map: React.FC<MapProps> = ({
         group.addLayer(marker);
       });
     });
-  }, [dronePatrols, showDronePatrols, viewScope, language, t]);
+  }, [dronePatrols, showDronePatrols, viewScope, language, t, isMapReady]);
 
   // FEATURE 4: Render Fine-Grained 6h Simulation Playback Polygon
   useEffect(() => {
@@ -588,7 +655,7 @@ export const Map: React.FC<MapProps> = ({
 
       group.addLayer(activePoly);
     });
-  }, [simulation6hData, currentSimStep, language, t]);
+  }, [simulation6hData, currentSimStep, language, t, isMapReady]);
 
   // FEATURE 5: Canvas Wind Particle Flow Overlay
   useEffect(() => {

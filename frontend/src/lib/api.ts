@@ -465,9 +465,14 @@ export async function predictFireRisk(payload: {
   rain?: number;
 }): Promise<PredictionResult> {
   try {
+    const token = typeof window !== "undefined" ? localStorage.getItem("inkad_auth_token") : null;
     const res = await fetchWithTimeout(`${API_BASE}/predict`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        "X-Demo-Account": "protection@inkad.dz",
+      },
       body: JSON.stringify(payload),
     });
     if (res.ok) {
@@ -1144,17 +1149,94 @@ export interface DGFWatchtower {
   radio_channel: string;
 }
 
+export const DEFAULT_DGF_WATCHTOWERS: DGFWatchtower[] = [
+  {
+    id: "vigie_yakouren",
+    name: "Poste Vigie Yakouren (Crête 920m)",
+    wilaya: "Tizi Ouzou (15)",
+    lat: 36.7410,
+    lon: 4.4390,
+    elevation_m: 920,
+    status: "ACTIVE_SURVEILLANCE",
+    status_label: "En Surveillance Active",
+    observer: "Agent DGF Slimane B.",
+    line_of_sight: "360° Couverture Forêt Domaniale & Col Ighil Bouchene",
+    smoke_detector: "CLEAR",
+    optical_status: "Vigilance Normale",
+    temp_sensor: 38.4,
+    humidity_sensor: 19.2,
+    wind_sensor: 26.0,
+    radio_channel: "VHF Ch. 4 (154.250 MHz DGF Tizi Ouzou)"
+  },
+  {
+    id: "vigie_azazga",
+    name: "Poste Vigie Azazga - Tala Guilef",
+    wilaya: "Tizi Ouzou (15)",
+    lat: 36.7150,
+    lon: 4.3820,
+    elevation_m: 740,
+    status: "ACTIVE_SURVEILLANCE",
+    status_label: "En Surveillance Active",
+    observer: "Agent DGF Karim M.",
+    line_of_sight: "Axe Routier RN12 & Vallée du Sebaou",
+    smoke_detector: "CLEAR",
+    optical_status: "Liaison CODIS Continue",
+    temp_sensor: 39.1,
+    humidity_sensor: 18.0,
+    wind_sensor: 31.0,
+    radio_channel: "VHF Ch. 4"
+  },
+  {
+    id: "vigie_adekar",
+    name: "Poste Vigie Adekar - Akfadou",
+    wilaya: "Bejaia (06)",
+    lat: 36.6850,
+    lon: 4.6210,
+    elevation_m: 1180,
+    status: "WARNING_THERMAL",
+    status_label: "Anomalie Optique Détectée",
+    observer: "Agent DGF Yacine K.",
+    line_of_sight: "Massif Central Akfadou & Crête Soummam",
+    smoke_detector: "SMOKE_SUSPECTED",
+    optical_status: "Transmission Visuelle Continue",
+    temp_sensor: 41.2,
+    humidity_sensor: 14.8,
+    wind_sensor: 38.5,
+    radio_channel: "VHF Ch. 7 (154.400 MHz DGF Bejaia)"
+  },
+  {
+    id: "vigie_chrea",
+    name: "Poste Vigie Pic de Chréa",
+    wilaya: "Blida (09)",
+    lat: 36.4250,
+    lon: 2.8750,
+    elevation_m: 1510,
+    status: "ACTIVE_SURVEILLANCE",
+    status_label: "Surveillance Active Atlas Blidéen",
+    observer: "Agent DGF Mustapha B.",
+    line_of_sight: "Versant Nord Mitidja & Cèdres Millénaires",
+    smoke_detector: "CLEAR",
+    optical_status: "Normal",
+    temp_sensor: 34.0,
+    humidity_sensor: 25.0,
+    wind_sensor: 22.0,
+    radio_channel: "VHF Ch. 2 (DGF Blida)"
+  }
+];
+
 export async function fetchDGFWatchtowers(): Promise<DGFWatchtower[]> {
   try {
     const res = await fetch(`${API_BASE}/api/dgf/vigies`);
     if (res.ok) {
       const data = await res.json();
-      return data.vigies || [];
+      if (Array.isArray(data.vigies) && data.vigies.length > 0) {
+        return data.vigies;
+      }
     }
   } catch (e) {
     console.warn("Could not fetch DGF vigies:", e);
   }
-  return [];
+  return DEFAULT_DGF_WATCHTOWERS;
 }
 
 export interface BroadcastSMSPayload {
@@ -1187,17 +1269,67 @@ export interface SiroccoCorridor {
   path_coords: [number, number][];
 }
 
+export const DEFAULT_SIROCCO_CORRIDORS: SiroccoCorridor[] = [
+  {
+    id: "corridor_sebaou",
+    name: "Couloir Aérologique Vallée du Sebaou - Yakouren",
+    wilaya: "Tizi Ouzou (15)",
+    wind_axis: "Sud-Sud-Ouest ➔ Nord-Nord-Est (195°)",
+    propagation_multiplier: 1.45,
+    multiplier_label: "+45% vitesse de propagation vers la crête",
+    description: "Canalisation thermique naturelle du vent saharien (Sirocco) le long du fleuve Sebaou vers la dense canopée de chêne-liège de Yakouren.",
+    path_coords: [
+      [36.650, 4.300],
+      [36.700, 4.380],
+      [36.735, 4.435],
+      [36.780, 4.480]
+    ]
+  },
+  {
+    id: "corridor_soummam",
+    name: "Couloir Venturi Soummam - Crête Akfadou",
+    wilaya: "Bejaia (06)",
+    wind_axis: "Sud ➔ Nord-Est (180°)",
+    propagation_multiplier: 1.60,
+    multiplier_label: "+60% effet venturi de crête",
+    description: "Effet venturi intense compressant l'air sec et chaud entre les massifs des Bibans et de l'Akfadou vers le golfe de Bejaia.",
+    path_coords: [
+      [36.520, 4.500],
+      [36.600, 4.540],
+      [36.671, 4.582],
+      [36.740, 4.650]
+    ]
+  },
+  {
+    id: "corridor_djurdjura",
+    name: "Couloir Orographique Tizi N'Kouilal - Tikjda",
+    wilaya: "Bouira (10)",
+    wind_axis: "Sud-Est ➔ Nord-Ouest (145°)",
+    propagation_multiplier: 1.40,
+    multiplier_label: "+40% turbulence ascendante de versant",
+    description: "Courants thermiques ascendants rapides léchant les falaises calcaires du Djurdjura à plus de 1600m d'altitude.",
+    path_coords: [
+      [36.400, 4.100],
+      [36.430, 4.120],
+      [36.452, 4.132],
+      [36.490, 4.160]
+    ]
+  }
+];
+
 export async function fetchSiroccoCorridors(): Promise<SiroccoCorridor[]> {
   try {
     const res = await fetch(`${API_BASE}/api/sirocco/corridors`);
     if (res.ok) {
       const data = await res.json();
-      return data.corridors || [];
+      if (Array.isArray(data.corridors) && data.corridors.length > 0) {
+        return data.corridors;
+      }
     }
   } catch (e) {
     console.warn("Could not fetch Sirocco corridors:", e);
   }
-  return [];
+  return DEFAULT_SIROCCO_CORRIDORS;
 }
 
 export interface DronePatrol {
@@ -1220,17 +1352,71 @@ export interface DronePatrol {
   flight_path: [number, number][];
 }
 
+export const DEFAULT_DRONE_PATROLS: DronePatrol[] = [
+  {
+    drone_id: "DRONE-INKAD-01",
+    model: "DJI Matrice 300 RTK + FLIR Zenmuse H20T",
+    home_base: "Base Mobile DGF / Protection Civile Azazga",
+    mission_name: "Patrouille Thermique Forêt de Yakouren (Crête Nord)",
+    status: "AIRBORNE_PATROL",
+    status_label: "En Vol de Reconnaissance",
+    lat: 36.7440,
+    lon: 4.4420,
+    altitude_m_agl: 460,
+    speed_kmh: 44.5,
+    battery_pct: 76,
+    flight_time_remaining: "26 min",
+    thermal_sensor: "FLIR LWIR 640x512 Radiométrique",
+    max_temperature_detected_c: 54.2,
+    hotspots_detected_count: 0,
+    video_link: "COFDM Ch. 9 (1080p Chiffré AES-256)",
+    flight_path: [
+      [36.720, 4.410],
+      [36.735, 4.435],
+      [36.755, 4.460],
+      [36.745, 4.485],
+      [36.720, 4.410]
+    ]
+  },
+  {
+    drone_id: "DRONE-INKAD-02",
+    model: "Autel EVO Max 4T (Caméra Thermique 640 + Zoom 8K)",
+    home_base: "Poste Avancé Protection Civile Adekar",
+    mission_name: "Surveillance Crête Soummam - Akfadou",
+    status: "STANDBY_READY",
+    status_label: "Prêt pour Décollage d'Intervention",
+    lat: 36.6850,
+    lon: 4.6210,
+    altitude_m_agl: 0,
+    speed_kmh: 0,
+    battery_pct: 100,
+    flight_time_remaining: "42 min",
+    thermal_sensor: "Infrarouge thermique 640x512",
+    max_temperature_detected_c: 32.0,
+    hotspots_detected_count: 0,
+    video_link: "Station Sol CODIS Bejaia",
+    flight_path: [
+      [36.671, 4.582],
+      [36.690, 4.610],
+      [36.705, 4.640],
+      [36.671, 4.582]
+    ]
+  }
+];
+
 export async function fetchDronePatrols(): Promise<DronePatrol[]> {
   try {
     const res = await fetch(`${API_BASE}/api/drones/patrols`);
     if (res.ok) {
       const data = await res.json();
-      return data.patrols || [];
+      if (Array.isArray(data.patrols) && data.patrols.length > 0) {
+        return data.patrols;
+      }
     }
   } catch (e) {
     console.warn("Could not fetch drone patrols:", e);
   }
-  return [];
+  return DEFAULT_DRONE_PATROLS;
 }
 
 

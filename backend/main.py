@@ -468,6 +468,30 @@ def predict_risk_get(
     return predict_risk_post(req, current_user=current_user)
 
 
+@app.post("/api/predict")
+def predict_risk_api_alias(req: PredictRequest, current_user: dict = Depends(get_current_user)):
+    """API alias for /predict to support /api/predict requests seamlessly."""
+    return predict_risk_post(req, current_user=current_user)
+
+
+@app.get("/api/predict")
+def predict_risk_get_api_alias(
+    lat: float = Query(..., description="Latitude"),
+    lon: float = Query(..., description="Longitude"),
+    temp: float = Query(..., description="Temperature in °C"),
+    humidity: float = Query(..., description="Relative humidity in %"),
+    wind: float = Query(..., description="Wind speed in km/h"),
+    rain: float = Query(0.0, description="Precipitation in mm"),
+    wind_direction: float = Query(180.0, description="Wind direction degrees"),
+    current_user: dict = Depends(get_current_user)
+):
+    """GET API alias for /predict."""
+    return predict_risk_get(
+        lat=lat, lon=lon, temp=temp, humidity=humidity, wind=wind,
+        rain=rain, wind_direction=wind_direction, current_user=current_user
+    )
+
+
 @app.get("/simulate")
 def simulate_fire_spread_get(
     lat: float = Query(..., description="Ignition Latitude"),
