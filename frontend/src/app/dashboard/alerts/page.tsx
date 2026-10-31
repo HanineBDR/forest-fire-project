@@ -705,6 +705,15 @@ export default function AlertsPage() {
                       <span>{t("export_pv")}</span>
                     </button>
 
+                    <Link
+                      href={`/dashboard?lat=${alert.lat}&lon=${alert.lon}`}
+                      className="w-full py-2 px-3 rounded-lg border border-red-600/80 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm"
+                      title={language === "ar" ? "عرض البؤرة والانتشار على الخريطة التكتيكية" : language === "en" ? "View Fire & Spread on Tactical Map" : "Localiser le foyer et la propagation sur la carte tactique"}
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-white" />
+                      <span>{language === "ar" ? "عرض على الخريطة التكتيكية" : language === "en" ? "View on Tactical Map" : "Voir sur la carte tactique"}</span>
+                    </Link>
+
                     <button
                       onClick={() => openFullHistoryModal(alert)}
                       className="w-full py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium text-center transition flex items-center justify-center gap-1.5 shadow-sm"

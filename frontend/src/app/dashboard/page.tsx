@@ -32,13 +32,18 @@ const DynamicMap = dynamic(() => import("@/components/Map").then((mod) => mod.Ma
 function DashboardMapInner() {
   const searchParams = useSearchParams();
   const focusParam = searchParams ? (searchParams.get("focus") as "vigies" | "sirocco" | "drones" | null) : null;
+  const latParam = searchParams?.get("lat");
+  const lonParam = searchParams?.get("lon");
+  const initialLat = latParam ? parseFloat(latParam) : 36.7350;
+  const initialLon = lonParam ? parseFloat(lonParam) : 4.4350;
+
   const { t, language } = useLanguage();
   const [regions, setRegions] = useState<RegionPreset[]>(DEFAULT_REGIONS);
   const [firmsHotspots, setFirmsHotspots] = useState<FIRMSHotspot[]>([]);
   const [selectedRegionId, setSelectedRegionId] = useState<string>("yakouren");
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lon: number }>({
-    lat: 36.7350,
-    lon: 4.4350,
+    lat: initialLat,
+    lon: initialLon,
   });
 
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -126,7 +131,7 @@ function DashboardMapInner() {
       } catch (e) {
         console.warn("Init error:", e);
       }
-      await runPredictionForLocation({ lat: 36.7350, lon: 4.4350 });
+      await runPredictionForLocation({ lat: initialLat, lon: initialLon });
     }
 
     init();

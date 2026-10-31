@@ -305,6 +305,11 @@ export const Map: React.FC<MapProps> = ({
       }).addTo(map);
 
       targetMarkerRef.current = marker;
+
+      // Smoothly pan map to selected location if it's out of current view
+      if (map.getBounds && !map.getBounds().contains([selectedLocation.lat, selectedLocation.lon])) {
+        map.panTo([selectedLocation.lat, selectedLocation.lon], { animate: true, duration: 0.8 });
+      }
     });
   }, [selectedLocation, prediction, isMapReady]);
 
@@ -824,7 +829,12 @@ export const Map: React.FC<MapProps> = ({
           <Tooltip content={t("tooltip_scope_northern")} position="bottom">
             <button
               type="button"
-              onClick={() => setViewScope("northern")}
+              onClick={() => {
+                setViewScope("northern");
+                if (mapInstanceRef.current) {
+                  mapInstanceRef.current.flyTo([36.65, 4.45], 9, { duration: 1.0 });
+                }
+              }}
               aria-pressed={viewScope === "northern"}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 viewScope === "northern" ? "bg-red-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
@@ -838,7 +848,12 @@ export const Map: React.FC<MapProps> = ({
           <Tooltip content={t("tooltip_scope_national")} position="bottom">
             <button
               type="button"
-              onClick={() => setViewScope("all_algeria")}
+              onClick={() => {
+                setViewScope("all_algeria");
+                if (mapInstanceRef.current) {
+                  mapInstanceRef.current.flyTo([28.0339, 1.6596], 5, { duration: 1.0 });
+                }
+              }}
               aria-pressed={viewScope === "all_algeria"}
               className={`px-2.5 py-1 rounded font-semibold transition-colors duration-150 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
                 viewScope === "all_algeria" ? "bg-red-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
