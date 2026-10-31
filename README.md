@@ -12,7 +12,7 @@
 - **Live demo:** [FINAL URL](https://in9ad.vercel.app)
 - **Demo video:** [VIDEO URL](https://youtu.be/3fW05QkjQ4U?si=a1Rbiv8YM0O5JouB)
 - **Repository:** [https://github.com/HanineBDR/forest-fire-project](https://github.com/HanineBDR/forest-fire-project)
-- **Pitch deck:** https://docs.google.[STRIPPED 71 bytes]
+- **Pitch deck:** https://docs.google.com/presentation/d/1PnqerdngM21NCWH3GcfZ-bahzzAJHUFoaLMczE9iRiU/present
 - **Interactive landing page:** https://jocelyneenolann.my.canva.site/inkad
 - 
 ---
