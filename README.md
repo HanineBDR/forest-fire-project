@@ -3,12 +3,12 @@
 > AI-Powered Wildfire Risk Prediction, Spread Simulation & Citizen Emergency Early Warning System for Northern Algeria.
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live%20Platform-0A4D3C?style=for-the-badge&logo=vercel)](https://in9ad.vercel.app)
-[![Demo Video](https://img.shields.io/badge/Video-Walkthrough%20Demo-red?style=for-the-badge&logo=youtube)]([VIDEO URL])
+[![Demo Video](https://img.shields.io/badge/Video-Walkthrough%20Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/3fW05QkjQ4U?si=a1Rbiv8YM0O5JouB)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/HanineBDR/forest-fire-project)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 - **Live demo:** [FINAL URL](https://in9ad.vercel.app)
-- **Demo video:** [VIDEO URL]
+- **Demo video:** [VIDEO URL](https://youtu.be/3fW05QkjQ4U?si=a1Rbiv8YM0O5JouB)
 - **Repository:** [https://github.com/HanineBDR/forest-fire-project](https://github.com/HanineBDR/forest-fire-project)
 
 ---
